@@ -3,20 +3,323 @@
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
 -->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-        <div>TODO write content</div>
-        <div> teste dabuide </div>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E</title>
+  <link rel="stylesheet" href="style_flex.css" />
+
+</head>
+
+<body>
+    
+<!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="index.html" class="logo">
+      <img src="images\TrallE_2.png" alt="logo" />
+     
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+            <!-- Botão de notificações -->
+        <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+            <div class="notification-popup" id="notification-popup">
+                
+            <div class="popup-header">
+            <h3>Notifications <span>🔔</span></h3>
+            </div>
+                
+            <hr class="popup-divider">
+            <ul class="notification-list">
+                <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+                <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+                <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+                <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+            </ul>
+
+            <a href="#" class="see-more-link">+ See more</a>
+            </div>
+           
+        <button class="icon-btn" aria-label="Perfil">👤</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="content">
+        
+<!-- ========== EVENTOS ========= -->
+<section class="events-section">
+  <h2 class="section-title1">Events you might be interested in 👁️</h2>
+  <div class="events-scroll">
+    <div class="event-card">
+      <img src="images/comiccon.png" alt="Comic Con Portugal">
+      <p>Comic Con Portugal</p>
+      <div class="see-more">
+        <a href="events.html?event=comiccon" class="see-more-link">
+          <span class="see-more-icon">+️</span> See more
+        </a>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <img src="images/amadoraBD.png" alt="Amadora BD">
+      <p>Amadora BD</p>
+      <div class="see-more">
+        <a href="events.html?event=amadoraBD" class="see-more-link">
+          <span class="see-more-icon">+️</span> See more
+        </a>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <img src="images/iberanime.png" alt="Iberanime Porto">
+      <p>Iberanime Porto</p>
+      <div class="see-more">
+        <a href="events.html?event=iberanime" class="see-more-link">
+          <span class="see-more-icon">+️</span> See more
+        </a>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <img src="images/lisbon.png" alt="Lisbon Games Week">
+      <p>Lisbon Games Week</p>
+      <div class="see-more">
+        <a href="events.html?event=lisbon" class="see-more-link">
+          <span class="see-more-icon">+️</span> See more
+        </a>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <img src="images/cardmadness.png" alt="Cardmadness 2026">
+      <p>Cardmadness 2026</p>
+      <div class="see-more">
+        <a href="events.html?event=cardmadness" class="see-more-link">
+          <span class="see-more-icon">+️</span> See more
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
 
-        <div> teste a rita está a dar crashout </div>
-        <div> teste rita10000 </div>
+ <!-- ========== COLEÇÕES ========= -->       
+      <div class="collections-and-collectors">
+        <section class="collections">
+          <h2 class="section-title1">Recently edited collections 📚</h2>
+          <div class="collections-grid">
+            <div class="collection-card">
+              <img src="images\pokémon_logo.png" alt="Pokemon Cards">
+              <p class="collection-name">Pokemon Cards</p>
+              <span class="collection-author">Rafael_Ameida123</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\championspath.png" alt="Champion's Path">
+              <p class="collection-name">Champion's Path</p>
+              <span class="collection-author">Paul_Perez1697</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\Funko.png" alt="Funko Pop" >
+              <p class="collection-name">Funko Pop</p>
+              <span class="collection-author">Rafa_Silva147</span>
+            </div>
+             
+            <div class="collection-card">
+              <img src="images\pokemon-pikachu.png" alt="Pokemon Cards" style="height: 110px">
+              <p class="collection-name">Pokemon Cards</p>
+              <span class="collection-author">Marco_Alex4865</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\SWSH.png" alt="Pokémon SWSH Set" style="height: 110px">
+              <p class="collection-name">Pokémon SWSH Set</p>
+              <span class="collection-author">Ana_SSilva7812</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\stamps.png" alt="Stamp collection" style="height: 110px">
+              <p class="collection-name">Stamp collection</p>
+              <span class="collection-author">John_VVV.741</span>
+            </div>
+                        
+            <div class="collection-card">
+              <img src="images\Coins.png" alt="Coins collection" style="height: 110px">
+              <p class="collection-name">Coins collection</p>
+              <span class="collection-author">Tomás.Freitas_3366</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\funko2.png" alt="Funko Pop" style="height: 110px">
+              <p class="collection-name">Funko Pop</p>
+              <span class="collection-author">Rafa_Silva147</span>
+            </div>
+              
+            <div class="collection-card">
+              <img src="images\panini.png" alt="Panini Cards" style="height: 110px">
+              <p class="collection-name">Panini Cards</p>
+              <span class="collection-author">Anne_Land.4826</span>
+            </div>
+              
+          </div>
+          
+          <!-- Botão Ver mais -->
+        <div class="see-more">
+          <a href="#" class="see-more-link">
+            <span class="see-more-icon">+️</span> See more
+          </a>
+        </div>                   
+        </section>
 
-    </body>
+<!-- ========== TOP COLECIONADORES ========= -->
+    <div class="side-ranking">
+
+  <section class="top-collectors-card">
+    <h2 class="section-title1">Top collectors of the week 🤝</h2>
+    <ol class="top-collector-list">
+      <li>
+        <span class="medal gold">🥇</span>
+        <div class="collector-info">
+          <span class="collector-name">Rafael_Ameida123</span>
+          <span class="collector-items">101 items</span>
+        </div>
+      </li>
+      <li>
+        <span class="medal silver">🥈</span>
+        <div class="collector-info">
+          <span class="collector-name">AnaAlmeida.889</span>
+          <span class="collector-items">87 items</span>
+        </div>
+      </li>
+      <li>
+        <span class="medal bronze">🥉</span>
+        <div class="collector-info">
+          <span class="collector-name">Gaby_Soares97</span>
+          <span class="collector-items">84 items</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+        
+<!-- ========== TOP ITENS ========= -->
+  <section class="top-items-card">
+    <h2 class="section-title1">Top 3 Items 💶</h2>
+
+    <div class="top-item">
+      <img src="images\1.png" alt="One Piece Card Game">
+      <div class="item-info">
+        <p class="item-name">One Piece Card Game <br><span>SR Super Parallel</span></p>
+        <p class="item-user">Rafael_Ameida123</p>
+        <p class="item-price">999,90€</p>
+      </div>
+    </div>
+
+    <div class="top-item">
+      <img src="images\2.png" alt="Magic Spider-Man">
+      <div class="item-info">
+        <p class="item-name">Magic the Gathering Marvel's <br><span>Spider-Man Collector Booster</span></p>
+        <p class="item-user">AnaAlmeida.889</p>
+        <p class="item-price">662,97€</p>
+      </div>
+    </div>
+
+    <div class="top-item">
+      <img src="images\3.png" alt="Charizard 1st Edition Holo">
+      <div class="item-info">
+        <p class="item-name">Charizard 1st <br><span>Edition Holo</span></p>
+        <p class="item-user">Gaby_Soares97</p>
+        <p class="item-price">651,17€</p>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+
+
+<!-- ========== TOP COLLECTIONS (POPUP INCL.) ========= -->
+<section class="top-collections-section">
+  <h2 class="section-title2">Top Collections ⭐</h2>
+  
+  <div class="top-collections-grid">
+      
+    <!-- Preço -->
+    <div class="top-collection-block" id="price-card" data-id="price-card">
+      <h3 class="top-collection-title">Price</h3>
+      <img src="images\pokémon_logo.png" alt="Pokemon Cards">
+      <p class="collection-name">Pokemon Cards</p>
+      <p class="collection-author">Rafael_Ameida123</p>
+      <p class="collection-extra">Price: 5312€</p>
+      <p class="collection-extra">Items: 51</p>
+      <p class="collection-date">Last updated: 27/03/2025</p>
+      </div>
+
+    <!-- Mais recente -->
+    <div class="top-collection-block" id="recent-card" data-id="recent-card">
+      <h3 class="top-collection-title">Most recent</h3>
+      <img src="images\championspath.png" alt="Champion's Path">
+      <p class="collection-name">Pokemon Champion's Path</p>
+      <p class="collection-author">Paul_Perez1697</p>
+      <p class="collection-extra">Price: 875€</p>
+      <p class="collection-extra">Items: 14</p>
+      <p class="collection-date">Last updated: 31/10/2025</p>
+
+    </div>
+
+    <!-- Mais itens -->
+    <div class="top-collection-block" id="items-card" data-id="items-card">
+      <h3 class="top-collection-title">More items</h3>
+      <img src="images\funko3.png" alt="Funko Pop">
+      <p class="collection-name">Funko Pop</p>
+      <p class="collection-author">Ana_SSilva7812</p>
+      <p class="collection-extra">Price: 103€</p>
+      <p class="collection-extra">Items: 152</p>     
+      <p class="collection-date">Last updated: 01/10/2025</p>
+
+    </div>
+  </div>
+</section>
+
+        
+<!-- ===== Right Sidebar (Under Header) ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>About collections</h3>
+        <p>Create collection</p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p>View requests</p>
+        <p>Team Page</p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p>Create event</p>
+        <p>View upcoming events</p>
+        <p>Event history</p>
+      </div>
+    </aside>
+  </div>
+ </div>
+    
+    
+ <!-- === POPUP DINÂMICO === -->
+<div id="hover-popup"></div>
+
+<!-- === JAVASCRIPT === -->
+<script src="javascript.js"></script>
+
+</body>
 </html>

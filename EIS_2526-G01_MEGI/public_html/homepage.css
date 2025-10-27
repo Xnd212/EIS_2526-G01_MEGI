@@ -34,9 +34,9 @@ header {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  height: 100px;
-position:fixed;
-top: 0;
+  height: 90px;
+    position:fixed;
+    top: 0;
   width: 100%;
   z-index: 1000;
 }
@@ -247,6 +247,7 @@ top: 0;
   padding: 1rem;
   background: #eef0ff;
   margin-right: 240px; 
+  margin-top: 110px;
 }
 
 /* =======================

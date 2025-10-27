@@ -243,3 +243,25 @@
 .events-section {
   background-color: transparent;
 }
+
+
+/* Team Member Photo */
+.member-photo.ana-rita {
+  background-image: url('images/anaritalopes.jpg');
+}
+
+.member-photo.david {
+  background-image: url('images/davidramos.jpg');
+}
+
+.member-photo.marco {
+  background-image: url('images/marcopereira.jpg');
+}
+
+.member-photo.tomas {
+  background-image: url('images/tomasfreitas.jpg');
+}
+
+.member-photo.telmo {
+  background-image: url('images/telmomatos.jpg');
+}

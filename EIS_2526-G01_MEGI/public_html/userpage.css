@@ -9,6 +9,16 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 
 @import url('style_flex.css'); /* Reuse global styles */
 
+body {
+  overflow-y: scroll;
+}
+
+.content {
+  margin-right: 240px;
+  padding: 2rem;
+  background: #eef0ff;
+}
+
 
 /* ======================
    USER PROFILE PAGE
@@ -16,9 +26,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 .profile-container {
   padding: 1rem;
   max-width: 1200px;
-  margin: 1rem;
+  margin: 110px 240px 1rem 1rem; /* top, right (sidebar), bottom, left */
   background: #eef0ff;
-  margin-top: 110px;
 }
 
 .user-info {

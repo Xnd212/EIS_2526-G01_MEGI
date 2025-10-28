@@ -1,0 +1,265 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this template
+*/
+/* 
+    Created on : 26/10/2025, 23:45:06
+    Author     : lopes
+*/
+
+@import url('style_flex.css'); /* Reuse global styles */
+
+
+/* ======================
+   USER PROFILE PAGE
+====================== */
+.profile-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 1rem;
+  background: #eef0ff;
+  margin-top: 110px;
+}
+
+.user-info {
+  width: 100%;
+}
+
+.user-profile-box {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.user-photo {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #b54242;
+}
+
+.user-info-content {
+  display: flex;
+  flex-direction: row; 
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.username {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.email {
+  margin: 0;
+  color: #555;
+}
+
+.edit-btn {
+  margin-top: 0.5rem;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats {
+  display: flex;
+  gap: 3.5rem;
+  font-size: 1.2rem;
+  color: #222;
+  justify-content: flex-end;
+}
+
+.stats div {
+  text-align: center;
+}
+
+.user-info-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.user-details-and-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+
+/* ==== Coleções  ==== */
+.collections-and-friends {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.collections {
+  flex: 2;
+  margin-bottom: 2rem;
+}
+
+
+.collections h3,
+.friends h3,
+.past-events h3{
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-decoration: underline;
+}
+
+.collection-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.collection-card {
+  background-color: #f3cccc;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  width: 180px;
+}
+
+.collection-card img {
+  height: 115px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 0.6rem;
+}
+
+.collection-card p {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.collection-card span {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.collection-card .last-updated {
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: #666;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+
+/* ==== Amigos  ==== */
+.friends {
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* duas colunas */
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.friend {
+  text-align: center;
+}
+
+.friend img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.friend-name {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #333;
+}
+
+.view-all {
+ display: block;
+  text-align: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #444;
+}
+
+.view-all:hover {
+  color: #b54242;
+}
+
+
+/* ==== eventos  ==== */
+.past-events {
+  margin-top: 2rem;
+}
+
+.past-events-grid {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 2rem;
+  justify-content: flex-start; 
+}
+
+.past-event-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 200px;
+  text-align: center;
+}
+
+.past-event-card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.event-name {
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.event-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+

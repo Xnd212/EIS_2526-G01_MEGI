@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/html.html to edit this template
+-->
+
+<!-- event.html -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Details</title>
+  <link rel="stylesheet" href="homepage.css" />
+  <link rel="stylesheet" href="events.css">
+</head>
+
+<body>
+<!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images\TrallE_2.png" alt="logo" />
+     
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+            <!-- Botão de notificações -->
+        <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+            <div class="notification-popup" id="notification-popup">
+                
+            <div class="popup-header">
+            <h3>Notifications <span>🔔</span></h3>
+            </div>
+                
+            <hr class="popup-divider">
+            <ul class="notification-list">
+                <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+                <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+                <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+                <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+            </ul>
+
+            <a href="#" class="see-more-link">+ See more</a>
+            </div>
+           
+        <a href="User Page.html" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+ 
+  <div class="main">
+    <div class="content">
+      <div id="event-details" class="event-details-box">
+        <!-- Conteúdo será preenchido por JS -->
+      </div>
+    </div>
+      
+      
+      
+    <!-- ===== Right Sidebar (Under Header) ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>About collections</h3>
+        <p>Create collection</p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p>View requests</p>
+        <p>Team Page</p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p>Create event</p>
+        <p>View upcoming events</p>
+        <p>Event history</p>
+      </div>
+    </aside>
+  </div>
+
+
+  <!-- === JAVASCRIPT === -->
+    <script src="events.js"></script>
+    
+    
+</body>
+</html>

@@ -1,0 +1,132 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this template
+*/
+/* 
+    Created on : 27/10/2025, 11:49:23
+    Author     : lopes
+*/
+
+@import url('homepage.css'); /* Reuse global styles */
+
+
+/* ===== Notification Popup Melhorado ===== */
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #b54242; /* cor escura da header */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 315px;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.notification-popup.active {
+  display: flex;
+}
+
+.popup-header {
+  background-color: #fbecec;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 2px solid #e8c3c3;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.popup-header h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #b54242;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.popup-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem;
+}
+
+.notification-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+
+/* ========================
+   EVENT DETAILS PAGE STYLE
+======================== */
+
+.event-details-box {
+  background: #fce6e3;
+  padding: 1.2rem;
+  border: 1px solid #dca4a4;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.event-details-content {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.event-details-content img {
+  height: 90px;
+  object-fit: contain;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.event-info p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+.collection-user {
+  font-size: 0.75rem;
+  color: #555;
+  margin-top: 0.3rem;
+}
+
+.collections-brought {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.collection-bring {
+  text-align: center;
+  background: #fff5f5;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  width: 250px;
+}
+
+.collection-bring img {
+  height: 90px;
+  width: 200px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+

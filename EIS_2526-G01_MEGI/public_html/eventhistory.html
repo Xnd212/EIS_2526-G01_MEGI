@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Event History</title>
+  <link rel="stylesheet" href="eventhistory.css" />
+</head>
+
+<body>
+
+  <!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <ul class="notification-list">
+          <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+          <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+          <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+          <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <button class="icon-btn" aria-label="Perfil">👤</button>
+    </div>
+  </header>
+
+  <!-- ===========================
+       MAIN CONTENT
+  ============================ -->
+  <div class="main">
+    <div class="content">
+      <section class="event-history-section">
+        <h2 class="page-title">Event history</h2>
+
+        <div class="event-list">
+
+          <!-- === EVENT CARD 1 === -->
+          <div class="event-card">
+            <div class="event-image img1"></div>
+            <div class="event-info">
+                <h3><strong>Comic Con Portugal</strong></h3>
+              <p><strong>Date:</strong> 03/10/2025</p>
+              <p class="rating">
+                <strong>Rating:</strong>
+                <span class="stars">⭐ ⭐ ⭐ ⭐ ☆</span>
+              </p>
+              <p><strong>Collection brought:</strong>
+                <a href="#">Pokemon Cards</a>
+              </p>
+            </div>
+          </div>
+
+          <!-- === EVENT CARD 2 === -->
+          <div class="event-card">
+            <div class="event-image img2"></div>
+            <div class="event-info">
+                <h3><strong>Amadora BD - International Comic Festival</strong></h3>
+              <p><strong>Date:</strong> 23/10/2025</p>
+              <p class="rating">
+                <strong>Rating:</strong>
+                <span class="stars">⭐ ⭐ ⭐ ☆ ☆</span>
+              </p>
+              <p><strong>Collection brought:</strong>
+                <a href="#">Panini Stickers</a>
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- ===========================
+         SIDEBAR
+    ============================ -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>About collections</h3>
+        <p>Create collection</p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p>View requests</p>
+        <p><a href="teampage.html">Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p>Create event</p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.html">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- === JAVASCRIPT === -->
+  <script src="eventhistory.js"></script>
+
+</body>
+</html>

@@ -43,7 +43,7 @@
   <div class="main">
     <div class="content">
       <section class="item-creation-section">
-        <h2 class="page-title">Create a New Item</h2>
+        <h2 class="page-title">Create a Collection</h2>
 
         <form id="itemForm" novalidate>
 
@@ -51,7 +51,7 @@
           <!-- Name -->
           <div class="form-group">
             <label for="itemName">Name <span class="required">*</span></label>
-            <input type="text" id="itemName" name="itemName" placeholder="Enter item name" />
+            <input type="text" id="itemName" name="itemName" placeholder="Enter collection name" />
           </div>
 
           <!-- Price -->
@@ -60,16 +60,10 @@
             <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price" step="0.01" min="0" />
           </div>
 
-          <!-- Acquisition Date -->
+          <!-- Starting Date -->
           <div class="form-group">
-            <label for="acquisitionDate">Acquisition Date (DD-MM-YYYY) <span class="required">*</span></label>
-            <input type="text" id="acquisitionDate" name="acquisitionDate" placeholder="e.g., 29-10-2025" />
-          </div>
-
-          <!-- Acquisition Place -->
-          <div class="form-group">
-            <label for="acquisitionPlace">Acquisition Place</label>
-            <input type="text" id="acquisitionPlace" name="acquisitionPlace" placeholder="Enter where item was acquired" />
+            <label for="creationDate">Starting Date (DD-MM-YYYY) <span class="required">*</span></label>
+            <input type="date" id="creationDate" name="creationDate"  />
           </div>
 
           <!-- Description -->
@@ -87,9 +81,9 @@
           
           <!-- Custom Multi-Select for Existing Items -->
           <div class="form-group">
-            <label>Existing Items <span class="required">*</span></label>
+            <label>Select Existing Items </label>
             <div class="custom-multiselect">
-              <button type="button" id="dropdownBtn">Select Collections ⮟</button>
+              <button type="button" id="dropdownBtn">Select from existing items ⮟</button>
               <div class="dropdown-content" id="dropdownContent">
                 <label><input type="checkbox" value="pokemon"> Charizard</label>
                 <label><input type="checkbox" value="coins"> Moeda Do Ulisses</label>
@@ -133,7 +127,7 @@
 
 
   <!-- === JAVASCRIPT === -->
-  <script src="itemcreation.js"></script>
+  <script src="collectioncreation.js"></script>
 
 </body>
 </html>

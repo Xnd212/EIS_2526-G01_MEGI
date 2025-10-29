@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dropdownBtn.textContent =
       checked.length > 0
         ? checked.join(", ")
-        : "Select Collections ⮟";
+        : "Select from existing items ⮟";
   });
 
   // =============================
@@ -56,11 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     const checkedCollections = [
-      ...dropdownContent.querySelectorAll("input[type='checkbox']:checked"),
+      ...dropdownContent.querySelectorAll("input[type='checkbox']:checked")
     ];
     const name = document.getElementById("itemName");
     const price = document.getElementById("itemPrice");
-    const date = document.getElementById("acquisitionDate");
+    const date = document.getElementById("creationDate");
 
     [name, price, date].forEach((el) => el.classList.remove("error"));
     formMessage.textContent = "";
@@ -84,9 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
       price.classList.add("error");
       valid = false;
     }
+    
+    const now = new Date();
 
-    const datePattern = /^\d{2}-\d{2}-\d{4}$/;
-    if (!datePattern.test(date.value.trim())) {
+    if (date > console.log(now)) {
       date.classList.add("error");
       valid = false;
     }

@@ -340,10 +340,10 @@ header {
 }
 
 .collection-card img {
-  height: 70px;
-  width: auto;
-  object-fit: contain;
-  margin-bottom: 0.8rem;
+    height: 120px;
+    width: 120px;
+    object-fit: contain;
+    margin-bottom: 0.8rem;
 }
 
 .collection-card p,

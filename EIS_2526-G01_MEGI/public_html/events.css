@@ -71,62 +71,201 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 }
 
 
-/* ========================
-   EVENT DETAILS PAGE STYLE
-======================== */
-
 .event-details-box {
   background: #fce6e3;
   padding: 1.2rem;
   border: 1px solid #dca4a4;
   border-radius: 12px;
   margin-top: 1rem;
+  position: relative;
 }
 
+/* Secção de imagem + infos */
 .event-details-content {
   display: flex;
+  justify-content: space-between;
+  align-items: center; 
   gap: 2rem;
   margin-bottom: 1.5rem;
-  align-items: center;
+  flex-wrap: wrap;
+  min-height: 160px;
 }
 
 .event-details-content img {
-  height: 90px;
+  height: 300px;
+  max-width: 300px;
   object-fit: contain;
   border-radius: 8px;
-  align-items: center;
+  padding-top: 1.5rem;
 }
 
 .event-info p {
   margin: 4px 0;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
-.collection-user {
-  font-size: 0.75rem;
-  color: #555;
-  margin-top: 0.3rem;
+/* TEASER */
+.event-teaser-wrapper {
+  display: flex;
+  align-items: center; 
+  gap: 7rem;
+  flex-wrap: wrap;
 }
 
+.video-thumbnail {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  overflow: hidden;
+  z-index: 10;
+  cursor: pointer;
+  flex: 0 0 300px; 
+  width: 320px;      
+  height: 160px;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  border-radius: 12px;
+  display: block;
+}
+
+.video-thumbnail .play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* COLEÇÕES */
 .collections-brought {
   display: flex;
-  gap: 2rem;
-  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
 }
 
 .collection-bring {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
   text-align: center;
-  background: #fff5f5;
-  padding: 0.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  width: 250px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
 }
 
 .collection-bring img {
-  height: 90px;
-  width: 200px;
-  object-fit: contain;
+  max-width: 100%;
+  height: auto;
   margin-bottom: 0.5rem;
 }
 
+.collection-name {
+  margin: 0;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.collection-user {
+  margin: 0.5rem;
+}
+
+
+/* MAPA */
+.map-title {
+  margin-top: 3rem;     
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.map-container {
+  width: 100%;
+  height: 200px;
+  margin-top: 0.5rem;
+  border: 2.5px solid #b54242;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  gap:0 ;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* INSCRIÇÃO */
+.register-section {
+  text-align: left;
+  background-color: #fff0f0;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  margin-top: 2rem;
+  max-width: 40%;
+}
+
+.register-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.register-text {
+  font-size: 1.1rem;
+  margin: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.register-button {
+  background-color: #b54242;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.register-button:hover {
+  background-color: #a03030;
+  transform: scale(1.05);
+}
+
+
+
+
+
+
+@media (max-width: 768px) {
+  .video-wrapper {
+    flex-direction: column;
+  }
+
+  .video-thumbnail, .register-section {
+    max-width: 100%;
+  }
+}

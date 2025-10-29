@@ -9,8 +9,17 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 
 @import url('homepage.css'); /* Reuse global styles */
 
+.event-details-box {
+  background: #fce6e3;
+  padding: 1.2rem;
+  border: 1px solid #dca4a4;
+  border-radius: 12px;
+  margin-top: 1rem;
+  position: relative;
+}
 
-/* ===== Notification Popup Melhorado ===== */
+
+/* ===== Notification Popup  ===== */
 .notification-popup {
   position: absolute;
   top: 60px;
@@ -33,7 +42,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 .popup-header {
   background-color: #fbecec;
   padding: 0.85rem 1.5rem;
-  border-bottom: 2px solid #e8c3c3;
+  border-bottom: 1px solid #b54242;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
@@ -57,12 +66,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
 .notification-list {
   list-style: none;
   padding: 0;
-  margin: 0.5rem;
+  margin: 0.75rem;
 }
 
 .notification-list li {
   padding: 0.4rem 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #eee;
   font-size: 0.9rem;
 }
 
@@ -70,15 +79,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this t
   border-bottom: none;
 }
 
-
-.event-details-box {
-  background: #fce6e3;
-  padding: 1.2rem;
-  border: 1px solid #dca4a4;
-  border-radius: 12px;
-  margin-top: 1rem;
-  position: relative;
+.notification-list li:first-child {
+  border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
 }
+
 
 /* Secção de imagem + infos */
 .event-details-content {

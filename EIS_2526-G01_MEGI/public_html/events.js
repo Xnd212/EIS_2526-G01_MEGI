@@ -151,7 +151,7 @@ container.innerHTML = `
   <div class="register-section">
     <div class="register-row">
       <p class="register-text">🎟️ Want to join? Sign up now!</p>
-      <a href="signupevent.html" class="register-button">Sign up</a>
+      <a href="sign_up_event.html" class="register-button">Sign up</a>
     </div>
   </div>
 `;

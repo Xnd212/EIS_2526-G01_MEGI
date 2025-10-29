@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Create Item</title>
+  <link rel="stylesheet" href="sign_up_event.css" />
+</head>
+
+<body>
+
+  <!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <ul class="notification-list">
+          <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+          <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+          <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+          <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.html" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+
+<!-- ===========================
+       MAIN
+  ============================ -->
+<div class="main">
+    <div class="content">
+      <section class="event-signup-section">
+        <h2 class="page-title">Sign up for Event</h2>
+
+        <form id="eventSignUpForm" novalidate>
+          <!-- Nome do utilizador -->
+          <div class="form-group">
+            <label for="userName">User name</label>
+            <input type="text" id="userName" name="userName"  />
+          </div>
+
+          <!-- Coleção -->
+          <div class="form-group">
+            <label for="collection">Collection <span class="required">*</span></label>
+            <select id="collection" name="collection" required>
+              <option value="">Select your collection</option>
+              
+            </select>
+          </div>
+
+          <!-- Número de participantes -->
+          <div class="form-group">
+            <label for="participants">Number of Participants</label>
+            <input type="number" id="participants" name="participants" value="1" min="1" />
+          </div>
+
+          <!-- Notificações -->
+          <div class="form-group">
+            <label>Do you want to receive notifications? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="notify" value="yes" /> Yes</label>
+              <label><input type="radio" name="notify" value="no" /> No</label>
+            </div>
+          </div>
+
+          <!-- opções de notificação -->
+          <div id="notificationFields" class="conditional-section hidden">
+            <label>Preferred method: <span class="required">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="notifyMethod" value="email" /> Email</label>
+              <label><input type="radio" name="notifyMethod" value="phone" /> Phone</label>
+            </div>
+
+            <div id="emailField" class="conditional-input hidden">
+              <label for="notifyEmail">Email</label>
+              <input type="email" id="notifyEmail" name="notifyEmail" placeholder="Enter your email" />
+            </div>
+
+            <div id="phoneField" class="conditional-input hidden">
+              <label for="notifyPhone">Phone Number</label>
+              <input type="tel" id="notifyPhone" name="notifyPhone" placeholder="Enter your phone number" />
+            </div>
+          </div>
+
+          <!-- Comentários -->
+          <div class="form-group">
+            <label for="comments">Comments or Notes</label>
+            <textarea id="comments" name="comments" rows="4" placeholder="Add any comments about your participation..."></textarea>
+          </div>
+
+          <!-- Termos -->
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="terms" name="terms" required />
+              I accept the terms and conditions. <span class="required">*</span>
+            </label>
+          </div>
+
+          <!-- Botão -->
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Confirm Registration</button>
+          </div>
+        </form>
+
+        <!-- Resumo da inscrição -->
+        <div id="summarySection" class="summary-section hidden">
+          <h3>Registration Summary</h3>
+          <div id="summaryContent"></div>
+          <div class="summary-actions">
+            <button id="editRegistration" class="btn-secondary">Edit Registration</button>
+            <button id="finalConfirm" class="btn-primary">Confirm Final Registration</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  
+
+  <!-- ===== Right Sidebar (Under Header) ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>About collections</h3>
+        <p>Create collection</p>
+        <p><a href="itemcreation.html"> Create item</a></p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p><a href="teampage.html"> Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p>Create event</p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.html">Event history</a></p>
+      </div>
+    </aside>
+
+
+
+  <!-- === JAVASCRIPT === -->
+  <script src="sign_up_event.js"></script>
+
+</body>
+</html>

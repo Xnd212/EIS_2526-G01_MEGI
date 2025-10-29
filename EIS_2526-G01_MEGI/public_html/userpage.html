@@ -180,13 +180,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/html.html to edit this
       <div class="sidebar-section collections-section">
         <h3>About collections</h3>
         <p>Create collection</p>
+        <p><a href="itemcreation.html"> Create item</a></p>
         <p>View collections</p>
       </div>
 
       <div class="sidebar-section friends-section">
         <h3>My friends</h3>
         <p>View collections</p>
-        <p>View requests</p>
         <p><a href="teampage.html"> Team Page</a></p>
       </div>
 
@@ -201,6 +201,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/html.html to edit this
 
 <!-- === JAVASCRIPT === -->
 <script src="homepage.js"></script>
+
+<script>
+  // Captura o nome do utilizador da userpage
+  const usernameElement = document.querySelector(".username");
+
+  if (usernameElement) {
+    const username = usernameElement.textContent.trim();
+
+    // Guarda o nome no localStorage
+    localStorage.setItem("username", username);
+    console.log("Username guardado:", username);
+  }
+</script>
 
 </body>
 </html>

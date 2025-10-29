@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Create Collection</title>
+  <link rel="stylesheet" href="itemcreation.css" />
+</head>
+
+<body>
+
+  <!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <ul class="notification-list">
+          <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+          <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+          <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+          <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.html" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  <!-- ===========================
+       MAIN CONTENT
+  ============================ -->
+  <div class="main">
+    <div class="content">
+      <section class="item-creation-section">
+        <h2 class="page-title">Create a New Item</h2>
+
+        <form id="itemForm" novalidate>
+
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="itemName">Name <span class="required">*</span></label>
+            <input type="text" id="itemName" name="itemName" placeholder="Enter item name" />
+          </div>
+
+          <!-- Price -->
+          <div class="form-group">
+            <label for="itemPrice">Price (€) <span class="required">*</span></label>
+            <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price" step="0.01" min="0" />
+          </div>
+
+          <!-- Acquisition Date -->
+          <div class="form-group">
+            <label for="acquisitionDate">Acquisition Date (DD-MM-YYYY) <span class="required">*</span></label>
+            <input type="text" id="acquisitionDate" name="acquisitionDate" placeholder="e.g., 29-10-2025" />
+          </div>
+
+          <!-- Acquisition Place -->
+          <div class="form-group">
+            <label for="acquisitionPlace">Acquisition Place</label>
+            <input type="text" id="acquisitionPlace" name="acquisitionPlace" placeholder="Enter where item was acquired" />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="itemDescription">Description</label>
+            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your item"></textarea>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label for="itemImage">Item Image (optional)</label>
+            <input type="file" id="itemImage" name="itemImage" accept="image/*" />
+          </div>
+          
+          
+          <!-- Custom Multi-Select for Existing Items -->
+          <div class="form-group">
+            <label>Existing Items <span class="required">*</span></label>
+            <div class="custom-multiselect">
+              <button type="button" id="dropdownBtn">Select Collections ⮟</button>
+              <div class="dropdown-content" id="dropdownContent">
+                <label><input type="checkbox" value="pokemon"> Charizard</label>
+                <label><input type="checkbox" value="coins"> Moeda Do Ulisses</label>
+                <label><input type="checkbox" value="stickers"> Cromo do Ronaldo 2016</label>
+                <label><input type="checkbox" value="comics"> Velho Logan</label>             
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Create Item</button>
+          </div>
+        </form>
+
+        <p id="formMessage" class="form-message"></p>
+      </section>
+    </div>
+
+   <!-- ===== Right Sidebar (Under Header) ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>About collections</h3>
+        <p>Create collection</p>
+        <p><a href="itemcreation.html"> Create item</a></p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p><a href="teampage.html"> Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p>Create event</p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.html">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+
+  <!-- === JAVASCRIPT === -->
+  <script src="itemcreation.js"></script>
+
+</body>
+</html>

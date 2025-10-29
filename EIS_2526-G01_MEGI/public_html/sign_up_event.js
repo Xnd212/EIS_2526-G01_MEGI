@@ -18,21 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
   
-
-
-// USERNAME
-const userNameInput = document.getElementById("userName");
-const storedUsername = localStorage.getItem("username");
-
-if (storedUsername) {
-  userNameInput.value = storedUsername;
-  userNameInput.readOnly = true; 
-  userNameInput.style.backgroundColor = "#f9f9f9"; 
-} else {
-  userNameInput.value = "Guest";
-}
-
-
+  
+  // Simulação: carregar as coleções do utilizador (podes substituir por fetch da tua API)
 const userCollections = ["Pokémon Cards", "Rare Coins", "Panini Stickers", "Comics"];
 
 const collectionSelect = document.getElementById("collection");
@@ -65,7 +52,6 @@ const mbwayField = document.getElementById("mbwayField");
 const presentialField = document.getElementById("presentialField");
 
 
-
 // =============================
 // NOTIFICATION LOGIC
 // =============================
@@ -92,9 +78,8 @@ notifyMethodRadios.forEach(method => {
 });
 
 
-// =============================
+
 // FORM SUBMISSION
-// =============================
 form.addEventListener("submit", e => {
   e.preventDefault();
 
@@ -107,25 +92,22 @@ form.addEventListener("submit", e => {
   const collection = collectionSelect.value;
   const participants = document.getElementById("participants").value;
   const notify = [...notifyRadios].find(r => r.checked)?.value || "no";
-  const payment = [...paymentRadios].find(r => r.checked)?.value;
   const comments = document.getElementById("comments").value.trim();
   const terms = document.getElementById("terms").checked;
 
-  // Validações 
+ 
+  // Validações
   if (collection === "") {
     collectionSelect.classList.add("error");
     valid = false;
   }
-  if (!payment) {
-    paymentFields.classList.remove("hidden");
-    valid = false;
-  }
+
   if (!terms) {
     alert("You must accept the terms and conditions.");
     valid = false;
   }
 
-  // Campos de notificação opcionais
+
   let notifyText = "No notifications";
   if (notify === "yes") {
     const method = [...notifyMethodRadios].find(r => r.checked)?.value;
@@ -151,33 +133,21 @@ form.addEventListener("submit", e => {
     }
   }
 
-  // Campos de pagamento 
-  let paymentText = "";
-  if (payment === "transfer") {
-    paymentText = "Bank Transfer (proof required)";
-  } else if (payment === "mbway") {
-    const mbNumber = document.getElementById("mbwayNumber").value.trim();
-    if (!mbNumber) {
-      document.getElementById("mbwayNumber").classList.add("error");
-      valid = false;
-    } else {
-      paymentText = `MBWay → ${mbNumber}`;
-    }
-  } else if (payment === "presential") {
-    paymentText = "Presential Payment (on event day)";
+    if (!valid) {
+    formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+    formMessage.classList.add("error");
+    return;
   }
+  
+  formMessage.textContent = "";
+  formMessage.className = "form-message";
 
-  if (!valid) return;
-
-  // =============================
-  // BUILD SUMMARY
-  // =============================
+  // Summary
   const summaryHTML = `
     <p><strong>User:</strong> ${name}</p>
     <p><strong>Collection:</strong> ${collection}</p>
     <p><strong>Participants:</strong> ${participants}</p>
     <p><strong>Notification:</strong> ${notifyText}</p>
-    <p><strong>Payment:</strong> ${paymentText}</p>
     ${comments ? `<p><strong>Comments:</strong> ${comments}</p>` : ""}
   `;
 
@@ -186,9 +156,18 @@ form.addEventListener("submit", e => {
   summarySection.classList.remove("hidden");
 });
 
-// =============================
-// EDIT & FINAL CONFIRM ACTIONS
-// =============================
+finalConfirmButton.addEventListener("click", () => {
+  summarySection.innerHTML = `
+    <h3>🎉 Registration Completed!</h3>
+    <p>Thank you for signing up for this event. We look forward to seeing you there!</p>
+    <div class="summary-actions">
+      <a href="events.html" class="back-link" id="goToEventPage">← Back to Event Page</a>
+    </div>
+  `;
+});
+  
+  
+// FINAL ACTIONS
 editButton.addEventListener("click", () => {
   summarySection.classList.add("hidden");
   form.classList.remove("hidden");
@@ -196,10 +175,12 @@ editButton.addEventListener("click", () => {
 
 finalConfirmButton.addEventListener("click", () => {
   summarySection.innerHTML = `
-    <h3>🎉 Registration Completed!</h3>
+    <h3>🎉 Registration completed!</h3>
     <p>Thank you for signing up for this event. We look forward to seeing you there!</p>
+    <div class="summary-actions">
+      <a href="homepage.html" class="back-link" id="goToEventPage">← Back to Home Page</a>
+    </div>
   `;
 });
-  
-  
+   
 });

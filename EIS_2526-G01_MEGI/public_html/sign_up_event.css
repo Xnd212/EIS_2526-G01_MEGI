@@ -11,9 +11,7 @@
   flex-grow: 1;
 }
 
-/* ===========================
-   EVENT SIGNUP FORM BOX
-=========================== */
+/* ====== EVENT ======= */
 
 .event-signup-section {
   background: #fff;
@@ -36,9 +34,7 @@
   margin-bottom: 2rem;
 }
 
-/* ===========================
-   FORM FIELDS
-=========================== */
+/* ====== FORM ======== */
 .form-group {
   display: flex;
   flex-direction: column; /* ✅ garante que o label fica em cima e o input em baixo */
@@ -80,7 +76,6 @@ textarea {
   resize: vertical;
 }
 
-/* Radio and Checkbox styling */
 .radio-group {
   display: flex;
   gap: 1rem;
@@ -94,10 +89,6 @@ textarea {
 input[type="checkbox"] {
   margin-right: 0.5rem;
 }
-
-/* ===========================
-   CONDITIONAL SECTIONS
-=========================== */
 
 .conditional-section {
   border-left: 3px solid #c77462;
@@ -115,9 +106,7 @@ input[type="checkbox"] {
   display: none;
 }
 
-/* ===========================
-   BUTTONS
-=========================== */
+/* ===== BUTTONS ======== */
 
 .form-actions,
 .summary-actions {
@@ -157,10 +146,24 @@ input[type="checkbox"] {
   background: #a55d4f;
 }
 
-/* ===========================
-   SUMMARY SECTION
-=========================== */
 
+
+.form-message {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.form-message.error {
+  color: #b54242;
+}
+
+.form-message.success {
+  color: #3d8b3d;
+}
+
+
+/* ======= SUMMARY ======= */
 .summary-section {
   margin-top: 2.5rem;
   padding: 1.8rem;
@@ -183,7 +186,20 @@ input[type="checkbox"] {
   font-size: 1rem;
 }
 
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 100;
+  color: #000000;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
 
+.back-link:hover {
+  color: #9d3636;
+  border-bottom-color: #b54242;
+}
 
 /* =======================
    Sidebar (Fixed on the Right)

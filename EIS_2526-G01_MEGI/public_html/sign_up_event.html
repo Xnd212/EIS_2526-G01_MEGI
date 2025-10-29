@@ -50,8 +50,8 @@
         <form id="eventSignUpForm" novalidate>
           <!-- Nome do utilizador -->
           <div class="form-group">
-            <label for="userName">User name</label>
-            <input type="text" id="userName" name="userName"  />
+            <label for="userName">User Name</label>
+            <input type="text" id="userName" name="userName" readonly value="Susana_Andrade123" />
           </div>
 
           <!-- Coleção -->
@@ -103,6 +103,7 @@
             <textarea id="comments" name="comments" rows="4" placeholder="Add any comments about your participation..."></textarea>
           </div>
 
+
           <!-- Termos -->
           <div class="form-group">
             <label>
@@ -115,6 +116,8 @@
           <div class="form-actions">
             <button type="submit" class="btn-primary">Confirm Registration</button>
           </div>
+          <p id="formMessage" class="form-message"></p>
+          
         </form>
 
         <!-- Resumo da inscrição -->

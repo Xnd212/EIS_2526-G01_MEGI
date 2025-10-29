@@ -85,10 +85,34 @@ document.addEventListener("DOMContentLoaded", () => {
       valid = false;
     }
 
-    const datePattern = /^\d{2}-\d{2}-\d{4}$/;
-    if (!datePattern.test(date.value.trim())) {
-      date.classList.add("error");
+/* preventing future and validating date*/
+    const dateInput = document.getElementById("acquisitionDate");
+
+    // Set max date in the date picker to today (prevents selecting future dates)
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.max = today;
+
+    // Validation
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
+    const dateValue = dateInput.value.trim();
+
+    if (!datePattern.test(dateValue)) {
+      // invalid format (shouldn’t happen with <input type="date"> but just in case)
+      dateInput.classList.add("error");
       valid = false;
+    } else {
+      // Check if the date is in the future
+      const selectedDate = new Date(dateValue);
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate > currentDate) {
+        dateInput.classList.add("error");
+        valid = false;
+      } else {
+        dateInput.classList.remove("error");
+      }
     }
 
     if (!valid) {

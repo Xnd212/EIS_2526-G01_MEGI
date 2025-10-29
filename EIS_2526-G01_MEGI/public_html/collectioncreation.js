@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dropdownBtn.textContent =
       checked.length > 0
         ? checked.join(", ")
-        : "Select from existing items ⮟";
+        : "Select Collections ⮟";
   });
 
   // =============================
@@ -68,12 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let valid = true;
 
-    if (checkedCollections.length === 0) {
-      dropdownBtn.style.borderColor = "#b54242";
-      valid = false;
-    } else {
-      dropdownBtn.style.borderColor = "#ccc";
-    }
+
 
     if (name.value.trim() === "") {
       name.classList.add("error");
@@ -84,12 +79,34 @@ document.addEventListener("DOMContentLoaded", () => {
       price.classList.add("error");
       valid = false;
     }
-    
-    const now = new Date();
+/* preventing future and validating date*/
+    const dateInput = document.getElementById("creationDate");
 
-    if (date > console.log(now)) {
-      date.classList.add("error");
+    // Set max date in the date picker to today (prevents selecting future dates)
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.max = today;
+
+    // Validation
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
+    const dateValue = dateInput.value.trim();
+
+    if (!datePattern.test(dateValue)) {
+      // invalid format (shouldn’t happen with <input type="date"> but just in case)
+      dateInput.classList.add("error");
       valid = false;
+    } else {
+      // Check if the date is in the future
+      const selectedDate = new Date(dateValue);
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate > currentDate) {
+        dateInput.classList.add("error");
+        valid = false;
+      } else {
+        dateInput.classList.remove("error");
+      }
     }
 
     if (!valid) {
@@ -101,8 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formMessage.textContent = "✅ Item created successfully!";
     formMessage.classList.add("success");
     form.reset();
-    dropdownBtn.textContent = "Select Collections ⮟";
-    dropdownContent.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    dropdownBtn.textContent = "Select from Existing Items ⮟";
   });
 });
 

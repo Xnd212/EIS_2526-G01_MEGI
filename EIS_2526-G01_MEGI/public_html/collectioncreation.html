@@ -62,26 +62,26 @@
 
           <!-- Starting Date -->
           <div class="form-group">
-            <label for="creationDate">Starting Date (DD-MM-YYYY) <span class="required">*</span></label>
+            <label for="creationDate">Starting Date (DD/MM/YYYY) <span class="required">*</span></label>
             <input type="date" id="creationDate" name="creationDate"  />
           </div>
 
           <!-- Description -->
           <div class="form-group">
             <label for="itemDescription">Description</label>
-            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your item"></textarea>
+            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your collection"></textarea>
           </div>
 
           <!-- Image Upload -->
           <div class="form-group">
-            <label for="itemImage">Item Image (optional)</label>
+            <label for="itemImage">Cover Image (optional)</label>
             <input type="file" id="itemImage" name="itemImage" accept="image/*" />
           </div>
           
           
           <!-- Custom Multi-Select for Existing Items -->
           <div class="form-group">
-            <label>Select Existing Items </label>
+            <label>Select Existing Items (optional) </label>
             <div class="custom-multiselect">
               <button type="button" id="dropdownBtn">Select from existing items ⮟</button>
               <div class="dropdown-content" id="dropdownContent">
@@ -93,7 +93,7 @@
             </div>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn-primary">Create Item</button>
+            <button type="submit" class="btn-primary">Create Collection</button>
           </div>
         </form>
 
@@ -105,7 +105,7 @@
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>About collections</h3>
-        <p>Create collection</p>
+        <p><a href="collectioncreation.html">Create collection</a></p>
         <p><a href="itemcreation.html"> Create item</a></p>
         <p>View collections</p>
       </div>

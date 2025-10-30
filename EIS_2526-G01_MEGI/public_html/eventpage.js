@@ -102,7 +102,7 @@ container.innerHTML = `
         <p><strong>Theme:</strong> ${event.theme}</p>
         <p><strong>Date:</strong> ${event.date}</p>
         <p><strong>Place:</strong> ${event.place}</p>
-        <p><strong>Descrição:</strong> ${event.description}</p>
+        <p><strong>Description:</strong> ${event.description}</p>
         <p><strong>Tags:</strong> ${event.tags.join(", ")}</p>
       </div>
     </div>

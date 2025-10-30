@@ -139,15 +139,33 @@ body {
 }
 
 .edit-btn {
+  display: inline-flex;
   margin-top: 0.5rem;
-  padding: 0.4rem 1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 200;
+  font-size: 0.9rem;
   border: none;
-  border-radius: 5px;
-  background-color: white;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
   cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.edit-btn:hover {
+  background-color: #a03838;
+  transform: translateY(-1px);
+}
+
+.edit-btn:active {
+  transform: translateY(1px);
+}
+
 
 .stats {
   display: flex;

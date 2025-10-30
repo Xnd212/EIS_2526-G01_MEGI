@@ -37,7 +37,7 @@
 /* ====== FORM ======== */
 .form-group {
   display: flex;
-  flex-direction: column; /* ✅ garante que o label fica em cima e o input em baixo */
+  flex-direction: column; 
   margin-bottom: 1.2rem;
 }
 

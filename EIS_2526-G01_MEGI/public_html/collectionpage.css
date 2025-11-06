@@ -1,0 +1,159 @@
+/* ===== Collection Page Styles ===== */
+
+.collection-details {
+  display: flex;
+  background-color: #fbecec;
+  border: 1px solid #dca4a4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  align-items: flex-start;
+}
+
+.collection-logo {
+  width: 220px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.collection-info p {
+  font-size: 1.05rem;
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+}
+
+.collection-logo-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.edit-link {
+  margin-top: 0.6rem;
+  text-decoration: none;
+  color: #b54242;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+
+.events-section {
+  margin-top: 2.5rem;
+}
+
+.event-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin: 1rem 0;
+}
+
+.event-card {
+  width: 150px;
+  text-align: center;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.event-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.next-event {
+  margin-top: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+  max-width: 280px;
+  text-align: center;
+}
+
+.next-event img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .collection-details {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .event-cards {
+    justify-content: center;
+  }
+
+  .next-event {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
+}
+
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar-section p {
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+.events-section {
+  background-color: transparent;
+}

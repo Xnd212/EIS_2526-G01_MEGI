@@ -323,7 +323,7 @@ header {
 }
 
 .collection-card {
-  flex: 0 0 calc(30% - 1rem); /* 🔹 3 por linha (100% / 3 - gap) */
+  flex: 0 0 calc(30% - 1rem); /* 3 por linha (100% / 3 - gap) */
   min-width: 200px;
   max-width: 300px;
   background-color: #f3cccc;

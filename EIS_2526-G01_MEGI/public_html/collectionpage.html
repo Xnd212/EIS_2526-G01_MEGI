@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Collection Page</title>
+  <link rel="stylesheet" href="homepage.css" />
+  <link rel="stylesheet" href="collectionpage.css">
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <hr class="popup-divider">
+        <ul class="notification-list">
+          <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+          <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+          <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+          <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.html" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="content">
+      <h2>Pokemon Cards</h2>
+      <div class="collection-details">
+          <div class="collection-logo-wrapper">
+              <img src="images/pokémon_logo.png" alt="Pokemon TCG Logo" class="collection-logo">
+              <a href="#" class="edit-link">✎ Edit</a>
+          </div>
+          <div class="collection-info">
+              <p><strong>Collector:</strong> Susana_Andrade123</p>
+              <p><strong>Theme:</strong> Pokemon Trading Cards</p>
+              <p><strong>Start Date:</strong> 03/10/2025</p>
+              <p><strong>Most recent Item:</strong> <a href="#">Champion's Path Charizard V (PSA 10)</a></p>
+              <p><strong>Descrição:</strong> Pokémon cards from my childhood, rediscovered at home.</p>
+              <p><strong>Tags:</strong> Pokemon, Cards, Anime, TCG</p>
+          </div>
+      </div>
+
+
+      <div class="events-section">
+        <h3>Previous Events</h3>
+        <div class="event-cards">   
+          <div class="event-card">
+            <img src="images/amadoraBD.png" alt="Amadora BD">
+            <p>Amadora BD - International Comic</p>
+          </div>
+          <div class="event-card">
+            <img src="images/iberanime.png" alt="Iberanime">
+            <p>Iberanime Porto</p>
+          </div>
+          <div class="event-card">
+            <img src="images/lisbon.png" alt="Lisbon Games">
+            <p>Lisbon Games</p>
+          </div>
+          <div class="view-all">
+            <p>👁️ View All</p>
+          </div>
+        </div>
+
+        <h3>Next Event</h3>
+        <div class="next-event">
+          <img src="images/cardmadness.png" alt="Cardmadness 2026">
+          <p><strong>CARDMADNESS 2026</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Right Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>My collections</h3>
+        <p><a href="collectioncreation.html">Create collection</a></p>
+        <p><a href="itemcreation.html">Create item</a></p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p><a href="teampage.html">Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Events</h3>
+        <p><a href="createevent.html">Create event</a></p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.html">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <script src="collectionpage.js"></script>
+</body>
+</html>

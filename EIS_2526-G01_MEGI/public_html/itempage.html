@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Item Page</title>
+  <link rel="stylesheet" href="homepage.css" />
+  <link rel="stylesheet" href="itempage.css" />
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <hr class="popup-divider">
+        <ul class="notification-list">
+          <li><strong>Rafael_Ameida123</strong> updated her Pokémon Cards collection.</li>
+          <li>The <strong>Comic Con Portugal</strong> event is coming soon!</li>
+          <li><strong>Paul_Perez1697</strong> updated her Pokémon Champion’s Path collection.</li>
+          <li><strong>Alex_Gomes158</strong> started a new collection: Rare Coins.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.html" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="content">
+      <h2>Champion's Path Charizard V (PSA 10)</h2>
+      <div class="item-details">
+        <div class="item-image-wrapper">
+          <img src="images/charizard_card.png" alt="Charizard V PSA 10" class="item-image">
+          <a href="#" class="edit-link">✎ Edit</a>
+        </div>
+
+        <div class="item-info">
+          <p><strong>Collector:</strong> Susana_Andrade123</p>
+          <p><strong>Price:</strong> 950€</p>
+          <p><strong>Item Type:</strong> Card</p>
+          <p><strong>Importance:</strong> High!!!!!</p>
+          <p><strong>Acquisition Date:</strong> 03/10/2025</p>
+          <p><strong>Acquisition Place:</strong> Comic Con 2025</p>
+          <p><strong>Registration Date:</strong> 03/10/2025</p>
+        </div>
+      </div>
+
+      <div class="belongs-section">
+        <h3>Collections it belongs to:</h3>
+        <div class="belongs-logos">
+          <div class="collection-logo-box">
+            <img src="images/pokemon-pikachu.png" alt="Pokemon TCG">
+            <p><a href="collectionpage.html">Pokémon Cards</a></p>
+          </div>
+          <div class="collection-logo-box">
+            <img src="images/championspath.png" alt="Champion's Path">
+            <p>Pokémon Champion's Path</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Right Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>My collections</h3>
+        <p><a href="collectioncreation.html">Create collection</a></p>
+        <p><a href="itemcreation.html">Create item</a></p>
+        <p>View collections</p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p>View collections</p>
+        <p><a href="teampage.html">Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Events</h3>
+        <p><a href="createevent.html">Create event</a></p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.html">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <script src="itempage.js"></script>
+</body>
+</html>

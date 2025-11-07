@@ -41,9 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ].map((c) => c.parentElement.textContent.trim());
 
     dropdownBtn.textContent =
-      checked.length > 0
-        ? checked.join(", ")
-        : "Select Collections ⮟";
+      checked.length > 0 ? checked.join(", ") : "Select Collections ⮟";
   });
 
   // =============================
@@ -60,9 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     const name = document.getElementById("itemName");
     const price = document.getElementById("itemPrice");
+    const type = document.getElementById("itemType");
+    const importance = document.getElementById("itemImportance");
     const date = document.getElementById("acquisitionDate");
 
-    [name, price, date].forEach((el) => el.classList.remove("error"));
+    [name, price, type, importance, date].forEach((el) =>
+      el.classList.remove("error")
+    );
     formMessage.textContent = "";
     formMessage.className = "form-message";
 
@@ -80,43 +82,46 @@ document.addEventListener("DOMContentLoaded", () => {
       valid = false;
     }
 
-    if (price.value.trim() === "" || isNaN(price.value) || parseFloat(price.value) < 0) {
+    if (
+      price.value.trim() === "" ||
+      isNaN(price.value) ||
+      parseFloat(price.value) < 0
+    ) {
       price.classList.add("error");
       valid = false;
     }
 
-/* preventing future and validating date*/
-    const dateInput = document.getElementById("acquisitionDate");
+    if (type.value.trim() === "") {
+      type.classList.add("error");
+      valid = false;
+    }
 
-    // Set max date in the date picker to today (prevents selecting future dates)
+    if (importance.value.trim() === "") {
+      importance.classList.add("error");
+      valid = false;
+    }
+
     const today = new Date().toISOString().split("T")[0];
-    dateInput.max = today;
+    date.max = today;
 
-    // Validation
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
-    const dateValue = dateInput.value.trim();
-
-    if (!datePattern.test(dateValue)) {
-      // invalid format (shouldn’t happen with <input type="date"> but just in case)
-      dateInput.classList.add("error");
+    const dateValue = date.value.trim();
+    if (!dateValue) {
+      date.classList.add("error");
       valid = false;
     } else {
-      // Check if the date is in the future
-      const selectedDate = new Date(dateValue);
-      const currentDate = new Date();
-      currentDate.setHours(0, 0, 0, 0);
-      selectedDate.setHours(0, 0, 0, 0);
-
-      if (selectedDate > currentDate) {
-        dateInput.classList.add("error");
+      const selected = new Date(dateValue);
+      const now = new Date();
+      selected.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      if (selected > now) {
+        date.classList.add("error");
         valid = false;
-      } else {
-        dateInput.classList.remove("error");
       }
     }
 
     if (!valid) {
-      formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+      formMessage.textContent =
+        "⚠️ Please fill in all required (*) fields correctly.";
       formMessage.classList.add("error");
       return;
     }
@@ -125,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
     formMessage.classList.add("success");
     form.reset();
     dropdownBtn.textContent = "Select Collections ⮟";
-    dropdownContent.querySelectorAll("input[type='checkbox']").forEach(cb => cb.checked = false);
+    dropdownContent
+      .querySelectorAll("input[type='checkbox']")
+      .forEach((cb) => (cb.checked = false));
   });
 });
-

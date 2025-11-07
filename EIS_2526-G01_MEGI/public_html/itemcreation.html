@@ -43,7 +43,7 @@
   <div class="main">
     <div class="content">
       <section class="item-creation-section">
-        <h2 class="page-title">Create a New Item</h2>
+        <h2 class="page-title">Create New Item</h2>
 
         <form id="itemForm" novalidate>
 
@@ -73,10 +73,22 @@
             <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price" step="0.01" min="0" />
           </div>
 
+          <!-- Item Type -->
+          <div class="form-group">
+            <label for="itemType">Item Type <span class="required">*</span></label>
+            <input type="text" id="itemType" name="itemType" placeholder="Enter item type (e.g., Card, Figure, Poster)" />
+          </div>
+
+          <!-- Importance -->
+          <div class="form-group">
+            <label for="itemImportance">Importance <span class="required">*</span></label>
+            <input type="text" id="itemImportance" name="itemImportance" placeholder="Enter importance level (e.g., High, Medium, Low)" />
+          </div>
+
           <!-- Acquisition Date -->
           <div class="form-group">
             <label for="acquisitionDate">Acquisition Date (DD-MM-YYYY) <span class="required">*</span></label>
-            <input type="date" id="acquisitionDate" name="acquisitionDate"  />
+            <input type="date" id="acquisitionDate" name="acquisitionDate" />
           </div>
 
           <!-- Acquisition Place -->
@@ -106,7 +118,7 @@
       </section>
     </div>
 
-   <!-- ===== Right Sidebar (Under Header) ===== -->
+    <!-- ===== Right Sidebar ===== -->
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>
@@ -130,9 +142,6 @@
     </aside>
   </div>
 
-
-  <!-- === JAVASCRIPT === -->
   <script src="itemcreation.js"></script>
-
 </body>
 </html>

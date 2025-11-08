@@ -19,3 +19,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const editBtn = document.getElementById("editBtn");
+
+  if (editBtn) {
+    editBtn.addEventListener("click", () => {
+      const itemData = {
+        price: document.getElementById("itemPrice").textContent,
+        itemType: document.getElementById("itemType").textContent,
+        importance: document.getElementById("itemImportance").textContent,
+        acquisitionDate: document.getElementById("itemAcquisitionDate").textContent,
+        acquisitionPlace: document.getElementById("itemAcquisitionPlace").textContent,
+        description: document.getElementById("itemDescription").textContent
+      };
+
+      localStorage.setItem("editItemData", JSON.stringify(itemData));
+      window.location.href = "edititem.html";
+    });
+  }
+});
+

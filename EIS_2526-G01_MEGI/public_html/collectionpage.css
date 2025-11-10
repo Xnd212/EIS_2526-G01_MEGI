@@ -169,13 +169,13 @@
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 200px;
+  width: 190px;
   text-align: center;
 }
 
 .item-card img {
-  width: 100%;
-  height: 250px;
+  width: 75%;
+  height: 160px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 0.5rem;
@@ -190,4 +190,120 @@
 .items-section {
   margin-top: 1rem;
   background-color: transparent;
+}
+
+
+
+
+/* ===============================
+   POPUP DE DETALHES (GERAL)
+================================= */
+#hover-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 430px;
+  height: 225px;
+  max-width: 90vw;
+  background-color: #ffffff;
+  border: 1px solid #a9a9a9;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: sans-serif;
+  font-size: 14px;
+
+  display: flex;
+  align-items: flex-start;  /* Alinha topo a topo */
+  overflow: visible;        /* ← Permite conteúdo extra */
+}
+
+#hover-popup.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===============================
+   POPUP CONTEÚDO – TÍTULOS
+================================= */
+#hover-popup h3.popup-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 5px;
+}
+
+#hover-popup .popup-user {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* ===============================
+   POPUP CONTEÚDO – LAYOUT FLEX
+================================= */
+.popup-content-flex {
+  display: flex;
+  align-items: center;
+  gap: 0rem;
+  width: 100%;
+  height: 100%; 
+}
+
+/* Coluna do texto (esquerda) */
+.popup-text {
+  flex: 1;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* ← alinha tudo no topo */
+}
+
+/* Coluna da imagem (direita) */
+.popup-image img {
+  width: 100%;
+  height: auto;             /* ← Altura automática */
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* ===============================
+   POPUP – TÍTULO DO ITEM (ACIMA DA IMAGEM)
+================================= */
+#hover-popup h4.popup-subtitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* ===============================
+   POPUP – IMAGEM
+================================= */
+.popup-image img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+/* ===============================
+   POPUP – DATA FINAL (ABAIXO DA IMAGEM)
+================================= */
+.popup-date {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* ===============================
+   POPUP – PARÁGRAFOS GERAIS
+================================= */
+#hover-popup p {
+  margin: 4px 0;
 }

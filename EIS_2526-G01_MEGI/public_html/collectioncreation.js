@@ -49,20 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // =============================
   // FORM VALIDATION
   // =============================
-  const form = document.getElementById("itemForm");
+  const form = document.getElementById("collectionForm");
   const formMessage = document.getElementById("formMessage");
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const checkedCollections = [
-      ...dropdownContent.querySelectorAll("input[type='checkbox']:checked")
-    ];
-    const name = document.getElementById("itemName");
-    const price = document.getElementById("itemPrice");
+
+    const name = document.getElementById("collectionName");
+    const theme = document.getElementById("collectionTheme");
     const date = document.getElementById("creationDate");
 
-    [name, price, date].forEach((el) => el.classList.remove("error"));
+    [name, theme, date].forEach((el) => el.classList.remove("error"));
     formMessage.textContent = "";
     formMessage.className = "form-message";
 
@@ -75,8 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
       valid = false;
     }
 
-    if (price.value.trim() === "" || isNaN(price.value) || parseFloat(price.value) < 0) {
-      price.classList.add("error");
+    if (theme.value.trim() === "" ) {
+      theme.classList.add("error");
       valid = false;
     }
 /* preventing future and validating date*/
@@ -115,10 +113,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    formMessage.textContent = "✅ Item created successfully!";
+    formMessage.textContent = "✅ Collection created successfully!";
     formMessage.classList.add("success");
     form.reset();
-    dropdownBtn.textContent = "Select from Existing Items ⮟";
+    dropdownBtn.textContent = "Select from existing Items ⮟";
+    
+    document.body.style.cursor = "wait";
+        // Redirect to collectionpage.html after 1.5 seconds
+    setTimeout(() => {
+        window.location.href = "collectionpage.html";
+    }, 1500);
   });
 });
 

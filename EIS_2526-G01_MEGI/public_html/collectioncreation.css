@@ -9,7 +9,7 @@
   justify-content: center;
 }
 
-.item-creation-section {
+.collection-creation-section {
   background: #fff;
   border: 1.5px solid #b54242;
   border-radius: 10px;
@@ -208,8 +208,12 @@ input.error {
 
 
 @media (max-width: 768px) {
-  .item-creation-section {
+  .collection-creation-section {
     max-width: 100%;
     padding: 1.5rem;
   }
 }
+
+
+
+

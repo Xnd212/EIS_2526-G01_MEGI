@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Create Collection</title>
-  <link rel="stylesheet" href="itemcreation.css" />
+  <link rel="stylesheet" href="collectioncreation.css" />
 </head>
 
 <body>
@@ -42,22 +42,22 @@
   ============================ -->
   <div class="main">
     <div class="content">
-      <section class="item-creation-section">
+      <section class="collection-creation-section">
         <h2 class="page-title">Create a Collection</h2>
 
-        <form id="itemForm" novalidate>
+        <form id="collectionForm" novalidate>
 
 
           <!-- Name -->
           <div class="form-group">
-            <label for="itemName">Name <span class="required">*</span></label>
-            <input type="text" id="itemName" name="itemName" placeholder="Enter collection name" />
+            <label for="collectionName">Name <span class="required">*</span></label>
+            <input type="text" id="collectionName" name="collectionName" placeholder="Enter collection name" />
           </div>
 
-          <!-- Price -->
+          <!-- Theme -->
           <div class="form-group">
-            <label for="itemPrice">Price (€) <span class="required">*</span></label>
-            <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price" step="0.01" min="0" />
+            <label for="collectionTheme">Theme <span class="required">*</span></label>
+            <input type="text" id="collectionTheme" name="collectionTheme" placeholder="Enter collection theme" />
           </div>
 
           <!-- Starting Date -->
@@ -68,14 +68,22 @@
 
           <!-- Description -->
           <div class="form-group">
-            <label for="itemDescription">Description</label>
-            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your collection"></textarea>
+            <label for="collectionDescription">Description</label>
+            <textarea id="collectionDescription" name="collectionDescription" rows="4" placeholder="Add details about your collection"></textarea>
+          </div>   
+          
+          <!-- Tags -->
+          <div class="form-group">
+            <label for="collectionTags">Tags</label>
+            <input type="text" id="collectionTags" name="collectionTags" placeholder="Enter collection tags" />
           </div>
+
+
 
           <!-- Image Upload -->
           <div class="form-group">
-            <label for="itemImage">Cover Image (optional)</label>
-            <input type="file" id="itemImage" name="itemImage" accept="image/*" />
+            <label for="collectionImage">Cover Image (optional)</label>
+            <input type="file" id="collectionImage" name="collectionImage" accept="image/*" />
           </div>
           
           
@@ -106,13 +114,13 @@
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>
         <p><a href="collectioncreation.html">Create collection</a></p>
-        <p><a href="itemcreation.html"> Create item</a></p>
-        <p>View collections</p>
+        <p><a href="itemcreation.html"> Create Item</a></p>
+        <p><a href="mycollectionspage.html">View collections</a></p>
       </div>
 
       <div class="sidebar-section friends-section">
         <h3>My friends</h3>
-        <p>View collections</p>
+        <p><a href="friendscollectionspage.html">View collections</a></p>
         <p><a href="teampage.html"> Team Page</a></p>
       </div>
 

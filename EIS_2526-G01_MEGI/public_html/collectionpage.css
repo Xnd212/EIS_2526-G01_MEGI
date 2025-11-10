@@ -40,6 +40,7 @@
 
 .events-section {
   margin-top: 2.5rem;
+  background-color: transparent;
 }
 
 .event-cards {
@@ -154,6 +155,39 @@
   background-color: #f3b8aa ;
 }
 
-.events-section {
+.items-grid {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 2rem;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  
+}
+
+.item-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 200px;
+  text-align: center;
+}
+
+.item-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.item_name {
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.items-section {
+  margin-top: 1rem;
   background-color: transparent;
 }

@@ -16,6 +16,27 @@ document.addEventListener("DOMContentLoaded", () => {
         popup.style.display = 'none';
       }
     });
+    
+  // === Importance Slider and Number Sync ===
+  const slider = document.getElementById("itemImportanceSlider");
+  const number = document.getElementById("itemImportanceNumber");
+
+  if (slider && number) {
+    // When slider changes, update number
+    slider.addEventListener("input", () => {
+      number.value = slider.value;
+    });
+
+    // When number changes, update slider (with bounds check)
+    number.addEventListener("input", () => {
+      let val = parseInt(number.value, 10);
+      if (isNaN(val)) return;
+      if (val < 1) val = 1;
+      if (val > 10) val = 10;
+      slider.value = val;
+      number.value = val;
+    });
+  }
   }
 
   // =============================
@@ -59,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = document.getElementById("itemName");
     const price = document.getElementById("itemPrice");
     const type = document.getElementById("itemType");
-    const importance = document.getElementById("itemImportance");
+    const importance = document.getElementById("itemImportanceNumber");
     const date = document.getElementById("acquisitionDate");
 
     [name, price, type, importance, date].forEach((el) =>

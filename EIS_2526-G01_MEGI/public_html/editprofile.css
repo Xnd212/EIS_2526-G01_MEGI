@@ -2,11 +2,84 @@
 
 
 body {
-  background: #eef0ff;
-  font-family: system-ui, sans-serif;
-  margin: 0;
-  padding: 0;
+  overflow-y: scroll;
 }
+
+.content {
+  margin-right: 240px;
+  padding: 2rem;
+  background: #eef0ff;
+}
+
+
+
+
+/* ===== Notification Popup  ===== */
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #b54242; /* cor escura da header */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 315px;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.notification-popup.active {
+  display: flex;
+}
+
+.popup-header {
+  background-color: #fbecec;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid #b54242;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.popup-header h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #b54242;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.popup-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem;
+}
+
+.notification-list li {
+  padding: 0.4rem 0;
+  border-bottom: 2px solid #eee;
+  font-size: 0.9rem;
+}
+
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+.notification-list li:first-child {
+  border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
+}
+
+
+
 
 .edit-profile-page {
   background: #fff;
@@ -312,90 +385,56 @@ body[data-theme="dark"] .btn-secondary:hover {
   background-color: #6a6a73;
 }
 
-/* Sidebar e header */
-body[data-theme="dark"] .sidebar {
-  background-color: #3b3b42;
-  color: #f2f2f2;
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
 }
 
-body[data-theme="dark"] header {
-  background-color: #44414a;
-  color: #f2f2f2;
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
 }
 
-/* Links */
-body[data-theme="dark"] a {
-  color: #f29b86;
-}
-
-body[data-theme="dark"] a:hover {
-  color: #ffb6a1;
-}
-
-/* Radio buttons e checkboxes */
-body[data-theme="dark"] input[type="radio"],
-body[data-theme="dark"] input[type="checkbox"] {
-  accent-color: #c77462;
-}
-
-/* Bordas do foco */
-body[data-theme="dark"] :focus-visible {
-  outline-color: #c77462;
-}
-
-
-
-
-
-
-/* Buttons */
-.btn-primary {
-  background: #b54242;
-  color: white;
-  padding: 0.7rem 1.4rem;
-  border: none;
-  border-radius: 6px;
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.btn-primary:hover {
-  background: #9d3636;
-}
-
-.btn-secondary {
-  background: #e8e8e8;
+.sidebar-section p {
   color: #333;
-  padding: 0.7rem 1.4rem;
-  border-radius: 6px;
-  border: none;
+  font-size: 0.9rem;
   cursor: pointer;
-  font-weight: bold;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
 }
 
-.btn-secondary:hover {
-  background: #dcdcdc;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-/* Feedback */
-.form-feedback {
-  text-align: center;
-  font-weight: bold;
-  margin-top: 1rem;
-}
-
-.form-feedback.success {
-  color: #3d8b3d;
-}
-
-.form-feedback.error {
+.sidebar-section p:hover {
   color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+.events-section {
+  background-color: transparent;
 }

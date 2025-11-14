@@ -121,6 +121,18 @@ header {
   z-index: 1000;
 }
 
+/* Estado normal: mostra parte da lista */
+.notification-popup .notification-list {
+  max-height: 180px;
+  overflow: hidden;
+}
+
+/* Quando expandido: aumenta e permite scroll */
+.notification-popup.expanded .notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 .notification-popup.active {
   display: flex;
 }

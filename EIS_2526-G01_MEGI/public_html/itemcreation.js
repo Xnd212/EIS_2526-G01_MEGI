@@ -1,9 +1,11 @@
 // =============================
-// Notification Popup
+// Notificações 
 // =============================
+
 document.addEventListener("DOMContentLoaded", () => {
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
   const popup = document.getElementById('notification-popup');
+  const seeMoreLink = document.querySelector('.see-more-link');
 
   if (bellBtn && popup) {
     bellBtn.addEventListener('click', (e) => {
@@ -16,6 +18,25 @@ document.addEventListener("DOMContentLoaded", () => {
         popup.style.display = 'none';
       }
     });
+  }
+
+  // Expandir / Encolher notificações
+  if (seeMoreLink) {
+    seeMoreLink.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      popup.classList.toggle('expanded');
+
+      if (popup.classList.contains('expanded')) {
+        seeMoreLink.textContent = "Show less";
+      } else {
+        seeMoreLink.textContent = "+ See more";
+      }
+    });
+  }
+});
+
+
     
   // === Importance Slider and Number Sync ===
   const slider = document.getElementById("itemImportanceSlider");
@@ -37,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
       number.value = val;
     });
   }
-  }
+  
 
   // =============================
   // Custom Multi-select Dropdown
@@ -155,4 +176,4 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll("input[type='checkbox']")
       .forEach((cb) => (cb.checked = false));
   });
-});
+

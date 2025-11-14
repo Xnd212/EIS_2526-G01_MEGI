@@ -1,9 +1,11 @@
 // =============================
-// Notification Popup
+// Notificações 
 // =============================
+
 document.addEventListener("DOMContentLoaded", () => {
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
   const popup = document.getElementById('notification-popup');
+  const seeMoreLink = document.querySelector('.see-more-link');
 
   if (bellBtn && popup) {
     bellBtn.addEventListener('click', (e) => {
@@ -16,11 +18,22 @@ document.addEventListener("DOMContentLoaded", () => {
         popup.style.display = 'none';
       }
     });
-  };
-  
-  
-  
-  
-  });
+  }
+
+  // Expandir / Encolher notificações
+  if (seeMoreLink) {
+    seeMoreLink.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      popup.classList.toggle('expanded');
+
+      if (popup.classList.contains('expanded')) {
+        seeMoreLink.textContent = "Show less";
+      } else {
+        seeMoreLink.textContent = "+ See more";
+      }
+    });
+  }
+});
 
 

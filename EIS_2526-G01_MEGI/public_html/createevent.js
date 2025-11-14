@@ -1,10 +1,13 @@
 // =============================
-  // EVENT FORM HANDLING
-  // =============================
+// EVENT FORM HANDLING
+// =============================
 document.addEventListener("DOMContentLoaded", () => {
+
   const form = document.getElementById("eventForm");
-  const formMessage = document.getElementById("formMessage");
-  const content = document.querySelector(".content");
+  const summarySection = document.getElementById("eventSummarySection");
+  const summaryContent = document.getElementById("eventSummaryContent");
+  const editBtn = document.getElementById("editEvent");
+  const finalConfirmBtn = document.getElementById("finalEventConfirm");
 
   const organizer = "Alex.Mendes147";
 
@@ -14,128 +17,81 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     // Campos
-    const name = document.getElementById("eventName");
-    const date = document.getElementById("startDate");
-    const theme = document.getElementById("theme");
-    const location = document.getElementById("location");
-    const description = document.getElementById("description");
-    const tags = document.getElementById("tags");
-    const youtube = document.getElementById("youtube");
-    const image = document.getElementById("coverImage");
+    const name = document.getElementById("eventName").value.trim();
+    const date = document.getElementById("startDate").value.trim();
+    const theme = document.getElementById("theme").value.trim();
+    const location = document.getElementById("location").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const tags = document.getElementById("tags").value.trim();
+    const youtube = document.getElementById("youtube").value.trim();
+    const imageFile = document.getElementById("coverImage").files[0];
 
-    const fields = [name, date, theme, location, description, tags, image];
-    fields.forEach((el) => el.classList.remove("error"));
-    formMessage.textContent = "";
-    formMessage.className = "form-message";
-
-    let valid = true;
-
-    // Validação
-    fields.forEach((field) => {
-      if (!field.value.trim() && field.type !== "file") {
-        field.classList.add("error");
-        valid = false;
-      }
-    });
-
-    const selectedDate = new Date(date.value);
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    selectedDate.setHours(0, 0, 0, 0);
-
-    if (selectedDate < currentDate) {
-      date.classList.add("error");
-      valid = false;
-    }
-
-    if (!image.files[0]) {
-      image.classList.add("error");
-      valid = false;
-    }
-
-    if (!valid) {
-      formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
-      formMessage.classList.add("error");
+    if (!name || !date || !theme || !location || !description || !tags || !imageFile) {
+      alert("Please fill all required fields.");
       return;
     }
 
-    // Ler imagem e gerar sumário
+    // Lê imagem
     const reader = new FileReader();
     reader.onload = function (e) {
-      const imageUrl = e.target.result;
+      const imageURL = e.target.result;
 
-      const summaryBox = document.createElement("div");
-      summaryBox.className = "event-card";
+      // ====== RESUMO DO EVENTO ======
+      summaryContent.innerHTML = `
+        <div class="event-card">
+          <div class="event-header">
+            <img src="${imageURL}" class="event-cover" alt="Event image">
 
-      // Construir embed YouTube (opcional)
-      let youtubeEmbed = "";
-      if (youtube.value.includes("youtube.com") || youtube.value.includes("youtu.be")) {
-        let videoId = "";
-        if (youtube.value.includes("embed/")) {
-          videoId = youtube.value.split("embed/")[1];
-        } else if (youtube.value.includes("watch?v=")) {
-          videoId = youtube.value.split("watch?v=")[1];
-        } else if (youtube.value.includes("youtu.be/")) {
-          videoId = youtube.value.split("youtu.be/")[1];
-        }
-        videoId = videoId.split("&")[0];
-        youtubeEmbed = `<div class="youtube-embed"><iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe></div>`;
-      }
-
-      // Sumário visual
-      summaryBox.innerHTML = `
-        <div class="event-header">
-          <img src="${imageUrl}" alt="${name.value}" class="event-cover" />
-          <div class="event-info">
-            <h3>${name.value}</h3>
-            <p><strong>Creator:</strong> ${organizer}</p>
-            <p><strong>Theme:</strong> ${theme.value}</p>
-            <p><strong>Date:</strong> ${date.value}</p>
-            <p><strong>Place:</strong> ${location.value}</p>
-            <p><strong>Description:</strong> ${description.value}</p>
-            <p class="event-tags"><strong>Tags:</strong> ${tags.value}</p>
+            <div class="event-info">
+              <h3>${name}</h3>
+              <p><strong>Creator:</strong> ${organizer}</p>
+              <p><strong>Theme:</strong> ${theme}</p>
+              <p><strong>Date:</strong> ${date}</p>
+              <p><strong>Place:</strong> ${location}</p>
+              <p><strong>Description:</strong> ${description}</p>
+              <p><strong>Tags:</strong> ${tags}</p>
+            </div>
           </div>
-        </div>
-        ${youtubeEmbed}
-        <div class="form-actions" style="justify-content: center; gap: 1rem; margin-top: 1rem;">
-          <button id="editBtn" class="btn-primary" type="button">Edit</button>
-          <button id="confirmBtn" class="btn-primary" type="button">Confirm and Create</button>
         </div>
       `;
 
-      // Apagar sumários anteriores
-      document.querySelectorAll(".event-card").forEach((el) => el.remove());
-      formMessage.textContent = "";
-      content.appendChild(summaryBox);
-
-      // Ocultar o formulário
-      form.style.display = "none";
-
-      // Botão Editar → mostra formulário de novo
-      document.getElementById("editBtn").addEventListener("click", () => {
-        summaryBox.remove();
-        form.style.display = "block";
-      });
-
-      // Botão Confirmar → mostra cartão final
-      document.getElementById("confirmBtn").addEventListener("click", () => {
-        form.reset();
-        summaryBox.querySelector(".form-actions").remove(); // remove botões
-        formMessage.textContent = "✅ Event created successfully!";
-        formMessage.classList.add("success");
-        form.style.display = "block";
-      });
+      // Mostra resumo, esconde formulário
+      form.classList.add("hidden");
+      summarySection.classList.remove("hidden");
     };
 
-    reader.readAsDataURL(image.files[0]);
+    reader.readAsDataURL(imageFile);
   });
+
+  // ===== Edit Event =====
+  editBtn.addEventListener("click", () => {
+    summarySection.classList.add("hidden");
+    form.classList.remove("hidden");
+  });
+
+  // ===== CONFIRM FINAL — mensagem final =====
+  finalConfirmBtn.addEventListener("click", () => {
+
+    summarySection.innerHTML = `
+      <h3>🎉 Event Created!</h3>
+      <p>Your event has been successfully created. We look forward to seeing you there!</p>
+
+      <div class="summary-actions">
+        <a href="homepage.html" class="back-link">← Back to Home Page</a>
+        <a href="eventpage.html" class="back-link">← See Event Page</a>
+      </div>
+    `;
+  });
+
 });
+
+
+
 
 
 // =============================
 // Notificações 
 // =============================
-
 document.addEventListener("DOMContentLoaded", () => {
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
   const popup = document.getElementById('notification-popup');
@@ -169,8 +125,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
-
-
 
 

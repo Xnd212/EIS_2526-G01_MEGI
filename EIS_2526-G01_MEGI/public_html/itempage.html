@@ -7,6 +7,7 @@
   <title>Trall-E | Item Page</title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="itempage.css" />
+  <link rel="stylesheet" href="mycollectionspage.css" />
 </head>
 
 <body>
@@ -63,18 +64,27 @@
         </div>
       </div>
 
-      <div class="belongs-section">
-        <h3>Collections it belongs to:</h3>
-        <div class="belongs-logos">
-          <div class="collection-logo-box">
-            <img src="images/pokemon-pikachu.png" alt="Pokemon TCG">
-            <p><a href="collectionpage.html">Pokémon Cards</a></p>
-          </div>
-          <div class="collection-logo-box">
-            <img src="images/championspath.png" alt="Champion's Path">
-            <p>Pokémon Champion's Path</p>
-          </div>
-        </div>
+      <div class="collections-and-friends">
+          <section class="collections">
+              <h2>Collections it belongs to</h2>
+              <div class="collection-grid">
+                  <div class="collection-card">
+                    <a href="collectionpage.html">
+                      <img src="images/pokemon-pikachu.png" alt="Pokemon Cards">
+                      <p class="collection-name">Pokemon Cards</p>
+                      <span class="last-updated">Last updated: 03/10/2025</span>
+                    </a>
+                  </div>
+
+                  <div class="collection-card">
+                    <a href="collectionpage.html">
+                      <img src="images\championspath.png" alt="Champion's Path">
+                      <p class="collection-name">Champion's Path</p>
+                      <span class="last-updated">Last updated: 17/05/2025</span>
+                    </a>
+                  </div>
+              </div>
+          </section>
       </div>
     </div>
 

@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Tomás_Freitas's Collections</title>
+  <link rel="stylesheet" href="homepage.css">
   <link rel="stylesheet" href="mycollectionspage.css">
 </head>
 
@@ -55,8 +56,47 @@
     <div class="content">
       <div class="collections-and-friends">
           <section class="collections">
+              <div class="collections-header">
               <h2>Tomás_Freitas's Collections</h2>
-              <div class="collection-grid">
+              
+                  <!-- Botão de filtro -->
+            <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
+              <!-- símbolo simples de funil + texto -->
+              &#128269; Filter ▾
+            </button>
+
+            <!-- Menu de filtros -->
+            <div class="filter-menu" id="filterMenu">
+                
+            <!-- Nome -->
+            <button type="button" data-sort="alpha-asc">Name: A–Z</button>
+            <button type="button" data-sort="alpha-desc">Name: Z–A</button>
+            <hr>
+
+            <!-- Preço -->
+            <button type="button" data-sort="price-asc">Price: Low–High</button>
+            <button type="button" data-sort="price-desc">Price: High–Low</button>
+            <hr>
+
+            <!-- Last updated (quando implementarmos) -->
+            <button type="button" data-sort="updated-desc">Last updated: New</button>
+            <button type="button" data-sort="updated-asc">Last updated: Old</button>
+            <hr>
+
+            <!-- Creation date -->
+            <button type="button" data-sort="created-desc">Created: New</button>
+            <button type="button" data-sort="created-asc">Created: Old</button>
+            <hr>
+
+            <!-- Nº itens -->
+            <button type="button" data-sort="items-desc">Items: Most</button>
+            <button type="button" data-sort="items-asc">Items: Fewest</button>
+          
+            </div>
+            </div>
+        
+            
+              <div class="collection-grid" id="collectionGrid">
                   <div class="collection-card">
                     <a href="collectionpage.html">
                       <img src="images/pokemon-pikachu.png" alt="Pokemon Cards">
@@ -113,7 +153,7 @@
   
 
 <!-- === JAVASCRIPT === -->
-<script src="homepage.js"></script>
+<script src="friendscollectionspage.js"></script>
 
 </body>
 </html>

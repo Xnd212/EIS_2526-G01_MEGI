@@ -151,6 +151,87 @@ body {
   color: #b54242;
 }
 
+
+
+/* ==== Filtros  ==== */
+.collections-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative; 
+  z-index: 1000;
+}
+
+.collections-header h2 {
+  font-weight: bold;
+  margin: 0; 
+}
+
+/* Botão de filtro */
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #b54242;
+  background-color: #fbecec;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #b54242;
+  z-index: 1001;
+}
+
+.filter-toggle:hover {
+  background-color: #f3cccc;
+}
+
+/* Dropdown de filtros */
+.filter-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.4rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 0.3rem 0;
+  min-width: 190px; 
+  display: none;
+  z-index: 500;
+  font-size: 0.85rem; 
+}
+
+.filter-menu.show {
+  display: block;
+}
+
+.filter-menu button {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.3rem 0.8rem;  
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-menu button:hover {
+  background-color: #fbecec;
+}
+
+.filter-menu hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 0.25rem 0;
+}
+
+
+
+
 /* =======================
    Sidebar (Fixed on the Right)
 ======================= */

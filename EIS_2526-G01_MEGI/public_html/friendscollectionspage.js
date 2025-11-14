@@ -110,4 +110,3 @@ document.addEventListener('DOMContentLoaded', function () {
     filterToggle.setAttribute('aria-expanded', 'false');
   });
 });
-

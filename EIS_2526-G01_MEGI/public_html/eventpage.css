@@ -224,15 +224,14 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .register-text {
   font-size: 1.1rem;
-  margin: 1rem;
   font-weight: 500;
   color: #333;
-  margin-left: 2.5rem;
+  margin: 0; 
 }
 
 .register-button {

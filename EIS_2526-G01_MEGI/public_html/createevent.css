@@ -208,7 +208,6 @@ textarea.error {
 
 .event-tags {
   margin-top: 0.5rem;
-  font-style: italic;
   color: #555;
 }
 
@@ -262,34 +261,201 @@ textarea.error {
   border: none;
 }
 
-.signup-box {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: #ffecec;
-  border-left: 4px solid #b54242;
+/* ========= SUMMARY (Event Summary) ========= */
+
+.summary-section {
+  margin-top: 2.5rem;
+  padding: 1.8rem;
+  background: #fff9f8;
+  border: 1.5px solid #c77462;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-section h3 {
+  font-size: 1.4rem;
+  color: #b54242;
+  border-bottom: 2px solid #c77462;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+#eventSummaryContent p {
+  margin: 0.4rem 0;
+  font-size: 1rem;
+}
+
+/* layout imagem + info no resumo */
+#eventSummaryContent .event-header {
   display: flex;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+#eventSummaryContent .event-cover {
+  width: 220px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #b54242;
+}
+
+#eventSummaryContent .event-info h3 {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+  color: #b54242;
+}
+
+.summary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* esconder elementos (form vs summary) */
+.hidden {
+  display: none;
+}
+
+/* ========= MODAL DE SUCESSO ========= */
+
+.event-success-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: none; /* hidden até o JS mostrar */
   align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
 
-.signup-box p {
-  margin: 0;
-  font-weight: bold;
+.success-box {
+  background: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
-.signup-box button {
-  background: #b54242;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
+.success-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+/* botão secundário (usado no resumo e no modal) */
+.btn-secondary {
+  background: #f4f4f4;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 0.7rem 1.4rem;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.signup-box button:hover {
-  background: #9d3636;
+.btn-secondary:hover {
+  background: #e3e3e3;
 }
+
+.item-creation-section.summary-mode {
+  min-height: auto !important;
+  height: auto;
+  padding-bottom: 2rem;
+}
+
+/* Resumo dentro do modal de sucesso */
+.modal-event-summary {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fff9f8;
+  border: 1px solid #f0c5b5;
+  border-radius: 10px;
+}
+
+/* Reaproveita o layout do resumo, mas ligeiramente mais compacto */
+.modal-event-summary .event-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.modal-event-summary .event-cover {
+  width: 180px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #b54242;
+}
+
+.modal-event-summary .event-info h3 {
+  margin-top: 0;
+  margin-bottom: 0.3rem;
+  color: #b54242;
+}
+
+/* ===== SUCCESS MODAL ===== */
+.event-success-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: none;            /* o JS muda para flex quando abre */
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.success-box {
+  background: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.success-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+/* Resumo dentro do modal */
+.modal-event-summary {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fff9f8;
+  border: 1px solid #f0c5b5;
+  border-radius: 10px;
+}
+
+.modal-event-summary .event-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.modal-event-summary .event-cover {
+  width: 180px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #b54242;
+}
+
+.modal-event-summary .event-info h3 {
+  margin-top: 0;
+  margin-bottom: 0.3rem;
+  color: #b54242;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {

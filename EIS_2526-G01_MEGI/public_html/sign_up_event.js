@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   
-  // Simulação: carregar as coleções do utilizador (podes substituir por fetch da tua API)
 const userCollections = ["Pokémon Cards", "Rare Coins", "Panini Stickers", "Comics"];
 
 const collectionSelect = document.getElementById("collection");

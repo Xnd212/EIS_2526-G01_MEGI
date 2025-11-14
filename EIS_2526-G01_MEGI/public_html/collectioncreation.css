@@ -18,7 +18,7 @@
   width: 100%;
   max-width: 800px;
   height: auto;
-  min-height: 850px;
+  min-height: 1020px;
 }
 
 .page-title {
@@ -99,6 +99,7 @@ label {
 input[type="text"],
 input[type="number"],
 input[type="file"],
+input[type="date"],
 textarea {
   padding: 0.6rem;
   border: 1px solid #ccc;

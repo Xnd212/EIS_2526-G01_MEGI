@@ -397,6 +397,110 @@ body[data-theme="dark"] .btn-secondary:hover {
   background-color: #6a6a73;
 }
 
+/* ===== BOTÕES GERAIS ===== */
+.btn-primary,
+.btn-secondary,
+.small-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;          
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;         
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+
+.btn-primary {
+  background-color: #b54242;     
+  color: #fff;
+  border-color: #b54242;
+  box-shadow: 0 2px 6px rgba(181, 66, 66, 0.4);
+}
+
+.btn-primary:hover {
+  background-color: #a43a3a;
+  border-color: #a43a3a;
+  box-shadow: 0 3px 8px rgba(181, 66, 66, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.btn-secondary {
+  background-color: #fff0f0;    
+  color: #b54242;
+  border-color: #c77462;
+}
+
+.btn-secondary:hover {
+  background-color: #f9dfd4;
+  border-color: #b54242;
+  box-shadow: 0 2px 6px rgba(199, 116, 98, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.small-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #f3c4b2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ===== FEEDBACK GERAL DO FORM ===== */
+.form-feedback {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.form-feedback.error {
+  color: #b54242;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.form-feedback.success {
+  color: #2e7d32;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+input.error,
+select.error {
+  border-color: #b54242;
+  background-color: #fff;
+}
+
+
+
 /* =======================
    Sidebar (Fixed on the Right)
 ======================= */

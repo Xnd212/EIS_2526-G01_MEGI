@@ -54,8 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // =============================
 photoInput.addEventListener("change", e => {
     const file = e.target.files[0];
-    if (!file)
-        return;
+    if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
         alert("File too large! Max size: 2MB");
@@ -110,10 +109,8 @@ notifyMethodRadios.forEach(method => {
     method.addEventListener("change", () => {
         emailField.classList.add("hidden");
         phoneField.classList.add("hidden");
-        if (method.value === "email")
-            emailField.classList.remove("hidden");
-        if (method.value === "phone")
-            phoneField.classList.remove("hidden");
+        if (method.value === "email") emailField.classList.remove("hidden");
+        if (method.value === "phone") phoneField.classList.remove("hidden");
     });
 });
 
@@ -126,7 +123,7 @@ const counterEl = document.getElementById("collectionCounter");
 
 dropdownBtn.addEventListener("click", () => {
     dropdownContent.style.display =
-            dropdownContent.style.display === "block" ? "none" : "block";
+        dropdownContent.style.display === "block" ? "none" : "block";
 });
 
 document.addEventListener("click", (e) => {
@@ -141,7 +138,7 @@ dropdownContent.addEventListener("change", () => {
     ].map((c) => c.parentElement.textContent.trim());
 
     dropdownBtn.textContent =
-            checked.length > 0 ? checked.join(", ") : "Select Collections ⮟";
+        checked.length > 0 ? checked.join(", ") : "Select Collections ⮟";
 });
 
 // =============================
@@ -150,12 +147,14 @@ dropdownContent.addEventListener("change", () => {
 function updateCollectionCounter() {
     const count = dropdownContent.querySelectorAll("input[type='checkbox']:checked").length;
 
-    counterEl.textContent = `${count} / 5 selected`;
+    if (counterEl) {
+        counterEl.textContent = `${count} / 5 selected`;
 
-    if (count > 5) {
-        counterEl.classList.add("limit-reached");
-    } else {
-        counterEl.classList.remove("limit-reached");
+        if (count > 5) {
+            counterEl.classList.add("limit-reached");
+        } else {
+            counterEl.classList.remove("limit-reached");
+        }
     }
 }
 
@@ -170,6 +169,7 @@ function validateCollections() {
 
     if (checked.length > 5) {
         feedbackMsg.textContent = "⚠️ You can select up to 5 collections only.";
+        feedbackMsg.classList.remove("success");
         feedbackMsg.classList.add("error");
         return false;
     }
@@ -182,45 +182,75 @@ function validateCollections() {
 // =============================
 function validateForm() {
     let valid = true;
+
+    // limpar mensagem geral
     feedbackMsg.textContent = "";
+    feedbackMsg.classList.remove("error", "success");
 
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
 
+    // USERNAME
     if (!usernameRegex.test(usernameInput.value.trim())) {
         valid = false;
         usernameInput.classList.add("error");
-    } else
+    } else {
         usernameInput.classList.remove("error");
+    }
 
+    // DOB
     if (!dobInput.value) {
         valid = false;
         dobInput.classList.add("error");
-    } else
+    } else {
         dobInput.classList.remove("error");
+    }
 
+    // EMAIL
     if (!validateEmail(emailInput.value.trim())) {
         valid = false;
         emailInput.classList.add("error");
-    } else
+    } else {
         emailInput.classList.remove("error");
+    }
 
+    // COUNTRY
     if (!countrySelect.value) {
         valid = false;
         countrySelect.classList.add("error");
-    } else
+    } else {
         countrySelect.classList.remove("error");
+    }
+
+    // NOTIFICATIONS (obrigatório escolher sim/não)
+    const notifySelected = [...notifyRadios].some(r => r.checked);
+    if (!notifySelected) {
+        valid = false;
+    }
+
+    // Se escolher "yes", método também obrigatório
+    if (notifySelected) {
+        const notifyYes = [...notifyRadios].find(r => r.checked && r.value === "yes");
+        if (notifyYes) {
+            const methodSelected = [...notifyMethodRadios].some(r => r.checked);
+            if (!methodSelected) {
+                valid = false;
+            }
+        }
+    }
+
+    // MAX 5 COLEÇÕES
+    if (!validateCollections()) {
+        valid = false;
+    }
 
     if (!valid) {
-        feedbackMsg.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+        if (!feedbackMsg.textContent) {
+            feedbackMsg.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+        }
         feedbackMsg.classList.add("error");
         return false;
     }
 
-    // NEW VALIDATION: max 5 collections
-    if (!validateCollections())
-        return false;
-
-    feedbackMsg.textContent = "";
     return true;
 }
 
@@ -234,8 +264,7 @@ function validateEmail(email) {
 form.addEventListener("submit", e => {
     e.preventDefault();
 
-    if (!validateForm())
-        return;
+    if (!validateForm()) return;
 
     const selectedMethod = document.querySelector("input[name='notifyMethod']:checked")?.value || "";
 
@@ -261,40 +290,4 @@ form.addEventListener("submit", e => {
     setTimeout(() => {
         window.location.href = "userpage.html";
     }, 1500);
-});
-
-// =============================
-// Notificações 
-// =============================
-document.addEventListener("DOMContentLoaded", () => {
-    const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-    const popup = document.getElementById('notification-popup');
-    const seeMoreLink = document.querySelector('.see-more-link');
-
-    if (bellBtn && popup) {
-        bellBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!popup.contains(e.target) && !bellBtn.contains(e.target)) {
-                popup.style.display = 'none';
-            }
-        });
-    }
-
-    if (seeMoreLink) {
-        seeMoreLink.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            popup.classList.toggle('expanded');
-
-            if (popup.classList.contains('expanded')) {
-                seeMoreLink.textContent = "Show less";
-            } else {
-                seeMoreLink.textContent = "+ See more";
-            }
-        });
-    }
 });

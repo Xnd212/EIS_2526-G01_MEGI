@@ -65,18 +65,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // função genérica para reordenar as cards
   function sortCards(compareFn) {
     const sorted = [...cards].sort(compareFn);
     grid.innerHTML = '';
     sorted.forEach(card => grid.appendChild(card));
   }
 
-  // clicar nas opções do menu
+  // clique nas opções do menu
   filterMenu.addEventListener('click', function (e) {
-    if (!e.target.matches('button[data-sort]')) return;
+    const btn = e.target.closest('button[data-sort]');
+    if (!btn) return;
 
-    const sortType = e.target.dataset.sort;
+    const sortType = btn.dataset.sort;
 
     switch (sortType) {
       case 'alpha-asc':
@@ -105,9 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
-    // fecha o menu depois de escolher
+    // fecha SEMPRE o menu depois de escolher
     filterMenu.classList.remove('show');
     filterToggle.setAttribute('aria-expanded', 'false');
   });
 });
-

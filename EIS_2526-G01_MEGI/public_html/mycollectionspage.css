@@ -153,7 +153,7 @@ body {
 
 
 
-/* Header das coleções com título + botão de filtro */
+/* ==== Filtros  ==== */
 .collections-header {
   display: flex;
   align-items: center;
@@ -161,6 +161,7 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
   position: relative; 
+  z-index: 1000;
 }
 
 .collections-header h2 {
@@ -180,6 +181,7 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
   color: #b54242;
+  z-index: 1001;
 }
 
 .filter-toggle:hover {
@@ -195,10 +197,11 @@ body {
   background-color: #ffffff;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  padding: 0.4rem 0;
-  min-width: 230px;
+  padding: 0.3rem 0;
+  min-width: 190px; 
   display: none;
   z-index: 500;
+  font-size: 0.85rem; 
 }
 
 .filter-menu.show {
@@ -210,8 +213,8 @@ body {
   background: none;
   border: none;
   text-align: left;
-  padding: 0.45rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;  
+  font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
 }

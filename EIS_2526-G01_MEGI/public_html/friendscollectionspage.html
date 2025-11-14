@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Tomás_Freitas's Collections</title>
+  <link rel="stylesheet" href="homepage.css">
   <link rel="stylesheet" href="mycollectionspage.css">
 </head>
 
@@ -56,6 +57,43 @@
       <div class="collections-and-friends">
           <section class="collections">
               <h2>Tomás_Freitas's Collections</h2>
+              
+                  <!-- Botão de filtro -->
+            <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
+              <!-- símbolo simples de funil + texto -->
+              &#128269; Filter ▾
+            </button>
+
+            <!-- Menu de filtros -->
+            <div class="filter-menu" id="filterMenu">
+                
+              <!-- Alfabético -->
+              <button type="button" data-sort="alpha-asc">Alphabetically A–Z</button>
+              <button type="button" data-sort="alpha-desc">Alphabetically Z–A</button>
+              <hr>
+
+              <!-- Preço -->
+              <button type="button" data-sort="price-asc">Price: Low to High</button>
+              <button type="button" data-sort="price-desc">Price: High to Low</button>
+              <hr>
+
+              <!-- Último modificado -->
+              <button type="button" data-sort="updated-desc">Last updated: Newest first</button>
+              <button type="button" data-sort="updated-asc">Last updated: Oldest first</button>
+              <hr>
+
+              <!-- Data criação -->
+              <button type="button" data-sort="created-desc">Creation date: Newest first</button>
+              <button type="button" data-sort="created-asc">Creation date: Oldest first</button>
+              <hr>
+
+              <!-- Nº itens -->
+              <button type="button" data-sort="items-desc">Items: Most to Fewest</button>
+              <button type="button" data-sort="items-asc">Items: Fewest to Most</button>
+            </div>
+ 
+        
+            
               <div class="collection-grid">
                   <div class="collection-card">
                     <a href="collectionpage.html">
@@ -112,7 +150,7 @@
   
 
 <!-- === JAVASCRIPT === -->
-<script src="homepage.js"></script>
+<script src="friendscollectionspage.js"></script>
 
 </body>
 </html>

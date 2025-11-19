@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Item Page</title>
+  <link rel="stylesheet" href="homepage.css" />
+  <link rel="stylesheet" href="itempage.css" />
+  <link rel="stylesheet" href="mycollectionspage.css" />
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <a href="homepage.php" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <hr class="popup-divider">
+        <ul class="notification-list">
+                <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+                <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+                <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+                <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+                
+                <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+                <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+                <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  
+  
+  <div class="main">
+    <div class="content">
+      <h2>Champion's Path Charizard V (PSA 10)</h2>
+      <div class="item-details">
+        <div class="item-image-wrapper">
+          <img src="images/CharizardV.png" alt="Charizard V PSA 10" class="item-image">
+          <a href="edititem.php" id="editRedirectBtn" class="edit-link">✎ Edit</a>
+        </div>
+
+        <div class="item-info">
+          <p><strong>Collector:</strong> Susana_Andrade123</p>
+          <p><strong>Price:</strong> 950€</p>
+          <p><strong>Item Type:</strong> Card</p>
+          <p><strong>Importance:</strong> 10</p>
+          <p><strong>Acquisition Date:</strong> 03/10/2025</p>
+          <p><strong>Acquisition Place:</strong> Comic Con 2025</p>
+          <p><strong>Description:</strong> A rare and highly graded Charizard card from the Champion's Path set. This card was one of the highlights of my 2025 Comic Con haul. It holds sentimental value and is a key item in my collection.</p>
+          <p><strong>Registration Date:</strong> 03/10/2025</p>
+        </div>
+      </div>
+
+         
+<div class="collections-and-friends">
+  <section class="collections">
+      <h3>Collections it belongs to</h3>
+      <div class="collection-grid">
+          <div class="collection-card">
+              <a href="collectionpage.php">
+                  <img src="images/pokemon-pikachu.png" alt="Pokemon Cards">
+                  <p class="collection-name">Pokemon Cards</p>
+                  <span class="last-updated">Last updated: 03/10/2025</span>
+              </a>
+          </div>
+
+          <div class="collection-card">
+              <a href="collectionpage.php">
+                  <img src="images/championspath.png" alt="Champion's Path">
+                  <p class="collection-name">Champion's Path</p>
+                  <span class="last-updated">Last updated: 17/05/2025</span>
+              </a>
+          </div>
+      </div>
+  </section>
+</div>
+</div>
+
+    <!-- ===== Right Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>My collections</h3>
+        <p><a href="collectioncreation.php">Create collection</a></p>
+        <p><a href="itemcreation.php">Create item</a></p>
+        <p><a href="mycollectionspage.php">View collections</a></p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p><a href="userfriendspage.php"> Viem Friends</a></p>
+        <p><a href="allfriendscollectionspage.php">View collections</a></p>
+        <p><a href="teampage.php">Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Events</h3>
+        <p><a href="createevent.php">Create event</a></p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.php">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <script src="itempage.js"></script>
+</body>
+</html>

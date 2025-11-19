@@ -1,0 +1,419 @@
+
+@import url('homepage.css'); /* Reuse global styles */
+
+body {
+  overflow-y: scroll;
+}
+
+.content {
+  margin-right: 240px;
+  padding: 2rem;
+  background: #eef0ff;
+}
+
+/* ===== Notification Popup  ===== */
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #b54242; /* cor escura da header */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 315px;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.notification-popup.active {
+  display: flex;
+}
+
+.popup-header {
+  background-color: #fbecec;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid #b54242;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.popup-header h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #b54242;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.popup-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem;
+}
+
+.notification-list li {
+  padding: 0.4rem 0;
+  border-bottom: 2px solid #eee;
+  font-size: 0.9rem;
+}
+
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+.notification-list li:first-child {
+  border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
+}
+
+
+/* ======================
+   USER PROFILE PAGE
+====================== */
+.profile-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 110px 240px 1rem 1rem; /* top, right (sidebar), bottom, left */
+  background: #eef0ff;
+}
+
+.user-info {
+  width: 100%;
+}
+
+.user-profile-box {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.user-photo {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #b54242;
+}
+
+.user-info-content {
+  display: flex;
+  flex-direction: row; 
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.username {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.email {
+  margin: 0;
+  color: #555;
+}
+
+.edit-btn {
+  display: inline-flex;
+  margin-top: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 200;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edit-btn:hover {
+  background-color: #a03838;
+  transform: translateY(-1px);
+}
+
+.edit-btn:active {
+  transform: translateY(1px);
+}
+
+
+.stats {
+  display: flex;
+  gap: 3.5rem;
+  font-size: 1.2rem;
+  color: #222;
+  justify-content: flex-end;
+}
+
+.stats div {
+  text-align: center;
+}
+
+.user-info-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.user-details-and-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+
+/* ==== Coleções  ==== */
+.collections-and-friends {
+  display: flex;
+  justify-content: space-between;
+  gap: 10rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.collections {
+  flex: 2;
+  margin-bottom: 2rem;
+}
+
+
+.collections h3,
+.friends h3,
+.past-events h3{
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-decoration: underline;
+}
+
+.collection-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.collection-card {
+  background-color: #f3cccc;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  width: 180px;
+}
+
+.collection-card img {
+  height: 115px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 0.6rem;
+}
+
+.collection-card p {
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.collection-card span {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.collection-card .last-updated {
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: #666;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+
+/* ==== Amigos  ==== */
+.friends {
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* duas colunas */
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.friend {
+  text-align: center;
+}
+
+.friend img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.friend-name {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #333;
+}
+
+.view-all {
+ display: block;
+  text-align: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #444;
+}
+
+.view-all:hover {
+  color: #b54242;
+}
+
+
+/* ==== eventos  ==== */
+.past-events {
+  margin-top: 2rem;
+}
+
+.past-events-grid {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 2rem;
+  justify-content: flex-start; 
+}
+
+.past-event-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 200px;
+  text-align: center;
+}
+
+.past-event-card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.event-name {
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.event-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
+}
+
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar-section p {
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+.events-section {
+  background-color: transparent;
+}
+
+
+@media (max-width: 768px) {
+  .item-creation-section {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+}
+
+.collection-card:last-child {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  background: none; /* removes pink background */
+  box-shadow: none; /* removes shadow */
+  border-radius: 0; /* removes rounded corners */
+}

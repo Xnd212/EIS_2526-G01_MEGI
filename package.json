@@ -1,0 +1,8 @@
+{
+    "name": "EIS_2526-G01_MEGI",
+    "version": "1.0.0",
+    "keywords": ["util", "functional", "server", "client", "browser"],
+    "author": "marco",
+    "contributors": [],
+    "dependencies": {}
+}

@@ -1,0 +1,266 @@
+@import url('homepage.css');
+
+.main {
+  display: flex;
+}
+
+.content {
+   padding: 2rem;
+  background: #eef0ff;
+  margin-right: 240px; 
+  flex-grow: 1;
+}
+
+/* ====== EVENT ======= */
+
+.event-signup-section {
+  background: #fff;
+  border: 1.5px solid #b54242;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto; 
+  height: auto;
+}
+
+.page-title {
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 2px solid #c77462;
+  padding-bottom: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+/* ====== FORM ======== */
+.form-group {
+  display: flex;
+  flex-direction: column; 
+  margin-bottom: 1.2rem;
+}
+
+label {
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 0.4rem;
+}
+
+.required {
+  color: #b54242;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="tel"],
+input[type="file"],
+select,
+textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #b54242;
+  outline: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.radio-group label {
+  font-weight: normal;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.conditional-section {
+  border-left: 3px solid #c77462;
+  background: #fdf3f1;
+  padding: 1rem;
+  margin-bottom: 1.3rem;
+  border-radius: 6px;
+}
+
+.conditional-input {
+  margin-top: 0.8rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ===== BUTTONS ======== */
+
+.form-actions,
+.summary-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-primary {
+  background: #b54242;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #9d3636;
+}
+
+.btn-secondary {
+  background: #c77462;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #a55d4f;
+}
+
+
+
+.form-message {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.form-message.error {
+  color: #b54242;
+}
+
+.form-message.success {
+  color: #3d8b3d;
+}
+
+
+/* ======= SUMMARY ======= */
+.summary-section {
+  margin-top: 2.5rem;
+  padding: 1.8rem;
+  background: #fff9f8;
+  border: 1.5px solid #c77462;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-section h3 {
+  font-size: 1.4rem;
+  color: #b54242;
+  border-bottom: 2px solid #c77462;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+#summaryContent p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 100;
+  color: #000000;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #9d3636;
+  border-bottom-color: #b54242;
+}
+
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
+}
+
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar-section p {
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+.events-section {
+  background-color: transparent;
+}
+
+
+@media (max-width: 768px) {
+  .item-creation-section {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+}
+
+

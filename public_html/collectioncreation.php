@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Create Collection</title>
+  <link rel="stylesheet" href="collectioncreation.css" />
+</head>
+
+<body>
+
+  <!-- ===========================
+       HEADER
+  ============================ -->
+  <header>
+    <a href="homepage.php" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="search" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <ul class="notification-list">
+                <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+                <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+                <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+                <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+                
+                <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+                <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+                <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  <!-- ===========================
+       MAIN CONTENT
+  ============================ -->
+  <div class="main">
+    <div class="content">
+      <section class="collection-creation-section">
+        <h2 class="page-title">Create a Collection</h2>
+
+        <form id="collectionForm" novalidate>
+
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="collectionName">Name <span class="required">*</span></label>
+            <input type="text" id="collectionName" name="collectionName" placeholder="Enter collection name" />
+          </div>
+
+          <!-- Theme -->
+          <div class="form-group">
+            <label for="collectionTheme">Theme <span class="required">*</span></label>
+            <input type="text" id="collectionTheme" name="collectionTheme" placeholder="Enter collection theme" />
+          </div>
+
+          <!-- Starting Date -->
+          <div class="form-group">
+            <label for="creationDate">Starting Date (DD/MM/YYYY) <span class="required">*</span></label>
+            <input type="date" id="creationDate" name="creationDate"  />
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="collectionDescription">Description</label>
+            <textarea id="collectionDescription" name="collectionDescription" rows="4" placeholder="Add details about your collection"></textarea>
+          </div>   
+          
+          <!-- Tags -->
+          <div class="form-group">
+            <label for="collectionTags">Tags</label>
+            <input type="text" id="collectionTags" name="collectionTags" placeholder="Enter collection tags" />
+          </div>
+
+
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label for="collectionImage">Cover Image (optional)</label>
+            <input type="file" id="collectionImage" name="collectionImage" accept="image/*" />
+          </div>
+          
+          
+          <!-- Custom Multi-Select for Existing Items -->
+          <div class="form-group">
+            <label>Select Existing Items (optional) </label>
+            <div class="custom-multiselect">
+              <button type="button" id="dropdownBtn">Select from existing items ⮟</button>
+              <div class="dropdown-content" id="dropdownContent">
+                <label><input type="checkbox" value="pokemon"> Charizard</label>
+                <label><input type="checkbox" value="coins"> Moeda Do Ulisses</label>
+                <label><input type="checkbox" value="stickers"> Cromo do Ronaldo 2016</label>
+                <label><input type="checkbox" value="comics"> Velho Logan</label>             
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Create Collection</button>
+          </div>
+        </form>
+
+        <p id="formMessage" class="form-message"></p>
+      </section>
+    </div>
+
+   <!-- ===== Right Sidebar (Under Header) ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>My collections</h3>
+        <p><a href="collectioncreation.php">Create collection</a></p>
+        <p><a href="itemcreation.php"> Create Item</a></p>
+        <p><a href="mycollectionspage.php">View collections</a></p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p><a href="userfriendspage.php"> Viem Friends</a></p>
+        <p><a href="allfriendscollectionspage.php">View collections</a></p>
+        <p><a href="teampage.php"> Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section events-section">
+        <h3>Events</h3>
+        <p><a href="createevent.php">Create event</a></p>
+        <p><a href="upcomingevents.php">View upcoming events</a></p>
+        <p><a href="eventhistory.php">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+
+  <!-- === JAVASCRIPT === -->
+  <script src="collectioncreation.js"></script>
+
+</body>
+</html>

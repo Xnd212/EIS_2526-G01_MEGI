@@ -1,0 +1,180 @@
+
+@import url('homepage.css'); 
+
+/* ===== Item Page Styles ===== */
+
+.item-details {
+  display: flex;
+  background-color: #fbecec;
+  border: 1px solid #dca4a4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  margin-bottom: 1rem;
+}
+
+.item-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-image {
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+}
+
+.edit-link {
+  margin-top: 0.6rem;
+  text-decoration: none;
+  color: #b54242;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.item-info p {
+  font-size: 1.05rem;
+  margin: 0.7rem 0;
+  padding-left: 2rem;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.item-collections-card {
+  margin: 2rem 1.5rem;
+  padding: 1.5rem 2rem;
+  background-color: #ffd9cc;  
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.item-collections-grid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.collections h3 {
+    margin-bottom: 0.5rem;   
+}
+
+.collection-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  width: 180px;          
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  color: inherit;
+}
+
+.collection-card img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+.collection-card p {
+  margin: 0;
+  font-weight: 500;
+}
+
+
+/* Collections Section */
+.belongs-section {
+  margin-top: 2rem;
+}
+
+.belongs-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.collection-logo-box {
+  text-align: center;
+}
+
+.collection-logo-box img {
+  width: 180px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.collection-logo-box p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
+}
+
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar-section p {
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+
+@media (max-width: 768px) {
+  .item-details {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .belongs-logos {
+    justify-content: center;
+  }
+}

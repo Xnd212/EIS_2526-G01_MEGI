@@ -127,7 +127,7 @@ $conn->close();
                     <div class="event-teaser-wrapper">
                         <div class="event-image-wrapper">
                             <?php if (!empty($event['image_id'])): ?>
-                                <img src="images/event_<?php echo $event['image_id']; ?>.png" alt="<?php echo htmlspecialchars($event['name']); ?>" />
+                                <img src="<?php echo $event['image_id']; ?>" alt="<?php echo htmlspecialchars($event['name']); ?>" />
                             <?php else: ?>
                                 <img src="images/default_event.png" alt="Event Image" />
                             <?php endif; ?>
@@ -162,7 +162,7 @@ $conn->close();
                                 <div class="collection-bring">
                                     <a href="collectionpage.php?collection_id=<?php echo $collection['collection_id']; ?>">
                                         <?php if (!empty($collection['image_id'])): ?>
-                                            <img src="images/collection_<?php echo $collection['image_id']; ?>.png" alt="<?php echo htmlspecialchars($collection['collection_name']); ?>">
+                                            <img src=<?php echo $collection['image_id']; ?>  alt="<?php echo htmlspecialchars($collection['collection_name']); ?>">
                                         <?php else: ?>
                                             <img src="images/default_collection.png" alt="Collection">
                                         <?php endif; ?>

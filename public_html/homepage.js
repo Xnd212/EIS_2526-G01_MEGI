@@ -1,14 +1,10 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/javascript.js to edit this template
- */
-
-// Aguarda até que todo o conteúdo da página esteja carregado
 document.addEventListener("DOMContentLoaded", () => {
-  const popup = document.getElementById("hover-popup"); 
 
+  /* ============================================================
+     POPUP AO PASSAR O RATO NAS TOP COLLECTIONS
+  ============================================================ */
+  const hoverPopup = document.getElementById("hover-popup");
 
-// Define os dados associados a cada card de coleção
   const collectionData = {
     "price-card": {
       collection: 'Pokemon Cards',
@@ -23,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     "recent-card": {
       collection: "Pokemon Champion's Path",
-      user: 'Paul_Perez1697',  
+      user: 'Paul_Perez1697',
       title: 'Charizard V',
       price: '300,25€',
       date: '29/10/2025',
@@ -45,86 +41,127 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-
-// Para cada card da Top Collections mostra e atualiza o conteúdo do popup ao mover o rato sobre o card
   document.querySelectorAll(".top-collection-block").forEach(block => {
     block.addEventListener("mousemove", e => {
       const id = block.getAttribute("data-id");
       const data = collectionData[id];
       if (!data) return;
 
-      // Gera o conteúdo do popup com base nos dados da coleção
-      popup.innerHTML = `
-  <div class="popup-content-flex">
-            
-    <!-- Texto à esquerda -->
-    <div class="popup-text">
-      <h3 class="popup-title">${data.collection}</h3>
-      <p class="popup-user">${data.user}</p>
+      hoverPopup.innerHTML = `
+        <div class="popup-content-flex">
+          <div class="popup-text">
+            <h3 class="popup-title">${data.collection}</h3>
+            <p class="popup-user">${data.user}</p>
+            <p><strong>Price:</strong> ${data.price}</p>
+            <p><strong>Acquisition Date:</strong> ${data.date}</p>
+            <p><strong>Acquisition Place:</strong> ${data.place}</p>
+            <p><strong>Items:</strong> ${data.items}</p>
+          </div>
+          <div class="popup-image">
+            <h4 class="popup-subtitle">${data.title}</h4>
+            <img src="${data.image}" alt="${data.title}">
+            <p class="popup-date">Last updated: ${data.updated}</p>
+          </div>
+        </div>
+      `;
 
-      <p><strong>Price:</strong> ${data.price}</p>
-      <p><strong>Acquisition Date:</strong> ${data.date}</p>
-      <p><strong>Acquisition Place:</strong> ${data.place}</p>
-      <p><strong>Items:</strong> ${data.items}</p>
-    </div>
-
-    <!-- Imagem + nome do produto + data -->
-    <div class="popup-image">
-      <h4 class="popup-subtitle">${data.title}</h4>
-      <img src="${data.image}" alt="${data.title}">
-      <p class="popup-date">Last updated: ${data.updated}</p>
-    </div>
-  </div>
-`;
-
-
-      // Posiciona o popup próximo ao cursor do rato
-      popup.style.left = e.pageX + 20 + "px";
-      popup.style.top = e.pageY + 20 + "px";
-      popup.classList.add("active");
+      hoverPopup.style.left = e.pageX + 20 + "px";
+      hoverPopup.style.top = e.pageY + 20 + "px";
+      hoverPopup.classList.add("active");
     });
-      // Esconde o popup quando o rato sai do card
-      block.addEventListener("mouseleave", () => {
-      popup.classList.remove("active");
+
+    block.addEventListener("mouseleave", () => {
+      hoverPopup.classList.remove("active");
     });
   });
-});
 
 
-// =============================
-// Notificações 
-// =============================
 
-document.addEventListener("DOMContentLoaded", () => {
+  /* ============================================================
+     DROPDOWN DE NOTIFICAÇÕES
+  ============================================================ */
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-  const popup = document.getElementById('notification-popup');
+  const notifPopup = document.getElementById('notification-popup');
   const seeMoreLink = document.querySelector('.see-more-link');
 
-  if (bellBtn && popup) {
-    bellBtn.addEventListener('click', (e) => {
+  if (bellBtn && notifPopup) {
+    bellBtn.addEventListener("click", e => {
       e.stopPropagation();
-      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+
+      // Fecha popup de logout se estiver aberto
+      const logoutPopup = document.getElementById("logout-popup");
+      if (logoutPopup) logoutPopup.style.display = "none";
+
+      notifPopup.style.display =
+        notifPopup.style.display === "block" ? "none" : "block";
     });
 
-    document.addEventListener('click', (e) => {
-      if (!popup.contains(e.target) && !bellBtn.contains(e.target)) {
-        popup.style.display = 'none';
+    document.addEventListener("click", e => {
+      if (!notifPopup.contains(e.target) && !bellBtn.contains(e.target)) {
+        notifPopup.style.display = "none";
       }
     });
   }
 
-  // Expandir / Encolher notificações
-  if (seeMoreLink) {
-    seeMoreLink.addEventListener('click', (e) => {
+  // Expandir lista
+  if (seeMoreLink && notifPopup) {
+    seeMoreLink.addEventListener("click", e => {
       e.preventDefault();
-
-      popup.classList.toggle('expanded');
-
-      if (popup.classList.contains('expanded')) {
-        seeMoreLink.textContent = "Show less";
-      } else {
-        seeMoreLink.textContent = "+ See more";
-      }
+      notifPopup.classList.toggle("expanded");
+      seeMoreLink.textContent = notifPopup.classList.contains("expanded")
+        ? "Show less"
+        : "+ See more";
     });
   }
+
+/* ============================================================
+   POPUP DE LOGOUT
+============================================================ */
+const logoutBtn    = document.getElementById("logout-btn");
+const logoutPopup  = document.getElementById("logout-popup");
+const cancelLogout = document.getElementById("cancel-logout");
+const confirmLogout = document.getElementById("confirm-logout");
+
+if (logoutBtn && logoutPopup) {
+  // Abrir/fechar popup ao clicar no ícone 🚪
+  logoutBtn.addEventListener("click", e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Fecha popup de notificações, se estiver aberto
+    if (notifPopup) {
+      notifPopup.style.display = "none";
+    }
+
+    logoutPopup.style.display =
+      logoutPopup.style.display === "block" ? "none" : "block";
+  });
+
+  // Fechar ao clicar fora
+  document.addEventListener("click", e => {
+    if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
+      logoutPopup.style.display = "none";
+    }
+  });
+}
+
+// Botão "Cancel"
+if (cancelLogout && logoutPopup) {
+  cancelLogout.addEventListener("click", e => {
+    e.stopPropagation();
+    logoutPopup.style.display = "none";
+  });
+}
+
+// Botão "Log out" → redireciona para login
+if (confirmLogout) {
+  confirmLogout.addEventListener("click", e => {
+    e.stopPropagation();
+    // muda o ficheiro se o teu login tiver outro nome
+    window.location.href = "loginpage.php";
+  });
+}
+
+
+ 
 });

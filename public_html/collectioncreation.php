@@ -121,6 +121,7 @@
         <p><a href="collectioncreation.php">Create collection</a></p>
         <p><a href="itemcreation.php"> Create Item</a></p>
         <p><a href="mycollectionspage.php">View collections</a></p>
+        <p><a href="myitems.php">View items</a></p>
       </div>
 
       <div class="sidebar-section friends-section">

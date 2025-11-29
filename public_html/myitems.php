@@ -13,16 +13,18 @@ if ($conn->connect_error) {
 // ====== DEFINIR O USER (ajusta depois para sessão) ======
 $user_id = 1; // TODO: trocar por $_SESSION['user_id'] quando tiveres login
 
-// ====== BUSCAR COLEÇÕES DESSE UTILIZADOR ======
+// ====== BUSCAR ITENS DESSE UTILIZADOR ======
+// item -> collection -> user
 $sql = "SELECT 
-            c.collection_id,
-            c.name,
-            c.starting_date,
-            i.url
-        FROM collection c
-        LEFT JOIN image i ON c.image_id = i.image_id
+            it.item_id,
+            it.name AS item_name,
+            img.url AS item_url,
+            c.name AS collection_name
+        FROM item it
+        INNER JOIN collection c ON it.collection_id = c.collection_id
+        LEFT JOIN image img ON it.image_id = img.image_id
         WHERE c.user_id = ?
-        ORDER BY c.starting_date DESC";
+        ORDER BY it.name ASC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -34,8 +36,9 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trall-E | My Collections</title>
-    <link rel="stylesheet" href="mycollectionspage.css">
+    <title>Trall-E | My Items</title>
+    <link rel="stylesheet" href="myitems.css">
+
 </head>
 
 <body>    
@@ -81,14 +84,14 @@ $result = $stmt->get_result();
             <div class="collections-and-friends">
                 <section class="collections">
                     <div class="collections-header">
-                        <h2>My Collections</h2>
+                        <h2>My Items</h2>
 
-                        <!-- Botão de filtro -->
+                        <!-- Botão de filtro (mantido igual) -->
                         <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
                             &#128269; Filter ▾
                         </button>
 
-                        <!-- Menu de filtros -->
+                        <!-- Menu de filtros (mantido igual, mesmo texto) -->
                         <div class="filter-menu" id="filterMenu">
                             <button type="button" data-sort="alpha-asc">Name: A–Z</button>
                             <button type="button" data-sort="alpha-desc">Name: Z–A</button>
@@ -107,32 +110,29 @@ $result = $stmt->get_result();
                         </div>
                     </div>
 
-                    <!-- ====== GRID DE COLEÇÕES (DINÂMICO) ====== -->
-                    <div class="collection-grid">
+                    <!-- ====== GRID DE ITENS (DINÂMICO) ====== -->
+                    <div class="item-grid">
                         <?php if ($result->num_rows > 0): ?>
                             <?php while ($row = $result->fetch_assoc()): ?>
-                                <?php
-                                    $img = !empty($row['url']) ? $row['url'] : 'images/default.png';
-                                    $date = !empty($row['starting_date'])
-                                          ? date("d/m/Y", strtotime($row['starting_date']))
-                                          : '';
-                                ?>
-                                <div class="collection-card">
-                                    <!-- AQUI vai o id na query string -->
-                                    <a href="collectionpage.php?id=<?php echo $row['collection_id']; ?>">
+                                <?php $img = !empty($row['item_url']) ? $row['item_url'] : 'images/default.png'; ?>
+                                <div class="item-card">
+                                    <a href="itempage.php?id=<?php echo $row['item_id']; ?>">
                                         <img src="<?php echo htmlspecialchars($img); ?>" 
-                                             alt="<?php echo htmlspecialchars($row['name']); ?>">
-                                        <p><strong><?php echo htmlspecialchars($row['name']); ?></strong></p>
-                                        <?php if ($date): ?>
-                                            <span class="last-updated">Last updated: <?php echo $date; ?></span>
+                                             alt="<?php echo htmlspecialchars($row['item_name']); ?>">
+                                        <p class="item-title"><strong><?php echo htmlspecialchars($row['item_name']); ?></strong></p>
+                                        <?php if (!empty($row['collection_name'])): ?>
+                                            <span class="item-collection">
+                                                From collection: <?php echo htmlspecialchars($row['collection_name']); ?>
+                                            </span>
                                         <?php endif; ?>
                                     </a>
                                 </div>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <p>You don't have any collections yet.</p>
+                            <p>You don't have any items yet.</p>
                         <?php endif; ?>
                     </div>
+
                 </section>
             </div>
         </div>
@@ -167,4 +167,7 @@ $result = $stmt->get_result();
     <script src="mycollectionspage.js"></script>
 </body>
 </html>
+
+
+
 

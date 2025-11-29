@@ -15,42 +15,53 @@
 <!-- ===========================
        HEADER
   ============================ -->
-  <header>
-    <a href="homepage.php" class="logo">
-      <img src="images\TrallE_2.png" alt="logo" />
-     
-    </a>
-    <div class="search-bar">
-      <input type="text" placeholder="Search" />
-    </div>
-    <div class="icons">
-            <!-- Botão de notificações -->
-        <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
-            <div class="notification-popup" id="notification-popup">
-                
-            <div class="popup-header">
+<header>
+  <a href="homepage.php" class="logo">
+    <img src="images/TrallE_2.png" alt="logo" />
+  </a>
+  <div class="search-bar">
+    <input type="text" placeholder="Search" />
+  </div>
+  <div class="icons">
+    <!-- Botão de notificações -->
+    <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+    <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
             <h3>Notifications <span>🔔</span></h3>
-            </div>
-                
-            
-            <ul class="notification-list">
-                <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
-                <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
-                <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
-                <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
-                
-                <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-                <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
-                <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
-                <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
-            </ul>
-
-            <a href="#" class="see-more-link">+ See more</a>
-            </div>
-           
-        <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+        </div>
+        <ul class="notification-list">
+            <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+            <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+            <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+            <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+            <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+            <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
+            <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
+            <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
     </div>
-  </header>
+
+    <!-- Perfil -->
+    <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+
+    <!-- Logout -->
+    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+    
+    <!-- Popup de Logout -->
+    <div class="logout-popup" id="logout-popup">
+      <h3>Logout</h3>
+      <p>Are you sure you want to log out?</p>
+      <div class="logout-actions">
+        <button class="cancel-btn" id="cancel-logout">Cancel</button>
+        <button class="logout-btn" id="confirm-logout">Log out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+
 
   <div class="main">
     <div class="content">
@@ -316,6 +327,7 @@
         <p><a href="collectioncreation.php">Create collection</a></p>
         <p><a href="itemcreation.php"> Create item</a></p>
         <p><a href="mycollectionspage.php">View collections</a></p>
+        <p><a href="myitems.php">View items</a></p>
       </div>
 
       <div class="sidebar-section friends-section">
@@ -335,6 +347,8 @@
   </div>
  </div>
     
+
+
     
  <!-- === POPUP DINÂMICO === -->
 <div id="hover-popup"></div>

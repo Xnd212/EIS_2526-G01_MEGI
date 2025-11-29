@@ -41,6 +41,22 @@ $stmt->execute();
 $result = $stmt->get_result();
 $col = $result->fetch_assoc();
 
+// ====== BUSCAR ITENS DA COLEÇÃO ======
+$item_sql = "SELECT 
+                it.item_id,
+                it.name,
+                it.image_id,
+                img.url AS item_url
+            FROM item it
+            LEFT JOIN image img ON it.image_id = img.image_id
+            WHERE it.collection_id = ?";
+
+$item_stmt = $conn->prepare($item_sql);
+$item_stmt->bind_param("i", $collection_id);
+$item_stmt->execute();
+$item_result = $item_stmt->get_result();
+
+
 if (!$col) {
     die("Coleção não encontrada.");
 }
@@ -149,35 +165,29 @@ if (!empty($col['starting_date'])) {
         </div>
       </div>
 
-      <!-- ===== ITENS (ainda estáticos) ===== -->
-      <div class="items-section">
-        <h3>Collection Items</h3>
-        <div class="items-grid">
-          <div class="item-card" id="charizard" data-id="charizard">
-            <a href="itempage.php">
-              <img src="images/CharizardV.png" alt="Champion's Path Charizard V (PSA 10)">
-              <p class="item-name">Champion's Path Charizard V (PSA 10)</p>
-              <p class="edit-btn">Remove item </p>
-            </a>
-          </div>
-
-          <div class="item-card" id="machamp" data-id="machamp">
-            <a href="itempage.php">
-              <img src="images/1st Edition Machamp.png" alt="1st Edition Machamp">
-              <p class="item-name">1st Edition Machamp</p>
-              <p class="edit-btn">Remove item </p>
-            </a>
-          </div>
-
-          <div class="item-card" id="charizard_1st" data-id="charizard_1st">
-            <a href="itempage.php">
-              <img src="images/3.png" alt="1st Edition Charizard">
-              <p class="item-name">1st Edition Charizard</p>
-              <p class="edit-btn">Remove item </p>
-            </a>
+        <div class="items-section">
+          <h3>Collection Items</h3>
+          <div class="items-grid">
+            <?php if ($item_result->num_rows > 0): ?>
+              <?php while ($item = $item_result->fetch_assoc()): ?>
+                <?php
+                  $item_img = !empty($item['item_url']) ? $item['item_url'] : 'images/default.png';
+                ?>
+                <div class="item-card">
+                  <a href="itempage.php?id=<?php echo $item['item_id']; ?>">
+                    <img src="<?php echo htmlspecialchars($item_img); ?>" 
+                         alt="<?php echo htmlspecialchars($item['name']); ?>">
+                    <p class="item-name"><?php echo htmlspecialchars($item['name']); ?></p>
+                    <p class="edit-btn">Remove item</p>
+                  </a>
+                </div>
+              <?php endwhile; ?>
+            <?php else: ?>
+              <p>No items in this collection yet.</p>
+            <?php endif; ?>
           </div>
         </div>
-      </div>
+
 
       <!-- ===== EVENTOS (ainda estáticos) ===== -->
       <div class="events-section">
@@ -220,6 +230,7 @@ if (!empty($col['starting_date'])) {
         <p><a href="collectioncreation.php">Create collection</a></p>
         <p><a href="itemcreation.php">Create item</a></p>
         <p><a href="mycollectionspage.php">View collections</a></p>
+        <p><a href="myitems.php">View items</a></p>
       </div>
 
       <div class="sidebar-section friends-section">

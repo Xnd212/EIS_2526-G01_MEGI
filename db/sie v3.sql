@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 29, 2025 at 08:02 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Tempo de geração: 29-Nov-2025 às 20:26
+-- Versão do servidor: 10.4.32-MariaDB
+-- versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `sie`
+-- Banco de dados: `sie`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `attends`
+-- Estrutura da tabela `attends`
 --
 
 CREATE TABLE `attends` (
@@ -35,7 +35,7 @@ CREATE TABLE `attends` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `collection`
+-- Estrutura da tabela `collection`
 --
 
 CREATE TABLE `collection` (
@@ -49,17 +49,18 @@ CREATE TABLE `collection` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `collection`
+-- Extraindo dados da tabela `collection`
 --
 
 INSERT INTO `collection` (`collection_id`, `user_id`, `Theme`, `image_id`, `name`, `starting_date`, `description`) VALUES
-(1, 1, 'Pokemon Trading Cards', NULL, 'Pokémon Cards', '2025-10-03', 'Pokémon cards from my childhood, rediscovered at home.'),
-(2, 2, 'Pokémon Trading Cards', NULL, 'Pokemon Vintage Cards', '2025-03-27', 'Main Pokémon TCG collection with vintage and modern cards.');
+(1, 1, 'Pokemon Trading Cards', 1, 'Pokémon Cards', '2025-10-03', 'Pokémon cards from my childhood, rediscovered at home.'),
+(2, 2, 'Pokémon Trading Cards', NULL, 'Pokemon Vintage Cards', '2025-03-27', 'Main Pokémon TCG collection with vintage and modern cards.'),
+(3, 1, 'Music', 2, 'Vinyl Collection', '2021-07-06', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `collection_tags`
+-- Estrutura da tabela `collection_tags`
 --
 
 CREATE TABLE `collection_tags` (
@@ -70,7 +71,7 @@ CREATE TABLE `collection_tags` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `event`
+-- Estrutura da tabela `event`
 --
 
 CREATE TABLE `event` (
@@ -86,7 +87,7 @@ CREATE TABLE `event` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `favourite`
+-- Estrutura da tabela `favourite`
 --
 
 CREATE TABLE `favourite` (
@@ -97,7 +98,7 @@ CREATE TABLE `favourite` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `friends`
+-- Estrutura da tabela `friends`
 --
 
 CREATE TABLE `friends` (
@@ -108,7 +109,7 @@ CREATE TABLE `friends` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `image`
+-- Estrutura da tabela `image`
 --
 
 CREATE TABLE `image` (
@@ -116,10 +117,18 @@ CREATE TABLE `image` (
   `url` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Extraindo dados da tabela `image`
+--
+
+INSERT INTO `image` (`image_id`, `url`) VALUES
+(1, 'images/pokemon-pikachu.png'),
+(2, 'images/vinil.png');
+
 -- --------------------------------------------------------
 
 --
--- Table structure for table `item`
+-- Estrutura da tabela `item`
 --
 
 CREATE TABLE `item` (
@@ -137,7 +146,7 @@ CREATE TABLE `item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `item`
+-- Extraindo dados da tabela `item`
 --
 
 INSERT INTO `item` (`item_id`, `collection_id`, `type_id`, `image_id`, `name`, `price`, `importance`, `acc_date`, `acc_place`, `description`, `registration_date`) VALUES
@@ -147,7 +156,7 @@ INSERT INTO `item` (`item_id`, `collection_id`, `type_id`, `image_id`, `name`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rating`
+-- Estrutura da tabela `rating`
 --
 
 CREATE TABLE `rating` (
@@ -160,7 +169,7 @@ CREATE TABLE `rating` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tags`
+-- Estrutura da tabela `tags`
 --
 
 CREATE TABLE `tags` (
@@ -171,7 +180,7 @@ CREATE TABLE `tags` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `type`
+-- Estrutura da tabela `type`
 --
 
 CREATE TABLE `type` (
@@ -180,7 +189,7 @@ CREATE TABLE `type` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `type`
+-- Extraindo dados da tabela `type`
 --
 
 INSERT INTO `type` (`type_id`, `name`) VALUES
@@ -189,7 +198,7 @@ INSERT INTO `type` (`type_id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Estrutura da tabela `user`
 --
 
 CREATE TABLE `user` (
@@ -203,7 +212,7 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user`
+-- Extraindo dados da tabela `user`
 --
 
 INSERT INTO `user` (`user_id`, `image_id`, `username`, `dob`, `email`, `country`, `password`) VALUES
@@ -211,18 +220,18 @@ INSERT INTO `user` (`user_id`, `image_id`, `username`, `dob`, `email`, `country`
 (2, NULL, 'Rafael_Ameida123', '1998-05-10', 'rafaelalmeida111@hotmail.com', 'Portugal', 'opapidelas');
 
 --
--- Indexes for dumped tables
+-- Índices para tabelas despejadas
 --
 
 --
--- Indexes for table `attends`
+-- Índices para tabela `attends`
 --
 ALTER TABLE `attends`
   ADD PRIMARY KEY (`user_id`,`event_id`),
   ADD KEY `event_id` (`event_id`);
 
 --
--- Indexes for table `collection`
+-- Índices para tabela `collection`
 --
 ALTER TABLE `collection`
   ADD PRIMARY KEY (`collection_id`),
@@ -230,41 +239,41 @@ ALTER TABLE `collection`
   ADD KEY `image_id` (`image_id`);
 
 --
--- Indexes for table `collection_tags`
+-- Índices para tabela `collection_tags`
 --
 ALTER TABLE `collection_tags`
   ADD PRIMARY KEY (`collection_id`,`tag_id`),
   ADD KEY `tag_id` (`tag_id`);
 
 --
--- Indexes for table `event`
+-- Índices para tabela `event`
 --
 ALTER TABLE `event`
   ADD PRIMARY KEY (`event_id`),
   ADD KEY `image_id` (`image_id`);
 
 --
--- Indexes for table `favourite`
+-- Índices para tabela `favourite`
 --
 ALTER TABLE `favourite`
   ADD PRIMARY KEY (`user_id`,`collection_id`),
   ADD KEY `collection_id` (`collection_id`);
 
 --
--- Indexes for table `friends`
+-- Índices para tabela `friends`
 --
 ALTER TABLE `friends`
   ADD PRIMARY KEY (`user_id`,`friend_id`),
   ADD KEY `friend_id` (`friend_id`);
 
 --
--- Indexes for table `image`
+-- Índices para tabela `image`
 --
 ALTER TABLE `image`
   ADD PRIMARY KEY (`image_id`);
 
 --
--- Indexes for table `item`
+-- Índices para tabela `item`
 --
 ALTER TABLE `item`
   ADD PRIMARY KEY (`item_id`),
@@ -273,7 +282,7 @@ ALTER TABLE `item`
   ADD KEY `image_id` (`image_id`);
 
 --
--- Indexes for table `rating`
+-- Índices para tabela `rating`
 --
 ALTER TABLE `rating`
   ADD PRIMARY KEY (`user_id`,`collection_id`,`event_id`),
@@ -281,19 +290,19 @@ ALTER TABLE `rating`
   ADD KEY `event_id` (`event_id`);
 
 --
--- Indexes for table `tags`
+-- Índices para tabela `tags`
 --
 ALTER TABLE `tags`
   ADD PRIMARY KEY (`tag_id`);
 
 --
--- Indexes for table `type`
+-- Índices para tabela `type`
 --
 ALTER TABLE `type`
   ADD PRIMARY KEY (`type_id`);
 
 --
--- Indexes for table `user`
+-- Índices para tabela `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`user_id`),
@@ -301,98 +310,98 @@ ALTER TABLE `user`
   ADD KEY `image_id` (`image_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de tabelas despejadas
 --
 
 --
--- AUTO_INCREMENT for table `collection`
+-- AUTO_INCREMENT de tabela `collection`
 --
 ALTER TABLE `collection`
-  MODIFY `collection_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `collection_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `event`
+-- AUTO_INCREMENT de tabela `event`
 --
 ALTER TABLE `event`
   MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `image`
+-- AUTO_INCREMENT de tabela `image`
 --
 ALTER TABLE `image`
-  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `item`
+-- AUTO_INCREMENT de tabela `item`
 --
 ALTER TABLE `item`
   MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `tags`
+-- AUTO_INCREMENT de tabela `tags`
 --
 ALTER TABLE `tags`
   MODIFY `tag_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `type`
+-- AUTO_INCREMENT de tabela `type`
 --
 ALTER TABLE `type`
   MODIFY `type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `user`
+-- AUTO_INCREMENT de tabela `user`
 --
 ALTER TABLE `user`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- Constraints for dumped tables
+-- Restrições para despejos de tabelas
 --
 
 --
--- Constraints for table `attends`
+-- Limitadores para a tabela `attends`
 --
 ALTER TABLE `attends`
   ADD CONSTRAINT `attends_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `attends_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `collection`
+-- Limitadores para a tabela `collection`
 --
 ALTER TABLE `collection`
   ADD CONSTRAINT `collection_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `collection_ibfk_2` FOREIGN KEY (`image_id`) REFERENCES `image` (`image_id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `collection_tags`
+-- Limitadores para a tabela `collection_tags`
 --
 ALTER TABLE `collection_tags`
   ADD CONSTRAINT `collection_tags_ibfk_1` FOREIGN KEY (`collection_id`) REFERENCES `collection` (`collection_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `collection_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`tag_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `event`
+-- Limitadores para a tabela `event`
 --
 ALTER TABLE `event`
   ADD CONSTRAINT `event_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `image` (`image_id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `favourite`
+-- Limitadores para a tabela `favourite`
 --
 ALTER TABLE `favourite`
   ADD CONSTRAINT `favourite_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `favourite_ibfk_2` FOREIGN KEY (`collection_id`) REFERENCES `collection` (`collection_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `friends`
+-- Limitadores para a tabela `friends`
 --
 ALTER TABLE `friends`
   ADD CONSTRAINT `friends_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `friends_ibfk_2` FOREIGN KEY (`friend_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `item`
+-- Limitadores para a tabela `item`
 --
 ALTER TABLE `item`
   ADD CONSTRAINT `item_ibfk_1` FOREIGN KEY (`collection_id`) REFERENCES `collection` (`collection_id`) ON DELETE CASCADE,
@@ -400,7 +409,7 @@ ALTER TABLE `item`
   ADD CONSTRAINT `item_ibfk_3` FOREIGN KEY (`image_id`) REFERENCES `image` (`image_id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `rating`
+-- Limitadores para a tabela `rating`
 --
 ALTER TABLE `rating`
   ADD CONSTRAINT `rating_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
@@ -408,7 +417,7 @@ ALTER TABLE `rating`
   ADD CONSTRAINT `rating_ibfk_3` FOREIGN KEY (`event_id`) REFERENCES `event` (`event_id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `user`
+-- Limitadores para a tabela `user`
 --
 ALTER TABLE `user`
   ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`image_id`) REFERENCES `image` (`image_id`) ON DELETE SET NULL;

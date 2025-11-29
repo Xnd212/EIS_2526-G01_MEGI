@@ -29,11 +29,12 @@ if ($conn->connect_error) {
 $error = "";
 
 // Check if form was submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($_POST['password'])) {
     $input = trim($_POST['username']);
+    $password = $_POST['password'];
     
     // Prepare statement to check both username and email
-    $stmt = $conn->prepare("SELECT user_id, username, email FROM user WHERE username = ? OR email = ?");
+    $stmt = $conn->prepare("SELECT user_id, username, email, password FROM user WHERE username = ? OR email = ?");
     $stmt->bind_param("ss", $input, $input);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -41,16 +42,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username'])) {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
         
-        // Set session variables
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['logged_in'] = true;
-        $_SESSION['is_guest'] = false;
-        
-        // Redirect to homepage
-        header("Location: homepage.php");
-        exit();
+        // Verify password (plain text comparison)
+        if ($password === $user['password']) {
+            // Set session variables
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['logged_in'] = true;
+            $_SESSION['is_guest'] = false;
+            
+            // Redirect to homepage
+            header("Location: homepage.php");
+            exit();
+        } else {
+            $error = "Password incorreta";
+        }
     } else {
         $error = "Username ou email não encontrado";
     }

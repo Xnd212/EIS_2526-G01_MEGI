@@ -73,7 +73,7 @@
 
                 <!-- Date of Birth -->
                 <div class="form-group">
-                    <label for="dob">Date of birth <span class="required">*</span></label>
+                    <label for="dob">Date of birth </label>
                     <input type="date" id="dob" name="dob" required />
                 </div>
 
@@ -91,7 +91,7 @@
 
                 <!-- Country -->
                 <div class="form-group">
-                    <label for="country">Country <span class="required">*</span></label>
+                    <label for="country">Country </label>
                     <select id="country" name="country" required>
                         <option value="">Select your country</option>
                         <option value="Portugal">Portugal</option>

@@ -1,0 +1,218 @@
+<?php
+// ====== CONEXÃO À BD ======
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "sie"; 
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+// ====== OBTÉM ID DO ITEM ======
+$item_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$item_id || $item_id <= 0) {
+    die("Item inválido.");
+}
+
+// ====== QUERY AO ITEM (com collector, type e image_id) ======
+$sql = "
+    SELECT 
+        i.*,
+        c.name      AS collection_name,
+        c.image_id  AS collection_image_id,
+        u.username  AS collector_name,
+        t.name      AS type_name
+    FROM item i
+    JOIN collection c ON i.collection_id = c.collection_id
+    JOIN user u       ON c.user_id      = u.user_id
+    LEFT JOIN type t  ON i.type_id      = t.type_id
+    WHERE i.item_id = ?
+";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $item_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$item = $result->fetch_assoc();
+
+if (!$item) {
+    die("Item não encontrado.");
+}
+
+// ====== IMAGEM DO ITEM (via item.image_id) ======
+$item_img_url = "images/placeholder.png";  // default
+if (!empty($item['image_id'])) {
+    $sqlImg = "SELECT url FROM image WHERE image_id = ? LIMIT 1";
+    $stmtImg = $conn->prepare($sqlImg);
+    $stmtImg->bind_param("i", $item['image_id']);
+    $stmtImg->execute();
+    $resImg = $stmtImg->get_result();
+    if ($row = $resImg->fetch_assoc()) {
+        $item_img_url = $row['url'];
+    }
+}
+
+// ====== IMAGEM DA COLEÇÃO (via collection.image_id) ======
+$collection_img_url = "images/placeholder_collection.png";  // default
+if (!empty($item['collection_image_id'])) {
+    $sqlColImg = "SELECT url FROM image WHERE image_id = ? LIMIT 1";
+    $stmtColImg = $conn->prepare($sqlColImg);
+    $stmtColImg->bind_param("i", $item['collection_image_id']);
+    $stmtColImg->execute();
+    $resColImg = $stmtColImg->get_result();
+    if ($colImg = $resColImg->fetch_assoc()) {
+        $collection_img_url = $colImg['url'];
+    }
+}
+
+// formatações simples
+function fmtDate($d) {
+    return $d ? date("d/m/Y", strtotime($d)) : "-";
+}
+?>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trall-E | Item Page</title>
+  <link rel="stylesheet" href="homepage.css" />
+  <link rel="stylesheet" href="itempage.css" />
+  <link rel="stylesheet" href="mycollectionspage.css" />
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <a href="homepage.php" class="logo">
+      <img src="images/TrallE_2.png" alt="logo" />
+    </a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search" />
+    </div>
+    <div class="icons">
+      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
+      <div class="notification-popup" id="notification-popup">
+        <div class="popup-header">
+          <h3>Notifications <span>🔔</span></h3>
+        </div>
+        <hr class="popup-divider">
+        <ul class="notification-list">
+          <!-- aqui ainda tens estático, podes dinamizar depois -->
+          <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+          <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+          <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+          <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+          <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+          <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+          <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+        </ul>
+        <a href="#" class="see-more-link">+ See more</a>
+      </div>
+      <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="content">
+      <!-- TÍTULO DO ITEM -->
+      <h2><?php echo htmlspecialchars($item['name']); ?></h2>
+
+      <div class="item-details">
+        <div class="item-image-wrapper">
+          <img src="<?php echo htmlspecialchars($item_img_url); ?>" 
+               alt="<?php echo htmlspecialchars($item['name']); ?>" 
+               class="item-image">
+          <a href="edititem.php?id=<?php echo $item_id; ?>" 
+             id="editRedirectBtn" class="edit-link">✎ Edit</a>
+        </div>
+
+        <div class="item-info">
+          <p><strong>Collector:</strong> 
+            <?php echo htmlspecialchars($item['collector_name']); ?>
+          </p>
+          <p><strong>Price:</strong> 
+            <?php echo htmlspecialchars($item['price']); ?>€
+          </p>
+          <p><strong>Item Type:</strong> 
+            <?php echo htmlspecialchars($item['type_name'] ?? '—'); ?>
+          </p>
+          <p><strong>Importance:</strong> 
+            <?php echo htmlspecialchars($item['importance']); ?>
+          </p>
+          <p><strong>Acquisition Date:</strong> 
+            <?php echo fmtDate($item['acc_date']); ?>
+          </p>
+          <p><strong>Acquisition Place:</strong> 
+            <?php echo htmlspecialchars($item['acc_place']); ?>
+          </p>
+          <p><strong>Description:</strong> 
+            <?php echo htmlspecialchars($item['description']); ?>
+          </p>
+          <!-- Se tiveres um campo registration_date na tabela -->
+          <?php if (!empty($item['registration_date'])): ?>
+          <p><strong>Registration Date:</strong> 
+            <?php echo fmtDate($item['registration_date']); ?>
+          </p>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <!-- Collections em que este item está (pelo teu modelo, pertence a 1, mas deixo em lista) -->
+      <div class="collections-and-friends">
+        <section class="collections">
+          <h3>Collections it belongs to</h3>
+          <div class="collection-grid">
+            <div class="collection-card">
+              <a href="collectionpage.php?id=<?php echo $item['collection_id']; ?>">
+                
+                <img src="<?php echo htmlspecialchars($collection_img_url); ?>" 
+                alt="<?php echo htmlspecialchars($item['collection_name']); ?>">
+
+                <p class="collection-name">
+                  <?php echo htmlspecialchars($item['collection_name']); ?>
+                </p>
+
+                <!-- se tiveres last_updated na collection, usa-o -->
+                <!-- <span class="last-updated">Last updated: ...</span> -->
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ===== Right Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section collections-section">
+        <h3>My collections</h3>
+        <p><a href="collectioncreation.php">Create collection</a></p>
+        <p><a href="itemcreation.php">Create item</a></p>
+        <p><a href="mycollectionspage.php">View collections</a></p>
+      </div>
+
+      <div class="sidebar-section friends-section">
+        <h3>My friends</h3>
+        <p><a href="userfriendspage.php">View Friends</a></p>
+        <p><a href="allfriendscollectionspage.php">View collections</a></p>
+        <p><a href="teampage.php">Team Page</a></p>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Events</h3>
+        <p><a href="createevent.php">Create event</a></p>
+        <p>View upcoming events</p>
+        <p><a href="eventhistory.php">Event history</a></p>
+      </div>
+    </aside>
+  </div>
+
+  <script src="itempage.js"></script>
+</body>
+</html>

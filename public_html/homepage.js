@@ -120,5 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       seeMoreLink.textContent = notifPopup.classList.contains("expanded")
         ? "Show less"
         : "+ See more";
-    });
-  }}
+});
+}
+
+});

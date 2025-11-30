@@ -1,3 +1,57 @@
+<?php
+session_start();
+
+// --- ID do utilizador logado ---
+// Aqui assumo que já tens o user_id guardado na sessão.
+// Se ainda não tiveres login feito, podes testar com um valor fixo, por ex: 1
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1; // <-- só para testes
+}
+$currentUserId = (int) $_SESSION['user_id'];
+
+// --- Ligação à base de dados ---
+$host   = "localhost";
+$user   = "root";
+$pass   = "";
+$dbname = "sie";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+// --- Buscar lista de amigos ---
+// friends(user_id, friend_id)
+// queremos os dados do utilizador que É amigo (tabela user)
+$sql = "
+    SELECT 
+        u.user_id,
+        u.username,
+        u.image_id,
+        u.country,
+        u.email
+    FROM friends f
+    INNER JOIN user u ON f.friend_id = u.user_id
+    WHERE f.user_id = ?
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $currentUserId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$friends = [];
+while ($row = $result->fetch_assoc()) {
+    $friends[] = $row;
+}
+
+$stmt->close();
+// $conn->close();  // se quiseres, mas só no fim da página
+?>
+
+
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -74,30 +128,31 @@
     <div class="content">    
   <div class="collections-and-friends">
     <section class="friends">
-      <h2>Friends</h2>
-      <div class="friends-grid">
-        <div class="friend">
-          <img src="images/anaritalopes.jpg" alt="Ana Rita Lopes">
-          <p class="friend-name"><strong><a href="friendpage.php">Ana_Rita_Lopes</a></strong></p>
+        <h2>Friends</h2>
+        <div class="friends-grid">
+          <?php if (empty($friends)): ?>
+            <p>You don't have any friends yet.</p>
+          <?php else: ?>
+            <?php foreach ($friends as $friend): ?>
+              <div class="friend">
+                <!-- Imagem: por agora uso um avatar genérico.
+                     Quando tiveres a tabela 'image', faz um JOIN e muda o src. -->
+                <img src="images/default_avatar.png"
+                     alt="<?php echo htmlspecialchars($friend['username']); ?>">
+
+                <p class="friend-name">
+                  <strong>
+                    <a href="friendpage.php?user_id=<?php echo $friend['user_id']; ?>">
+                      <?php echo htmlspecialchars($friend['username']); ?>
+                    </a>
+                  </strong>
+                </p>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
-        <div class="friend">
-          <img src="images/tomasfreitas.jpg" alt="Tomás Freitas">
-          <p class="friend-name"><strong><a href="friendpage.php">Tomás_Freitas</a></strong></p>
-        </div>
-        <div class="friend">
-          <img src="images/davidramos.jpg" alt="David Ramos">
-          <p class="friend-name"><strong><a href="friendpage.php">David_Ramos</a></strong></p>
-        </div>
-        <div class="friend">
-          <img src="images/telmomatos.jpg" alt="Telmo Matos">
-          <p class="friend-name"><strong><a href="friendpage.php">Telmo_Matos</a></strong></p>
-        </div>
-        <div class="friend">
-          <img src="images/marcopereira.jpg" alt="Marco Pereira">
-          <p class="friend-name"><strong><a href="friendpage.php">Marco_Pereira</a></strong></p>
-        </div>
-      </div>
-    </section>
+      </section>
+
   </div>
     
     

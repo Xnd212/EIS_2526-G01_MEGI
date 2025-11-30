@@ -1,3 +1,136 @@
+<?php
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+session_start();
+
+// DEBUG: Check if form submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    file_put_contents('debug.txt', "FORM SUBMITTED at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
+    file_put_contents('debug.txt', print_r($_POST, true) . "\n", FILE_APPEND);
+    file_put_contents('debug.txt', print_r($_FILES, true) . "\n", FILE_APPEND);
+}
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Database connection
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "sie"; 
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+$error = "";
+$success = false;
+$new_event_id = null;
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $event_name = trim($_POST['eventName']);
+    $start_date = $_POST['startDate']; // Already in YYYY-MM-DD format from date input
+    $theme = trim($_POST['theme']);
+    $place = trim($_POST['location']);
+    $description = trim($_POST['description']);
+    $teaser_url = !empty($_POST['youtube']) ? trim($_POST['youtube']) : null;
+    $user_id = $_SESSION['user_id'];
+    
+    // Validate required fields
+    if (empty($event_name) || empty($start_date) || empty($theme) || empty($place) || empty($description)) {
+        $error = "Please fill in all required fields";
+    } 
+    // Validate date format (YYYY-MM-DD)
+    elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start_date)) {
+        $error = "Invalid date format";
+    }
+    else {
+        $image_id = null;
+        
+        // Handle image upload
+        if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] == UPLOAD_ERR_OK) {
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $file_type = $_FILES['coverImage']['type'];
+            
+            if (in_array($file_type, $allowed_types)) {
+                $file_extension = pathinfo($_FILES['coverImage']['name'], PATHINFO_EXTENSION);
+                $new_filename = 'event_' . time() . '_' . uniqid() . '.' . $file_extension;
+                
+                // Full path for move_uploaded_file
+                $target_path = __DIR__ . '/images/' . $new_filename;
+                // URL path for database
+                $url_path = 'images/' . $new_filename;
+                
+                // Create images directory if it doesn't exist
+                if (!file_exists(__DIR__ . '/images')) {
+                    mkdir(__DIR__ . '/images', 0777, true);
+                }
+                
+                if (move_uploaded_file($_FILES['coverImage']['tmp_name'], $target_path)) {
+                    // Insert image URL into image table
+                    $image_stmt = $conn->prepare("INSERT INTO image (url) VALUES (?)");
+                    $image_stmt->bind_param("s", $url_path);
+                    
+                    if ($image_stmt->execute()) {
+                        $image_id = $image_stmt->insert_id;
+                    } else {
+                        $error = "Error saving image to database: " . $image_stmt->error;
+                        // Delete uploaded file if database insert fails
+                        unlink($target_path);
+                    }
+                    $image_stmt->close();
+                } else {
+                    $error = "Error uploading image file. Check folder permissions.";
+                }
+            } else {
+                $error = "File type not allowed. Use JPEG, PNG, GIF or WEBP";
+            }
+        } else {
+            // Check specific upload error
+            if (isset($_FILES['coverImage'])) {
+                switch($_FILES['coverImage']['error']) {
+                    case UPLOAD_ERR_INI_SIZE:
+                    case UPLOAD_ERR_FORM_SIZE:
+                        $error = "Image file is too large";
+                        break;
+                    case UPLOAD_ERR_NO_FILE:
+                        $error = "No image file selected";
+                        break;
+                    default:
+                        $error = "Error uploading image";
+                }
+            } else {
+                $error = "Cover image is required";
+            }
+        }
+        
+        // Insert event if no errors
+        if (empty($error)) {
+            // Insert with or without teaser_url
+            $event_stmt = $conn->prepare("INSERT INTO event (user_id, image_id, name, date, theme, place, description, teaser_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $event_stmt->bind_param("iissssss", $user_id, $image_id, $event_name, $start_date, $theme, $place, $description, $teaser_url);
+            
+            if ($event_stmt->execute()) {
+                $new_event_id = $event_stmt->insert_id;
+                $success = true;
+            } else {
+                $error = "Error creating event: " . $event_stmt->error;
+            }
+            
+            $event_stmt->close();
+        }
+    }
+}
+
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +166,7 @@
           <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
           <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
           <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
           <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
           <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
         </ul>
@@ -53,7 +186,25 @@
       <section class="item-creation-section">
         <h2 class="page-title">Create a Event</h2>
 
-        <form id="eventForm" novalidate>
+        <?php if ($success): ?>
+          <!-- ==== SUCCESS MODAL ==== -->
+          <div id="eventSuccessModal" class="event-success-modal" style="display: flex;">
+            <div class="success-box">
+              <h2>Event created successfully ✅</h2>
+              <p>Your event has been created.</p>
+              <div class="success-buttons">
+                <a href="eventpage.php?event_id=<?php echo $new_event_id; ?>" class="btn-primary">Go to event page</a>
+                <a href="homepage.php" class="btn-secondary">Go to homepage</a>
+              </div>
+            </div>
+          </div>
+        <?php else: ?>
+
+        <?php if (!empty($error)): ?>
+          <p class="form-message error" style="color: red; padding: 10px; background: #ffe6e6; border-radius: 5px; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
+        <?php endif; ?>
+
+        <form id="eventForm" method="POST" action="" enctype="multipart/form-data" novalidate>
           <!-- Name -->
           <div class="form-group">
             <label for="eventName">Event Name <span class="required">*</span></label>
@@ -62,6 +213,7 @@
               id="eventName"
               name="eventName"
               placeholder="e.g. Comic Con Portugal"
+              value="<?php echo isset($_POST['eventName']) ? htmlspecialchars($_POST['eventName']) : ''; ?>"
               required
             />
           </div>
@@ -69,7 +221,13 @@
           <!-- Date -->
           <div class="form-group">
             <label for="startDate">Date <span class="required">*</span></label>
-            <input type="date" id="startDate" name="startDate" required />
+            <input 
+              type="date" 
+              id="startDate" 
+              name="startDate" 
+              value="<?php echo isset($_POST['startDate']) ? htmlspecialchars($_POST['startDate']) : ''; ?>"
+              required 
+            />
           </div>
 
           <!-- Theme -->
@@ -80,6 +238,7 @@
               id="theme"
               name="theme"
               placeholder="e.g. Anime, Cards, etc."
+              value="<?php echo isset($_POST['theme']) ? htmlspecialchars($_POST['theme']) : ''; ?>"
               required
             />
           </div>
@@ -92,6 +251,7 @@
               id="location"
               name="location"
               placeholder="e.g. Exponor – Porto"
+              value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>"
               required
             />
           </div>
@@ -105,18 +265,18 @@
               rows="4"
               placeholder="Brief description about the event"
               required
-            ></textarea>
+            ><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
           </div>
 
-          <!-- Tags -->
+          <!-- Tags (not saved to database) -->
           <div class="form-group">
-            <label for="tags">Tags <span class="required">*</span></label>
+            <label for="tags">Tags</label>
             <input
               type="text"
               id="tags"
               name="tags"
               placeholder="e.g. Pokemon, Anime, TCG"
-              required
+              value="<?php echo isset($_POST['tags']) ? htmlspecialchars($_POST['tags']) : ''; ?>"
             />
           </div>
 
@@ -127,7 +287,8 @@
               type="url"
               id="youtube"
               name="youtube"
-              placeholder="e.g. https://www.youtube.com/embed/..."
+              placeholder="e.g. https://www.youtube.com/watch?v=..."
+              value="<?php echo isset($_POST['youtube']) ? htmlspecialchars($_POST['youtube']) : ''; ?>"
             />
           </div>
 
@@ -148,35 +309,7 @@
           </div>
         </form>
 
-        <p id="formMessage" class="form-message"></p>
-
-        <!-- ==== EVENT SUMMARY ==== -->
-        <div id="eventSummarySection" class="summary-section hidden">
-          <h3>Event Summary</h3>
-          <div id="eventSummaryContent"></div>
-          <div class="summary-actions">
-            <button id="editEvent" class="btn-secondary" type="button">Edit Event</button>
-            <button id="finalEventConfirm" class="btn-primary" type="button">Confirm and Create</button>
-          </div>
-        </div>
-        
-        <!-- ==== SUCCESS MODAL ==== -->
-        <div id="eventSuccessModal" class="event-success-modal">
-      <div class="success-box">
-
-        <h2>Event created successfully</h2>
-        <p>Your event has been created.</p>
-
-        <!-- RESUMO DO EVENTO APÓS CRIAÇÃO -->
-        <div id="modalEventSummary" class="modal-event-summary"></div>
-
-        <div class="success-buttons">
-          <button id="goToEventBtn" class="btn-primary">Go to event page</button>
-          <button id="goToHomeBtn" class="btn-secondary">Go to homepage</button>
-        </div>
-      </div>
-        </div>
-        
+        <?php endif; ?>
       </section>
     </div>
 
@@ -193,7 +326,7 @@
 
       <div class="sidebar-section friends-section">
         <h3>My friends</h3>
-        <p><a href="userfriendspage.php">Viem Friends</a></p>
+        <p><a href="userfriendspage.php">View Friends</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
       </div>
@@ -205,18 +338,6 @@
         <p><a href="eventhistory.php">Event history</a></p>
       </div>
     </aside>
-  </div>
-
-  <!-- ========== SUCCESS MODAL ========== -->
-  <div id="eventSuccessModal" class="event-success-modal">
-    <div class="success-box">
-      <h2>Event created successfully ✅</h2>
-      <p>Your event has been created.</p>
-      <div class="success-buttons">
-        <button id="goToEventBtn" class="btn-primary">Go to event page</button>
-        <button id="goToHomeBtn" class="btn-secondary">Go to homepage</button>
-      </div>
-    </div>
   </div>
 
   <!-- === JAVASCRIPT === -->

@@ -1,0 +1,26 @@
+FORM SUBMITTED at 2025-11-30 01:23:13
+Array
+(
+    [eventName] => Report Gent
+    [startDate] => 2025-12-04
+    [theme] => Studying
+    [location] => Gent - De Krook
+    [description] => Studying in Gnet
+    [tags] => Gent
+    [youtube] => https://www.youtube.com/watch?v=r6ehZUsjLJ4
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => final_report_cover_clean.png
+            [full_path] => final_report_cover_clean.png
+            [type] => image/png
+            [tmp_name] => C:\xampp\tmp\php28F2.tmp
+            [error] => 0
+            [size] => 2826558
+        )
+
+)
+

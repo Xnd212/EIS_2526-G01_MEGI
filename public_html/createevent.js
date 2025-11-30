@@ -13,9 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!form) return;
 
+  // Only prevent default if showing preview, otherwise let PHP handle it
   form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
     // Campos
     const name = document.getElementById("eventName").value.trim();
     const date = document.getElementById("startDate").value.trim();
@@ -23,70 +22,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const location = document.getElementById("location").value.trim();
     const description = document.getElementById("description").value.trim();
     const tags = document.getElementById("tags").value.trim();
-    const youtube = document.getElementById("youtube").value.trim();
     const imageFile = document.getElementById("coverImage").files[0];
 
     if (!name || !date || !theme || !location || !description || !tags || !imageFile) {
+      e.preventDefault();
       alert("Please fill all required fields.");
       return;
     }
 
-    // Lê imagem
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const imageURL = e.target.result;
-
-      // ====== RESUMO DO EVENTO ======
-      summaryContent.innerHTML = `
-        <div class="event-card">
-          <div class="event-header">
-            <img src="${imageURL}" class="event-cover" alt="Event image">
-
-            <div class="event-info">
-              <h3>${name}</h3>
-              <p><strong>Creator:</strong> ${organizer}</p>
-              <p><strong>Theme:</strong> ${theme}</p>
-              <p><strong>Date:</strong> ${date}</p>
-              <p><strong>Place:</strong> ${location}</p>
-              <p><strong>Description:</strong> ${description}</p>
-              <p><strong>Tags:</strong> ${tags}</p>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Mostra resumo, esconde formulário
-      form.classList.add("hidden");
-      summarySection.classList.remove("hidden");
-    };
-
-    reader.readAsDataURL(imageFile);
-  });
-
-  // ===== Edit Event =====
-  editBtn.addEventListener("click", () => {
-    summarySection.classList.add("hidden");
-    form.classList.remove("hidden");
-  });
-
-  // ===== CONFIRM FINAL — mensagem final =====
-  finalConfirmBtn.addEventListener("click", () => {
-
-    summarySection.innerHTML = `
-      <h3>🎉 Event Created!</h3>
-      <p>Your event has been successfully created. We look forward to seeing you there!</p>
-
-      <div class="summary-actions">
-        <a href="homepage.php" class="back-link">← Back to Home Page</a>
-        <a href="eventpage.php" class="back-link">← See Event Page</a>
-      </div>
-    `;
+    // Let the form submit normally to PHP - remove e.preventDefault()
+    // The form will now POST to the server and create the event
   });
 
 });
-
-
-
 
 
 // =============================
@@ -125,5 +73,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
-

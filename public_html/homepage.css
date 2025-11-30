@@ -126,6 +126,7 @@ header {
   display: flex;
 }
 
+
 /* Header */
 .popup-header {
   background-color: #fbecec;
@@ -805,4 +806,15 @@ a {
   .collection-card {
     max-width: 280px;
   }
+}
+
+/* Add this to homepage.css */
+
+/* Defines how the button looks when it is active/clicked */
+.icon-btn.active {
+  background-color: #ffd700; /* Yellow/Gold color */
+  color: #fff;               /* Icon color becomes white */
+  border-radius: 50%;        /* Makes the background circular */
+  transform: scale(1.1);     /* Slightly larger */
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6); /* Optional glow */
 }

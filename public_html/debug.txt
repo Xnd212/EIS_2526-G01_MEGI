@@ -24,3 +24,55 @@ Array
 
 )
 
+FORM SUBMITTED at 2025-11-30 21:17:21
+Array
+(
+    [eventName] => CM Porto
+    [startDate] => 2025-12-05
+    [theme] => Estiem
+    [location] => Feup
+    [description] => CM PORTO
+    [tags] => EGI
+    [youtube] => https://www.youtube.com/watch?v=4tWaimev1Tc
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => 2ª trilogia CM (1).png
+            [full_path] => 2ª trilogia CM (1).png
+            [type] => image/png
+            [tmp_name] => C:\xampp\tmp\php3F03.tmp
+            [error] => 0
+            [size] => 1109304
+        )
+
+)
+
+FORM SUBMITTED at 2025-11-30 21:18:27
+Array
+(
+    [eventName] => Report Gent
+    [startDate] => 2025-12-05
+    [theme] => Teste rita
+    [location] => Casa da Rita
+    [description] => testa, Rita
+    [tags] => Rita
+    [youtube] => 
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => cristianoronaldo (1).jpeg
+            [full_path] => cristianoronaldo (1).jpeg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php4289.tmp
+            [error] => 0
+            [size] => 38994
+        )
+
+)
+

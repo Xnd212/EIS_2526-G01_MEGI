@@ -78,7 +78,7 @@ header {
   font-size: 1rem;
 }
 
-/* Ícones do header */
+/* Ícones no header */
 .icons {
   display: flex;
   gap: 0.5rem;
@@ -102,38 +102,31 @@ header {
 }
 
 /* ===== Notification Popup  ===== */
-
 .notification-popup {
   position: absolute;
   top: 60px;
   right: 60px;
+
   background: #fff;
   border-radius: 10px;
   border: 1px solid #b54242;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
   width: 315px;
   padding: 0;
+
   display: none;
   flex-direction: column;
+
   z-index: 1000;
 }
 
-/* Estado normal: mostra parte da lista */
-.notification-popup .notification-list {
-  max-height: 180px;
-  overflow: hidden;
-}
-
-/* Quando expandido: aumenta e permite scroll */
-.notification-popup.expanded .notification-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
+/* When visible */
 .notification-popup.active {
   display: flex;
 }
 
+/* Header */
 .popup-header {
   background-color: #fbecec;
   padding: 0.85rem 1.5rem;
@@ -152,6 +145,7 @@ header {
   gap: 0.5rem;
 }
 
+/* Notification list */
 .notification-list {
   list-style: none;
   padding: 0;
@@ -168,71 +162,83 @@ header {
   border-bottom: none;
 }
 
-/* ----- Logout Popup (dropdown pequeno) ----- */
-.logout-popup {
-  position: absolute;          
-  top: 60px;                   /* Mesma altura do notification-popup */
-  right: 0px;                  /* Alinhado à direita do container .icons */
-  width: 260px;
-  background: #ffffff;
-  border-radius: 10px;
-  border: 1px solid #b54242;
-  padding: 1rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  z-index: 1200;
-  display: none;               
+/* Expandable list max-height */
+.notification-popup .notification-list {
+  max-height: 180px;
+  overflow: hidden;
 }
 
-.logout-popup h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
+.notification-popup.expanded .notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Link */
+.see-more-link {
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
   color: #b54242;
-  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
 }
 
+/* ===== Logout Popup (inherits layout from notification-popup) ===== */
+.logout-popup {
+  width: 260px;
+}
+
+/* Texto */
 .logout-popup p {
-  margin: 0 0 0.9rem;
-  font-size: 0.9rem;
+  margin: 1rem 1.4rem;
+  font-size: 0.95rem;
   color: #333;
 }
 
-.logout-actions {
+/* Wrapper dos botões */
+.logout-popup .logout-btn-wrapper {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 0.8rem;
+  padding: 0.8rem 1.4rem 1.1rem;
+  border-top: 1px solid #e2b8b8;
+  margin-top: 0.4rem;
 }
 
-/* Botões do popup */
-
-.logout-btn {
-  background-color: #e88a8a;
-  border: none;
-  padding: 0.4rem 0.9rem;
+/* Estilo base dos botões */
+.logout-popup .logout-btn-wrapper .logout-btn {
+  display: inline-block;
+  padding: 0.5rem 1.3rem;
+  border-radius: 999px;            /* “pill” */
   font-size: 0.9rem;
-  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid transparent;
   cursor: pointer;
-  color: white;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
+  transition: 0.2s ease;
 }
 
-.logout-btn:hover {
-  background-color: #d56a6a;
+/* Cancel – cinza/rosa suave */
+.logout-popup .logout-btn-wrapper .cancel-btn {
+  background-color: #f5eaea;
+  color: #7a3434;
+  border-color: #e3cfcf;
 }
 
-.cancel-btn {
-  background-color: #ddd;
-  border: none;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #333;
-  transition: background-color 0.2s ease;
+.logout-popup .logout-btn-wrapper .cancel-btn:hover {
+  background-color: #eddede;
+  border-color: #d8bcbc;
 }
 
-.cancel-btn:hover {
-  background-color: #ccc;
+/* Log out – rosa suave */
+.logout-popup .logout-btn-wrapper .confirm-btn {
+  background-color: #f2c6c6;
+  color: #7a2e2e;
+  border-color: #e1a8a8;
+}
+
+.logout-popup .logout-btn-wrapper .confirm-btn:hover {
+  background-color: #ecb3b3;
+  border-color: #d99999;
 }
 
 
@@ -761,6 +767,7 @@ header {
 #hover-popup p {
   margin: 4px 0;
 }
+
 
 
 /* =======================

@@ -41,6 +41,26 @@
             </div>
            
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
+        
+            <!-- Logout -->
+    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+
+    <div class="notification-popup logout-popup" id="logout-popup">
+      <div class="popup-header">
+        <h3>Logout</h3>
+      </div>
+
+      <p>Are you sure you want to log out?</p>
+
+      <div class="logout-btn-wrapper">
+        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">
+          Cancel
+        </button>
+        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">
+          Log out
+        </button>
+      </div>
+    </div>
     </div>
   </header>
 
@@ -132,6 +152,10 @@
       </div>
     </aside>
   </div>
+    
+    
   <script src="edititem.js"></script>
+  <script src="logout.js"></script>
+
 </body>
 </html>

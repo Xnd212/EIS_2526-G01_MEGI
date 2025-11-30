@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     block.addEventListener("mousemove", e => {
       const id = block.getAttribute("data-id");
       const data = collectionData[id];
-      if (!data) return;
+      if (!data || !hoverPopup) return;
 
       hoverPopup.innerHTML = `
         <div class="popup-content-flex">
@@ -71,39 +71,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     block.addEventListener("mouseleave", () => {
-      hoverPopup.classList.remove("active");
+      if (hoverPopup) hoverPopup.classList.remove("active");
     });
   });
 
+
+  /* ============================================================
+     ELEMENTOS PARTILHADOS
+  ============================================================ */
+  const bellBtn       = document.querySelector('.icon-btn[aria-label="Notificações"]');
+  const notifPopup    = document.getElementById('notification-popup');
+  const logoutBtn     = document.getElementById("logout-btn");
+  const logoutPopup   = document.getElementById("logout-popup");
+  const cancelLogout  = document.getElementById("cancel-logout");
+  const confirmLogout = document.getElementById("confirm-logout");
+  const seeMoreLink   = notifPopup ? notifPopup.querySelector('.see-more-link') : null;
 
 
   /* ============================================================
      DROPDOWN DE NOTIFICAÇÕES
   ============================================================ */
-  const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-  const notifPopup = document.getElementById('notification-popup');
-  const seeMoreLink = document.querySelector('.see-more-link');
-
   if (bellBtn && notifPopup) {
     bellBtn.addEventListener("click", e => {
       e.stopPropagation();
 
       // Fecha popup de logout se estiver aberto
-      const logoutPopup = document.getElementById("logout-popup");
-      if (logoutPopup) logoutPopup.style.display = "none";
+      if (logoutPopup) {
+        logoutPopup.classList.remove("active");
+      }
 
-      notifPopup.style.display =
-        notifPopup.style.display === "block" ? "none" : "block";
+      notifPopup.classList.toggle("active");
     });
 
+    // Fecha notificações ao clicar fora
     document.addEventListener("click", e => {
       if (!notifPopup.contains(e.target) && !bellBtn.contains(e.target)) {
-        notifPopup.style.display = "none";
+        notifPopup.classList.remove("active");
       }
     });
   }
 
-  // Expandir lista
+  // Expandir lista de notificações
   if (seeMoreLink && notifPopup) {
     seeMoreLink.addEventListener("click", e => {
       e.preventDefault();
@@ -114,54 +122,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-/* ============================================================
-   POPUP DE LOGOUT
-============================================================ */
-const logoutBtn    = document.getElementById("logout-btn");
-const logoutPopup  = document.getElementById("logout-popup");
-const cancelLogout = document.getElementById("cancel-logout");
-const confirmLogout = document.getElementById("confirm-logout");
 
-if (logoutBtn && logoutPopup) {
-  // Abrir/fechar popup ao clicar no ícone 🚪
-  logoutBtn.addEventListener("click", e => {
-    e.preventDefault();
-    e.stopPropagation();
+  /* ============================================================
+     POPUP DE LOGOUT
+  ============================================================ */
+  if (logoutBtn && logoutPopup) {
+    // Abrir/fechar popup ao clicar no ícone 🚪
+    logoutBtn.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Fecha popup de notificações, se estiver aberto
-    if (notifPopup) {
-      notifPopup.style.display = "none";
-    }
+      // Fecha popup de notificações, se estiver aberto
+      if (notifPopup) {
+        notifPopup.classList.remove("active");
+      }
 
-    logoutPopup.style.display =
-      logoutPopup.style.display === "block" ? "none" : "block";
-  });
+      logoutPopup.classList.toggle("active");
+    });
 
-  // Fechar ao clicar fora
-  document.addEventListener("click", e => {
-    if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
-      logoutPopup.style.display = "none";
-    }
-  });
-}
+    // Fechar ao clicar fora
+    document.addEventListener("click", e => {
+      if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
+        logoutPopup.classList.remove("active");
+      }
+    });
+  }
 
-// Botão "Cancel"
-if (cancelLogout && logoutPopup) {
-  cancelLogout.addEventListener("click", e => {
-    e.stopPropagation();
-    logoutPopup.style.display = "none";
-  });
-}
+  // Botão "Cancel"
+  if (cancelLogout && logoutPopup) {
+    cancelLogout.addEventListener("click", e => {
+      e.stopPropagation();
+      logoutPopup.classList.remove("active");
+    });
+  }
 
-// Botão "Log out" → redireciona para login
-if (confirmLogout) {
-  confirmLogout.addEventListener("click", e => {
-    e.stopPropagation();
-    // muda o ficheiro se o teu login tiver outro nome
-    window.location.href = "loginpage.php";
-  });
-}
+  // Botão "Log out" 
+  if (confirmLogout && logoutPopup) {
+    confirmLogout.addEventListener("click", e => {
+      e.stopPropagation();
+      window.location.href = "logout.php"; 
+    });
+  }
 
-
- 
 });

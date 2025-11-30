@@ -215,3 +215,30 @@ input[type="password"] {
     object-fit: contain;
 }
 
+.signup-centered {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.signup-centered input[type="email"],
+.signup-centered input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.auth-wrapper:has(.signup-centered) {
+    justify-content: center;
+}
+
+.auth-wrapper:has(.signup-centered) .or-label {
+    display: none;
+}
+
+.auth-wrapper:has(.signup-centered)::before {
+    display: none;
+}
+
+.auth-wrapper:has(.signup-centered)::after {
+    display: none;
+}

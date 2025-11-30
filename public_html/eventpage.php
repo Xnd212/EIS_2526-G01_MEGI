@@ -1,9 +1,89 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get event_id from URL
+if (!isset($_GET['event_id'])) {
+    header("Location: upcomingevents.php");
+    exit();
+}
+
+$event_id = intval($_GET['event_id']);
+
+// Database connection
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "sie"; 
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+// Get event details
+$stmt = $conn->prepare("SELECT e.*, u.username as creator_username, i.url as image_url
+                        FROM event e 
+                        JOIN user u ON e.user_id = u.user_id 
+                        LEFT JOIN image i ON e.image_id = i.image_id
+                        WHERE e.event_id = ?");
+$stmt->bind_param("i", $event_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    echo "Evento não encontrado";
+    exit();
+}
+
+$event = $result->fetch_assoc();
+$stmt->close();
+
+// Get collections being brought to this event
+$collections_stmt = $conn->prepare("SELECT a.collection_id, c.name as collection_name, 
+                                            u.username, i.url as collection_image_url
+                                     FROM attends a
+                                     JOIN user u ON a.user_id = u.user_id
+                                     JOIN collection c ON a.collection_id = c.collection_id
+                                     LEFT JOIN image i ON c.image_id = i.image_id
+                                     WHERE a.event_id = ?");
+$collections_stmt->bind_param("i", $event_id);
+$collections_stmt->execute();
+$collections_result = $collections_stmt->get_result();
+$collections = $collections_result->fetch_all(MYSQLI_ASSOC);
+$collections_stmt->close();
+
+// Check if current user is already signed up
+$check_attendance = $conn->prepare("SELECT * FROM attends WHERE user_id = ? AND event_id = ?");
+$check_attendance->bind_param("ii", $_SESSION['user_id'], $event_id);
+$check_attendance->execute();
+$is_attending = $check_attendance->get_result()->num_rows > 0;
+$check_attendance->close();
+
+// Format date
+$event_date = date("d/m/Y", strtotime($event['date']));
+
+// Get video ID from teaser_url if it's a YouTube link
+$video_id = null;
+if (!empty($event['teaser_url'])) {
+    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $event['teaser_url'], $matches)) {
+        $video_id = $matches[1];
+    }
+}
+
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | Comic Con Portugal</title>
+  <title>Trall-E | <?php echo htmlspecialchars($event['name']); ?></title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="eventpage.css" />
 </head>
@@ -13,7 +93,6 @@
   <header>
     <a href="homepage.php" class="logo">
       <img src="images\TrallE_2.png" alt="logo" />
-     
     </a>
     <div class="search-bar">
       <input type="text" placeholder="Search" />
@@ -71,59 +150,65 @@
   <div class="main">
     <div class="content">
       <div class="event-details-box">
-        <h2>Comic Con Portugal</h2>
+        <h2><?php echo htmlspecialchars($event['name']); ?></h2>
 
         <div class="event-teaser-wrapper">
 
           <div class="event-image-wrapper">
-            <img src="images/comiccon.png" alt="Comic Con Portugal" />
+            <?php if (!empty($event['image_url'])): ?>
+              <img src="<?php echo htmlspecialchars($event['image_url']); ?>" alt="<?php echo htmlspecialchars($event['name']); ?>" />
+            <?php else: ?>
+              <img src="images/default_event.png" alt="Event Image" />
+            <?php endif; ?>
           </div>
 
           <div class="event-details-content">
             <div class="event-info">
-              <p><strong>Creator:</strong> Alex.Mendes147</p>
-              <p><strong>Theme:</strong> Card</p>
-              <p><strong>Date:</strong> 03/10/2025</p>
-              <p><strong>Place:</strong> EXPONOR – Porto</p>
-              <p><strong>Description:</strong> The biggest pop culture event in Portugal.</p>
-              <p><strong>Tags:</strong> Pokemon, Cards, Anime, TCG</p>
+              <p><strong>Creator:</strong> <?php echo htmlspecialchars($event['creator_username']); ?></p>
+              <p><strong>Theme:</strong> <?php echo htmlspecialchars($event['theme']); ?></p>
+              <p><strong>Date:</strong> <?php echo $event_date; ?></p>
+              <p><strong>Place:</strong> <?php echo htmlspecialchars($event['place']); ?></p>
+              <p><strong>Description:</strong> <?php echo htmlspecialchars($event['description']); ?></p>
             </div>
           </div>
 
           <!-- TEASER VÍDEO -->
+          <?php if ($video_id): ?>
           <div class="video-thumbnail">
-            <a href="https://www.youtube.com/watch?v=6mw8rvBWbYE" target="_blank">
-              <img src="https://img.youtube.com/vi/6mw8rvBWbYE/hqdefault.jpg" alt="Video Teaser">
+            <a href="<?php echo htmlspecialchars($event['teaser_url']); ?>" target="_blank">
+              <img src="https://img.youtube.com/vi/<?php echo $video_id; ?>/hqdefault.jpg" alt="Video Teaser">
               <div class="play-button">▶</div>
             </a>
           </div>
+          <?php endif; ?>
 
         </div>
 
         <!-- COLEÇÕES -->
-        <h3 class="collections-others"> Collections others are bringing:</h3>
+        <?php if (count($collections) > 0): ?>
+        <h3 class="collections-others">Collections others are bringing:</h3>
         <div class="collections-brought">
+          <?php foreach ($collections as $collection): ?>
           <div class="collection-bring">
-            <a href="collectionpage.php">
-            <img src="images/pokémon_logo.png" alt="Pokemon Cards">
-            <p class="collection-name"><strong>Pokemon Cards</strong></p>
-            <p class="collection-user">Rafael_Ameida123</p>
+            <a href="collectionpage.php?collection_id=<?php echo $collection['collection_id']; ?>">
+              <?php if (!empty($collection['collection_image_url'])): ?>
+                <img src="<?php echo htmlspecialchars($collection['collection_image_url']); ?>" alt="<?php echo htmlspecialchars($collection['collection_name']); ?>">
+              <?php else: ?>
+                <img src="images/default_collection.png" alt="Collection">
+              <?php endif; ?>
+              <p class="collection-name"><strong><?php echo htmlspecialchars($collection['collection_name']); ?></strong></p>
+              <p class="collection-user"><?php echo htmlspecialchars($collection['username']); ?></p>
             </a>
           </div>
-          <div class="collection-bring">
-            <a href="collectionpage.php">
-            <img src="images/championspath.png" alt="Pokemon Champion's Path">
-            <p class="collection-name"><strong>Pokemon Champion's Path</strong></p>
-            <p class="collection-user">Andre_SS123</p>
-            </a>
-          </div>
+          <?php endforeach; ?>
         </div>
+        <?php endif; ?>
 
         <!-- MAPA -->
         <h3 class="map-title">Where to find us:</h3>
         <div class="map-container">
           <iframe
-            src="https://www.google.com/maps?q=EXPONOR%20%E2%80%93%20Porto&output=embed"
+            src="https://www.google.com/maps?q=<?php echo urlencode($event['place']); ?>&output=embed"
             allowfullscreen
             referrerpolicy="no-referrer-when-downgrade">
           </iframe>
@@ -132,8 +217,13 @@
         <!-- INSCRIÇÃO -->
         <div class="register-section">
           <div class="register-row">
-            <p class="register-text">🎟️ Want to join? Sign up now!</p>
-            <a href="sign_up_event.php" class="register-button">Sign up</a>
+            <?php if ($is_attending): ?>
+              <p class="register-text">✅ You're signed up for this event!</p>
+              <a href="sign_up_event.php?event_id=<?php echo $event_id; ?>" class="register-button registered">Manage Registration</a>
+            <?php else: ?>
+              <p class="register-text">🎟️ Want to join? Sign up now!</p>
+              <a href="sign_up_event.php?event_id=<?php echo $event_id; ?>" class="register-button">Sign up</a>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -151,7 +241,7 @@
       </div>
       <div class="sidebar-section friends-section">
         <h3>My friends</h3>
-        <p><a href="userfriendspage.php"> Viem Friends</a></p>
+        <p><a href="userfriendspage.php">View Friends</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
       </div>

@@ -121,7 +121,4 @@ document.addEventListener("DOMContentLoaded", () => {
         ? "Show less"
         : "+ See more";
     });
-  }
-
-
-
+  }}

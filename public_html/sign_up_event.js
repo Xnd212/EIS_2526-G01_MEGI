@@ -1,203 +1,211 @@
-// =============================
-// Notificações 
-// =============================
-
 document.addEventListener("DOMContentLoaded", () => {
-  const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-  const popup = document.getElementById('notification-popup');
-  const seeMoreLink = document.querySelector('.see-more-link');
+    
+    // ============================================
+    // 1. NAVBAR LOGIC (Notifications & Logout)
+    // ============================================
+    const bellBtn = document.getElementById("notification-btn");
+    const notifPopup = document.getElementById("notification-popup");
+    const logoutBtn = document.getElementById("logout-btn");
+    const logoutPopup = document.getElementById("logout-popup");
+    const cancelLogout = document.getElementById("cancel-logout");
+    const confirmLogout = document.getElementById("confirm-logout");
 
-  if (bellBtn && popup) {
-    bellBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!popup.contains(e.target) && !bellBtn.contains(e.target)) {
-        popup.style.display = 'none';
-      }
-    });
-  }
-
-  // Expandir / Encolher notificações
-  if (seeMoreLink) {
-    seeMoreLink.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      popup.classList.toggle('expanded');
-
-      if (popup.classList.contains('expanded')) {
-        seeMoreLink.textContent = "Show less";
-      } else {
-        seeMoreLink.textContent = "+ See more";
-      }
-    });
-  }
-});
-
-  
-  
-const userCollections = ["Pokémon Cards", "Rare Coins", "Panini Stickers", "Comics"];
-
-const collectionSelect = document.getElementById("collection");
-userCollections.forEach(col => {
-  const option = document.createElement("option");
-  option.value = col;
-  option.textContent = col;
-  collectionSelect.appendChild(option);
-});
-
-
-const form = document.getElementById("eventSignUpForm");
-const summarySection = document.getElementById("summarySection");
-const summaryContent = document.getElementById("summaryContent");
-const editButton = document.getElementById("editRegistration");
-const finalConfirmButton = document.getElementById("finalConfirm");
-
-// notificação
-const notifyRadios = document.querySelectorAll("input[name='notify']");
-const notificationFields = document.getElementById("notificationFields");
-const notifyMethodRadios = document.querySelectorAll("input[name='notifyMethod']");
-const emailField = document.getElementById("emailField");
-const phoneField = document.getElementById("phoneField");
-
-// pagamento
-const paymentRadios = document.querySelectorAll("input[name='payment']");
-const paymentFields = document.getElementById("paymentFields");
-const transferField = document.getElementById("transferField");
-const mbwayField = document.getElementById("mbwayField");
-const presentialField = document.getElementById("presentialField");
-
-
-// =============================
-// NOTIFICATION LOGIC
-// =============================
-notifyRadios.forEach(radio => {
-  radio.addEventListener("change", () => {
-    if (radio.value === "yes") {
-      notificationFields.classList.remove("hidden");
-    } else {
-      notificationFields.classList.add("hidden");
-      emailField.classList.add("hidden");
-      phoneField.classList.add("hidden");
-      notifyMethodRadios.forEach(r => (r.checked = false));
+    // Close helper
+    function closePopups() {
+        if (notifPopup) notifPopup.style.display = "none";
+        if (logoutPopup) {
+            logoutPopup.style.display = "none";
+            logoutPopup.classList.remove("active");
+        }
     }
-  });
-});
 
-notifyMethodRadios.forEach(method => {
-  method.addEventListener("change", () => {
-    emailField.classList.add("hidden");
-    phoneField.classList.add("hidden");
-    if (method.value === "email") emailField.classList.remove("hidden");
-    if (method.value === "phone") phoneField.classList.remove("hidden");
-  });
-});
-
-
-
-// FORM SUBMISSION
-form.addEventListener("submit", e => {
-  e.preventDefault();
-
-  // Reset mensagens de erro
-  const inputs = form.querySelectorAll("input, select, textarea");
-  inputs.forEach(input => input.classList.remove("error"));
-
-  let valid = true;
-  const name = document.getElementById("userName").value.trim();
-  const collection = collectionSelect.value;
-  const participants = document.getElementById("participants").value;
-  const notify = [...notifyRadios].find(r => r.checked)?.value || "no";
-  const comments = document.getElementById("comments").value.trim();
-  const terms = document.getElementById("terms").checked;
-
- 
-  // Validações
-  if (collection === "") {
-    collectionSelect.classList.add("error");
-    valid = false;
-  }
-
-  if (!terms) {
-    alert("You must accept the terms and conditions.");
-    valid = false;
-  }
-
-
-  let notifyText = "No notifications";
-  if (notify === "yes") {
-    const method = [...notifyMethodRadios].find(r => r.checked)?.value;
-    if (!method) {
-      alert("Please select a notification method (email or phone).");
-      valid = false;
-    } else if (method === "email") {
-      const email = document.getElementById("notifyEmail").value.trim();
-      if (!email) {
-        document.getElementById("notifyEmail").classList.add("error");
-        valid = false;
-      } else {
-        notifyText = `Email → ${email}`;
-      }
-    } else if (method === "phone") {
-      const phone = document.getElementById("notifyPhone").value.trim();
-      if (!phone) {
-        document.getElementById("notifyPhone").classList.add("error");
-        valid = false;
-      } else {
-        notifyText = `Phone → ${phone}`;
-      }
+    if (bellBtn && notifPopup) {
+        bellBtn.addEventListener("click", (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const isVisible = notifPopup.style.display === 'flex' || notifPopup.style.display === 'block';
+            closePopups();
+            notifPopup.style.display = isVisible ? 'none' : 'flex';
+        });
     }
-  }
 
-    if (!valid) {
-    formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
-    formMessage.classList.add("error");
-    return;
-  }
-  
-  formMessage.textContent = "";
-  formMessage.className = "form-message";
+    if (logoutBtn && logoutPopup) {
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const isVisible = logoutPopup.classList.contains("active");
+            closePopups();
+            if (!isVisible) {
+                logoutPopup.classList.add("active");
+                logoutPopup.style.display = "block";
+            }
+        });
+    }
 
-  // Summary
-  const summaryHTML = `
-    <p><strong>User:</strong> ${name}</p>
-    <p><strong>Collection:</strong> ${collection}</p>
-    <p><strong>Participants:</strong> ${participants}</p>
-    <p><strong>Notification:</strong> ${notifyText}</p>
-    ${comments ? `<p><strong>Comments:</strong> ${comments}</p>` : ""}
-  `;
+    if (cancelLogout) {
+        cancelLogout.addEventListener("click", closePopups);
+    }
+    
+    // Close on click outside
+    document.addEventListener("click", (e) => {
+        if (notifPopup && !notifPopup.contains(e.target) && e.target !== bellBtn) {
+            notifPopup.style.display = 'none';
+        }
+        if (logoutPopup && !logoutPopup.contains(e.target) && e.target !== logoutBtn) {
+            logoutPopup.style.display = 'none';
+            logoutPopup.classList.remove("active");
+        }
+    });
 
-  summaryContent.innerHTML = summaryHTML;
-  form.classList.add("hidden");
-  summarySection.classList.remove("hidden");
+    // ============================================
+    // 2. FORM NOTIFICATIONS TOGGLE
+    // ============================================
+    const notifyRadios = document.querySelectorAll('input[name="notify"]');
+    const notificationFields = document.getElementById('notificationFields');
+    
+    notifyRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'yes') {
+                notificationFields.style.display = 'block';
+                notificationFields.classList.remove('hidden');
+            } else {
+                notificationFields.style.display = 'none';
+                notificationFields.classList.add('hidden');
+            }
+        });
+    });
+
+    const methodRadios = document.querySelectorAll('input[name="notifyMethod"]');
+    const emailField = document.getElementById('emailField');
+    const phoneField = document.getElementById('phoneField');
+
+    methodRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'email') {
+                emailField.style.display = 'block';
+                emailField.classList.remove('hidden');
+                phoneField.style.display = 'none';
+                phoneField.classList.add('hidden');
+            } else {
+                emailField.style.display = 'none';
+                emailField.classList.add('hidden');
+                phoneField.style.display = 'block';
+                phoneField.classList.remove('hidden');
+            }
+        });
+    });
+
+    // ============================================
+    // 3. FORM SUBMISSION & SUMMARY
+    // ============================================
+    const form = document.getElementById('eventSignUpForm');
+    const summarySection = document.getElementById('summarySection');
+    const summaryContent = document.getElementById('summaryContent');
+    const formMessage = document.getElementById('formMessage');
+    const editBtn = document.getElementById('editRegistration');
+    const finalConfirmBtn = document.getElementById('finalConfirm');
+
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(formMessage) formMessage.textContent = "";
+            
+            // Client Validation
+            const collection = document.getElementById('collection').value;
+            const terms = document.getElementById('terms').checked;
+            const notify = document.querySelector('input[name="notify"]:checked').value;
+
+            if (!collection) {
+                alert("Please select a collection option.");
+                return;
+            }
+            if (!terms) {
+                alert("You must accept the terms and conditions.");
+                return;
+            }
+            if (notify === 'yes') {
+                const method = document.querySelector('input[name="notifyMethod"]:checked');
+                if(!method) { alert("Please select a notification method."); return; }
+                if(method.value === 'email' && !document.getElementById('notifyEmail').value.trim()) {
+                    alert("Please enter your email."); return;
+                }
+                if(method.value === 'phone' && !document.getElementById('notifyPhone').value.trim()) {
+                    alert("Please enter your phone number."); return;
+                }
+            }
+
+            // Generate Summary
+            const colSelect = document.getElementById('collection');
+            const colName = colSelect.options[colSelect.selectedIndex].text;
+            const participants = document.getElementById('participants').value;
+            const comments = document.getElementById('comments').value || "None";
+
+            let html = `<strong>Collection:</strong> ${colName}<br>`;
+            html += `<strong>Participants:</strong> ${participants}<br>`;
+            html += `<strong>Notifications:</strong> ${notify.toUpperCase()}<br>`;
+            if (notify === 'yes') {
+                const method = document.querySelector('input[name="notifyMethod"]:checked').value;
+                const contact = method === 'email' ? document.getElementById('notifyEmail').value : document.getElementById('notifyPhone').value;
+                html += `<strong>Contact (${method}):</strong> ${contact}<br>`;
+            }
+            html += `<strong>Comments:</strong> ${comments}`;
+
+            summaryContent.innerHTML = html;
+
+            // Show Summary
+            form.style.display = 'none';
+            form.classList.add('hidden');
+            summarySection.style.display = 'block';
+            summarySection.classList.remove('hidden');
+        });
+    }
+
+    // Go Back (Edit)
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            summarySection.style.display = 'none';
+            summarySection.classList.add('hidden');
+            form.style.display = 'block';
+            form.classList.remove('hidden');
+        });
+    }
+
+    // Final Submission (Server)
+    if (finalConfirmBtn) {
+        finalConfirmBtn.addEventListener('click', () => {
+            const eventId = form.getAttribute('data-event-id');
+            let collectionId = document.getElementById('collection').value;
+            
+            // "Not bringing a collection" (value 0)
+            if (collectionId === "0") collectionId = 0; 
+
+            // AJAX POST
+            fetch('sign_up_event.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_id: eventId,
+                    collection_id: collectionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    summarySection.innerHTML = `
+                        <h3>🎉 Registration Completed!</h3>
+                        <p>Thank you for signing up.</p>
+                        <div class="summary-actions">
+                            <a href="${data.redirect}" class="btn-primary" style="text-decoration:none; padding:10px 20px; display:inline-block; margin-top:10px; background:#b54242; color:white; border-radius:10px;">Back to Event Page</a>
+                        </div>
+                    `;
+                } else {
+                    alert("Error: " + data.message);
+                    summarySection.style.display = 'none';
+                    form.style.display = 'block';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Connection error.");
+            });
+        });
+    }
 });
-
-finalConfirmButton.addEventListener("click", () => {
-  summarySection.innerHTML = `
-    <h3>🎉 Registration Completed!</h3>
-    <p>Thank you for signing up for this event. We look forward to seeing you there!</p>
-    <div class="summary-actions">
-      <a href="events.php" class="back-link" id="goToEventPage">← Back to Event Page</a>
-    </div>
-  `;
-});
-  
-  
-// FINAL ACTIONS
-editButton.addEventListener("click", () => {
-  summarySection.classList.add("hidden");
-  form.classList.remove("hidden");
-});
-
-finalConfirmButton.addEventListener("click", () => {
-  summarySection.innerHTML = `
-    <h3>🎉 Registration completed!</h3>
-    <p>Thank you for signing up for this event. We look forward to seeing you there!</p>
-    <div class="summary-actions">
-      <a href="homepage.php" class="back-link" id="goToEventPage">← Back to Home Page</a>
-    </div>
-  `;
-});
-   

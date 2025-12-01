@@ -35,7 +35,6 @@ if ($conn->connect_error) {
 // ==========================================
 // 2. FETCH EVENT DETAILS
 // ==========================================
-// Updated: Fetching 'place' instead of 'location'
 $sql = "SELECT e.*, i.url as image_url
         FROM event e 
         LEFT JOIN image i ON e.image_id = i.image_id
@@ -115,12 +114,48 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
           border-radius: 8px;
       }
       .register-button.registered {
-          background-color: #28a745; 
+          background-color: #dc3545; /* Red for 'Leave' */
+          color: white;
+          cursor: pointer;
       }
+      /* Reusing popup styles for consistency */
+      .leave-popup {
+          display: none;
+          position: absolute;
+          top: 60px;
+          right: 20px; /* Or center it if you prefer */
+          width: 300px;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          padding: 20px;
+          z-index: 1000;
+          text-align: center;
+      }
+      .leave-popup h3 {
+          margin-top: 0;
+          color: #333;
+      }
+      .leave-btn-wrapper {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 20px;
+      }
+      .leave-btn-wrapper button {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: bold;
+      }
+      .cancel-leave { background: #eee; color: #333; }
+      .confirm-leave { background: #dc3545; color: white; }
   </style>
 </head>
 <body>
 
+  <!-- ===== Header ===== -->
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -140,6 +175,8 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
         
         <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+        
+        <!-- LOGOUT POPUP -->
         <div class="notification-popup logout-popup" id="logout-popup">
             <div class="popup-header"><h3>Logout</h3></div>
             <p>Are you sure you want to log out?</p>
@@ -148,9 +185,21 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
                 <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
             </div>
         </div>
+
+        <!-- NEW: LEAVE EVENT POPUP (Hidden by default) -->
+        <div class="leave-popup" id="leave-popup">
+            <div class="popup-header"><h3>Leave Event</h3></div>
+            <p>Are you sure you want to leave this event? You will be removed from the list.</p>
+            <div class="leave-btn-wrapper">
+                <button type="button" class="cancel-leave" id="cancel-leave">Cancel</button>
+                <button type="button" class="confirm-leave" id="confirm-leave">Confirm</button>
+            </div>
+        </div>
+
     </div>
   </header>
 
+  <!-- ===== Main Content ===== -->
   <div class="main">
     <div class="content">
       <div class="event-details-box">
@@ -166,7 +215,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
           <div class="event-details-content">
             <div class="event-info">
-              
               <p><strong>Date:</strong> <?php echo $event_date; ?></p>
               
               <?php if(isset($event['place'])): ?>
@@ -177,6 +225,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             </div>
           </div>
 
+          <!-- VIDEO TEASER -->
           <?php if ($video_id): ?>
           <div class="video-thumbnail">
             <a href="<?php echo htmlspecialchars($event['teaser_url']); ?>" target="_blank">
@@ -187,6 +236,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
           <?php endif; ?>
         </div>
 
+        <!-- COLLECTIONS -->
         <?php if (count($collections) > 0): ?>
         <h3 class="collections-others">Collections others are bringing:</h3>
         <div class="collections-brought">
@@ -203,6 +253,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </div>
         <?php endif; ?>
 
+        <!-- MAP -->
         <?php if(isset($event['place']) && !empty($event['place'])): ?>
             <h3 class="map-title">Where to find us:</h3>
             <div class="map-container">
@@ -213,11 +264,13 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             </div>
         <?php endif; ?>
 
+        <!-- REGISTRATION SECTION -->
         <div class="register-section">
           <div class="register-row">
             <?php if ($is_attending): ?>
               <p class="register-text">✅ You're signed up!</p>
-              <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=leave" class="register-button registered">Leave Event</a>
+              <!-- MODIFIED: Uses button with ID and data-id attribute -->
+              <button id="leave-event-btn" class="register-button registered" data-id="<?php echo $event_id; ?>">Leave Event</button>
             <?php else: ?>
               <p class="register-text">🎟️ Want to join? Sign up now!</p>
               <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=join" class="register-button">Sign up</a>
@@ -228,6 +281,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
       </div>
     </div>
 
+    <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>

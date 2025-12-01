@@ -1,9 +1,11 @@
 <?php
 session_start();
 
-// ---------- USER LOGADO (apenas para teste) ----------
+// ---------- USER LOGADO ----------
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // <-- muda depois quando tiveres login
+    // Se não houver sessão ativa, redireciona para o login
+    header("Location: login.php");
+    exit();
 }
 $currentUserId = (int) $_SESSION['user_id'];
 
@@ -37,11 +39,11 @@ $sqlUser = "
         u.image_id,
         img.url AS profile_image,
 
-        -- Contar items através das coleções do user
+        -- Contar items através das coleções do user (usando tabela contains)
         (
             SELECT COUNT(*)
-            FROM item i
-            INNER JOIN collection c2 ON i.collection_id = c2.collection_id
+            FROM contains con
+            INNER JOIN collection c2 ON con.collection_id = c2.collection_id
             WHERE c2.user_id = u.user_id
         ) AS total_items,
 
@@ -97,6 +99,26 @@ while ($row = $resultF->fetch_assoc()) {
     $friends[] = $row;
 }
 $stmtF->close();
+
+/* ==========================================
+   2.5) CHECK IF CURRENT USER IS FRIENDS WITH PROFILE USER
+   ========================================== */
+$isFriend = false;
+if ($currentUserId !== $profileUserId) {
+    $sqlCheckFriend = "
+        SELECT 1 
+        FROM friends 
+        WHERE user_id = ? AND friend_id = ?
+        LIMIT 1
+    ";
+    $stmtCheck = $conn->prepare($sqlCheckFriend);
+    $stmtCheck->bind_param("ii", $currentUserId, $profileUserId);
+    $stmtCheck->execute();
+    $resultCheck = $stmtCheck->get_result();
+    $isFriend = ($resultCheck->num_rows > 0);
+    $stmtCheck->close();
+}
+
 
 /* ==========================================
    3) COLEÇÕES DO PERFIL (tabela collection)
@@ -192,7 +214,7 @@ $stmtE->close();
           <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
           <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
           <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
           <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
           <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
         </ul>
@@ -244,7 +266,7 @@ $stmtE->close();
                   </p>
 
                   <!-- botão Add Friend (a implementar no add_friend.php) -->
-                  <a class="edit-btn"
+                  <a class="edit-btn <?php echo $isFriend ? 'active' : ''; ?>"
                      href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>">
                     👥 Add Friend
                   </a>

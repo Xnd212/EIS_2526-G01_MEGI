@@ -162,7 +162,7 @@ body {
   transform: translateY(-1px);
 }
 
-.edit-btn:active {
+.edit-btn.active {
   transform: translateY(1px);
 }
 

@@ -16,19 +16,22 @@ if (!$item_id || $item_id <= 0) {
     die("Item inválido.");
 }
 
-// ====== QUERY AO ITEM (com collector, type e image_id) ======
+// ====== QUERY AO ITEM (com collector, type e image_id) usando contains ======
 $sql = "
     SELECT 
         i.*,
+        c.collection_id,
         c.name      AS collection_name,
         c.image_id  AS collection_image_id,
         u.username  AS collector_name,
         t.name      AS type_name
     FROM item i
-    JOIN collection c ON i.collection_id = c.collection_id
+    INNER JOIN contains con ON i.item_id = con.item_id
+    INNER JOIN collection c ON con.collection_id = c.collection_id
     JOIN user u       ON c.user_id      = u.user_id
     LEFT JOIN type t  ON i.type_id      = t.type_id
     WHERE i.item_id = ?
+    LIMIT 1
 ";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $item_id);
@@ -109,7 +112,7 @@ function fmtDate($d) {
           <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
           <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
           <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
           <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
           <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
         </ul>

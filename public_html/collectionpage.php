@@ -41,15 +41,16 @@ $stmt->execute();
 $result = $stmt->get_result();
 $col = $result->fetch_assoc();
 
-// ====== BUSCAR ITENS DA COLEÇÃO ======
+// ====== BUSCAR ITENS DA COLEÇÃO (através da tabela contains) ======
 $item_sql = "SELECT 
                 it.item_id,
                 it.name,
                 it.image_id,
                 img.url AS item_url
-            FROM item it
+            FROM contains con
+            INNER JOIN item it ON con.item_id = it.item_id
             LEFT JOIN image img ON it.image_id = img.image_id
-            WHERE it.collection_id = ?";
+            WHERE con.collection_id = ?";
 
 $item_stmt = $conn->prepare($item_sql);
 $item_stmt->bind_param("i", $collection_id);
@@ -106,7 +107,7 @@ if (!empty($col['starting_date'])) {
           <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
           <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
           <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
           <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
           <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
         </ul>
@@ -276,6 +277,3 @@ if (!empty($col['starting_date'])) {
 
 </body>
 </html>
-
-
-

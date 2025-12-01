@@ -1,189 +1,192 @@
-  // =============================
-  // Custom Multi-select Dropdown
-  // =============================
+document.addEventListener("DOMContentLoaded", () => {
+  // ============================================================
+  // 1. CUSTOM MULTI-SELECT DROPDOWN
+  // ============================================================
   const dropdownBtn = document.getElementById("dropdownBtn");
   const dropdownContent = document.getElementById("dropdownContent");
 
-  dropdownBtn.addEventListener("click", () => {
-    dropdownContent.style.display =
-      dropdownContent.style.display === "block" ? "none" : "block";
-  });
+  if (dropdownBtn && dropdownContent) {
+    dropdownBtn.addEventListener("click", (e) => {
+      e.preventDefault(); // Prevent button from submitting form
+      e.stopPropagation();
+      dropdownContent.style.display =
+        dropdownContent.style.display === "block" ? "none" : "block";
+    });
 
-  document.addEventListener("click", (e) => {
-    if (!dropdownContent.contains(e.target) && e.target !== dropdownBtn) {
-      dropdownContent.style.display = "none";
-    }
-  });
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdownContent.contains(e.target) && e.target !== dropdownBtn) {
+        dropdownContent.style.display = "none";
+      }
+    });
 
-  dropdownContent.addEventListener("change", () => {
-    const checked = [
-      ...dropdownContent.querySelectorAll("input[type='checkbox']:checked"),
-    ].map((c) => c.parentElement.textContent.trim());
+    // Update button text when checkboxes change
+    dropdownContent.addEventListener("change", () => {
+      const checked = [
+        ...dropdownContent.querySelectorAll("input[type='checkbox']:checked"),
+      ].map((c) => c.parentElement.textContent.trim());
 
-    dropdownBtn.textContent =
-      checked.length > 0
-        ? checked.join(", ")
-        : "Select Collections ⮟";
-  });
+      dropdownBtn.textContent =
+        checked.length > 0
+          ? checked.join(", ")
+          : "Select from existing items ⮟";
+    });
+  }
 
-  // =============================
-  // FORM VALIDATION
-  // =============================
+  // ============================================================
+  // 2. FORM VALIDATION
+  // ============================================================
   const form = document.getElementById("collectionForm");
   const formMessage = document.getElementById("formMessage");
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  if (form && formMessage) {
+    form.addEventListener("submit", (e) => {
+      // Prevent default submission to allow validation
+      e.preventDefault();
 
+      const name = document.getElementById("collectionName");
+      const theme = document.getElementById("collectionTheme");
+      const dateInput = document.getElementById("creationDate");
 
-    const name = document.getElementById("collectionName");
-    const theme = document.getElementById("collectionTheme");
-    const date = document.getElementById("creationDate");
+      // Clear previous errors
+      [name, theme, dateInput].forEach((el) => {
+        if (el) el.classList.remove("error");
+      });
+      formMessage.textContent = "";
+      formMessage.className = "form-message";
 
-    [name, theme, date].forEach((el) => el.classList.remove("error"));
-    formMessage.textContent = "";
-    formMessage.className = "form-message";
+      let valid = true;
 
-    let valid = true;
-
-
-
-    if (name.value.trim() === "") {
-      name.classList.add("error");
-      valid = false;
-    }
-
-    if (theme.value.trim() === "" ) {
-      theme.classList.add("error");
-      valid = false;
-    }
-/* preventing future and validating date*/
-    const dateInput = document.getElementById("creationDate");
-
-    // Set max date in the date picker to today (prevents selecting future dates)
-    const today = new Date().toISOString().split("T")[0];
-    dateInput.max = today;
-
-    // Validation
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
-    const dateValue = dateInput.value.trim();
-
-    if (!datePattern.test(dateValue)) {
-      // invalid format (shouldn’t happen with <input type="date"> but just in case)
-      dateInput.classList.add("error");
-      valid = false;
-    } else {
-      // Check if the date is in the future
-      const selectedDate = new Date(dateValue);
-      const currentDate = new Date();
-      currentDate.setHours(0, 0, 0, 0);
-      selectedDate.setHours(0, 0, 0, 0);
-
-      if (selectedDate > currentDate) {
-        dateInput.classList.add("error");
+      // Name Validation
+      if (!name || name.value.trim() === "") {
+        if (name) name.classList.add("error");
         valid = false;
-      } else {
-        dateInput.classList.remove("error");
       }
-    }
 
-    if (!valid) {
-      formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
-      formMessage.classList.add("error");
-      return;
-    }
+      // Theme Validation
+      if (!theme || theme.value.trim() === "") {
+        if (theme) theme.classList.add("error");
+        valid = false;
+      }
 
-    formMessage.textContent = "✅ Collection created successfully!";
-    formMessage.classList.add("success");
-    form.reset();
-    dropdownBtn.textContent = "Select from existing Items ⮟";
-    
-    document.body.style.cursor = "wait";
-        // Redirect to collectionpage.php after 1.5 seconds
-    setTimeout(() => {
-        window.location.href = "collectionpage.php";
-    }, 1500);
-  });
+      // Date Validation
+      if (dateInput) {
+        const dateValue = dateInput.value.trim();
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
 
+        if (!datePattern.test(dateValue)) {
+          dateInput.classList.add("error");
+          valid = false;
+        } else {
+          // Check if date is in the future
+          const selectedDate = new Date(dateValue);
+          const currentDate = new Date();
+          currentDate.setHours(0, 0, 0, 0); // Reset time
+          selectedDate.setHours(0, 0, 0, 0);
 
-// =============================
-// Notificações 
-// =============================
+          if (selectedDate > currentDate) {
+            dateInput.classList.add("error");
+            valid = false;
+          } else {
+            dateInput.classList.remove("error");
+          }
+        }
+      } else {
+        valid = false;
+      }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-  const popup = document.getElementById('notification-popup');
-  const seeMoreLink = document.querySelector('.see-more-link');
+      // --- FINAL DECISION ---
+      if (!valid) {
+        formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+        formMessage.classList.add("error");
+        return; // Stop here, do not send to PHP
+      }
 
-  if (bellBtn && popup) {
-    bellBtn.addEventListener('click', (e) => {
+      // IF VALID: SUBMIT THE FORM TO PHP
+      formMessage.textContent = "Processing...";
+      form.submit(); // This bypasses the listener and sends data to the server
+    });
+  }
+
+  // ============================================================
+  // 3. NOTIFICATIONS
+  // ============================================================
+  const bellBtn = document.getElementById("notification-btn");
+  const notifPopup = document.getElementById("notification-popup");
+  const seeMoreLink = document.querySelector(".see-more-link");
+
+  if (bellBtn && notifPopup) {
+    bellBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!popup.contains(e.target) && !bellBtn.contains(e.target)) {
-        popup.style.display = 'none';
-      }
-    });
-  }
-
-  // Expandir / Encolher notificações
-  if (seeMoreLink) {
-    seeMoreLink.addEventListener('click', (e) => {
       e.preventDefault();
+      // Toggle display
+      notifPopup.style.display =
+        notifPopup.style.display === "block" ? "none" : "block";
+    });
 
-      popup.classList.toggle('expanded');
-
-      if (popup.classList.contains('expanded')) {
-        seeMoreLink.textContent = "Show less";
-      } else {
-        seeMoreLink.textContent = "+ See more";
+    // Close when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!notifPopup.contains(e.target) && !bellBtn.contains(e.target)) {
+        notifPopup.style.display = "none";
       }
     });
   }
-  
-    /* ============================================================
-     POPUP DE LOGOUT
-  ============================================================ */
+
+  // Expand/Collapse notifications
+  if (seeMoreLink && notifPopup) {
+    seeMoreLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      notifPopup.classList.toggle("expanded");
+      seeMoreLink.textContent = notifPopup.classList.contains("expanded")
+        ? "Show less"
+        : "+ See more";
+    });
+  }
+
+  // ============================================================
+  // 4. LOGOUT POPUP (Fixed ReferenceError)
+  // ============================================================
+  const logoutBtn = document.getElementById("logout-btn");
+  const logoutPopup = document.getElementById("logout-popup");
+  const cancelLogout = document.getElementById("cancel-logout");
+  const confirmLogout = document.getElementById("confirm-logout");
+
   if (logoutBtn && logoutPopup) {
-    // Abrir/fechar popup ao clicar no ícone 🚪
-    logoutBtn.addEventListener("click", e => {
+    // Open Popup
+    logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      // Fecha popup de notificações, se estiver aberto
-      if (notifPopup) {
-        notifPopup.classList.remove("active");
-      }
+      // Close notifications if open
+      if (notifPopup) notifPopup.style.display = "none";
 
-      logoutPopup.classList.toggle("active");
+      logoutPopup.classList.add("active");
+      logoutPopup.style.display = "block"; // Force display
     });
 
-    // Fechar ao clicar fora
-    document.addEventListener("click", e => {
+    // Close when clicking outside
+    document.addEventListener("click", (e) => {
       if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
         logoutPopup.classList.remove("active");
+        logoutPopup.style.display = "none";
       }
     });
   }
 
-  // Botão "Cancel"
+  // Cancel Button
   if (cancelLogout && logoutPopup) {
-    cancelLogout.addEventListener("click", e => {
+    cancelLogout.addEventListener("click", (e) => {
       e.stopPropagation();
       logoutPopup.classList.remove("active");
+      logoutPopup.style.display = "none";
     });
   }
 
-  // Botão "Log out" 
-  if (confirmLogout && logoutPopup) {
-    confirmLogout.addEventListener("click", e => {
+  // Confirm Button (Redirect to logout PHP)
+  if (confirmLogout) {
+    confirmLogout.addEventListener("click", (e) => {
       e.stopPropagation();
-      window.location.href = "logout.php"; 
+      window.location.href = "logout.php";
     });
   }
-
 });
-
-

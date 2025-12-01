@@ -310,6 +310,7 @@ if ($result_cols && $result_cols->num_rows > 0) {
   </div>
 
   <script src="itemcreation.js"></script>
+  <script src="logout.js"></script>
 
 </body>
 </html>

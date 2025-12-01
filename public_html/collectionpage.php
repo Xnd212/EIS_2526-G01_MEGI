@@ -267,6 +267,7 @@ if (!empty($col['starting_date'])) {
   <div id="hover-popup"></div>
 
   <script src="collectionpage.js"></script>
+  <script src="logout.js"></script>
 
 </body>
 </html>

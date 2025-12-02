@@ -122,7 +122,7 @@
 
                 <div class="sidebar-section friends-section">
                     <h3>My friends</h3>
-                    <p><a href="userfriendspage.php"> Viem Friends</a></p>
+                    <p><a href="userfriendspage.php"> View Friends</a></p>
                     <p><a href="allfriendscollectionspage.php">View collections</a></p>
                     <p><a href="teampage.php"> Team Page</a></p>
                 </div>

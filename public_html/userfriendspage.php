@@ -126,8 +126,11 @@ $stmt->close();
               ?>
 
               <div class="friend">
-                <img src="<?php echo htmlspecialchars($imgSrc); ?>"
-                     alt="<?php echo htmlspecialchars($friend['username']); ?>">
+                 <a href="friendpage.php?user_id=<?php echo $friend['user_id']; ?>">
+                    <img src="<?php echo htmlspecialchars($imgSrc); ?>"
+                        alt="<?php echo htmlspecialchars($friend['username']); ?>">
+                 </a>
+
 
                 <p class="friend-name">
                   <strong>

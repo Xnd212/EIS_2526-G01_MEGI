@@ -17,8 +17,21 @@
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 800px;
-  height: auto;
-  min-height: 860px;
+  min-height: 600px;
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 1rem;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: none;
+  font-size: 1rem;
 }
 
 .page-title {

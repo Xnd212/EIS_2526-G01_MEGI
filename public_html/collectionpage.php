@@ -12,14 +12,12 @@ if ($conn->connect_error) {
 }
 
 // ====== BUSCAR ID DA COLEÇÃO ======
-// Ex: collectionpage.php?id=1
 $collection_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$collection_id) {
     die("Coleção inválida.");
 }
 
 // ====== BUSCAR DADOS DA COLEÇÃO ======
-// assumo que tens uma tabela `user` com campo `username`
 $sql = "SELECT 
             c.collection_id,
             c.user_id,
@@ -29,7 +27,7 @@ $sql = "SELECT
             c.starting_date,
             c.description,
             u.username,
-            i.*
+            i.url
         FROM collection c
         LEFT JOIN user u ON c.user_id = u.user_id
         LEFT JOIN image i ON c.image_id = i.image_id
@@ -41,7 +39,26 @@ $stmt->execute();
 $result = $stmt->get_result();
 $col = $result->fetch_assoc();
 
-// ====== BUSCAR ITENS DA COLEÇÃO (através da tabela contains) ======
+if (!$col) {
+    die("Coleção não encontrada.");
+}
+
+// ====== BUSCAR ITEM MAIS RECENTE (Novo Código) ======
+// Ordena por data de aquisição (decrescente) e depois por ID (decrescente)
+$recent_sql = "SELECT i.item_id, i.name 
+               FROM item i
+               JOIN contains cn ON i.item_id = cn.item_id
+               WHERE cn.collection_id = ?
+               ORDER BY i.acc_date DESC, i.item_id DESC 
+               LIMIT 1";
+
+$recent_stmt = $conn->prepare($recent_sql);
+$recent_stmt->bind_param("i", $collection_id);
+$recent_stmt->execute();
+$recent_result = $recent_stmt->get_result();
+$most_recent_item = $recent_result->fetch_assoc();
+
+// ====== BUSCAR TODOS OS ITENS DA COLEÇÃO ======
 $item_sql = "SELECT 
                 it.item_id,
                 it.name,
@@ -57,17 +74,11 @@ $item_stmt->bind_param("i", $collection_id);
 $item_stmt->execute();
 $item_result = $item_stmt->get_result();
 
-
-if (!$col) {
-    die("Coleção não encontrada.");
-}
-
 // formatar data (opcional)
 $starting_date_fmt = "";
 if (!empty($col['starting_date'])) {
     $starting_date_fmt = date("d/m/Y", strtotime($col['starting_date']));
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -82,7 +93,6 @@ if (!empty($col['starting_date'])) {
 </head>
 
 <body>
-  <!-- ===== HEADER ===== -->
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -93,7 +103,6 @@ if (!empty($col['starting_date'])) {
     </div>
 
     <div class="icons">
-      <!-- Botão de notificações -->
       <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
       <div class="notification-popup" id="notification-popup">
         <div class="popup-header">
@@ -102,14 +111,7 @@ if (!empty($col['starting_date'])) {
 
         <hr class="popup-divider">
         <ul class="notification-list">
-          <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
-          <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
-          <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
-          <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
-          <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-          <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion's Path collection.</li>
-          <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
-          <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+          <li><strong>Ana_Rita_Lopes</strong> added 3 new items...</li>
         </ul>
 
         <a href="#" class="see-more-link">+ See more</a>
@@ -117,41 +119,29 @@ if (!empty($col['starting_date'])) {
 
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       
-          <!-- Logout -->
-    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+      <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
-    <div class="notification-popup logout-popup" id="logout-popup">
-      <div class="popup-header">
-        <h3>Logout</h3>
+      <div class="notification-popup logout-popup" id="logout-popup">
+        <div class="popup-header">
+          <h3>Logout</h3>
+        </div>
+        <p>Are you sure you want to log out?</p>
+        <div class="logout-btn-wrapper">
+          <button type="button" class="logout-btn cancel-btn" id="cancel-logout">Cancel</button>
+          <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
+        </div>
       </div>
-
-      <p>Are you sure you want to log out?</p>
-
-      <div class="logout-btn-wrapper">
-        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">
-          Cancel
-        </button>
-        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">
-          Log out
-        </button>
-      </div>
-    </div>
     </div>
   </header>
 
   <div class="main">
     <div class="content">
-      <!-- NOME DA COLEÇÃO VINDO DA BD -->
       <h2><?php echo htmlspecialchars($col['name']); ?></h2>
 
       <div class="collection-details">
         <div class="collection-logo-wrapper">
-
         <?php
-        // vai buscar o campo 'url' da tabela image
-        $image_src = !empty($col['url']) 
-                     ? $col['url'] 
-                     : 'images/default.png';  // fallback
+        $image_src = !empty($col['url']) ? $col['url'] : 'images/default.png';
         ?>
         <img src="<?php echo htmlspecialchars($image_src); ?>" 
              alt="Collection Logo" class="collection-logo">
@@ -172,8 +162,15 @@ if (!empty($col['starting_date'])) {
             <p><strong>Start Date:</strong> <?php echo $starting_date_fmt; ?></p>
           <?php endif; ?>
 
-          <!-- Por enquanto estático, até ligares à tabela de itens -->
-          <p><strong>Most recent Item:</strong> <a href="itempage.php">Champion's Path Charizard V (PSA 10)</a></p>
+          <p><strong>Most recent Item:</strong> 
+            <?php if ($most_recent_item): ?>
+                <a href="itempage.php?id=<?php echo $most_recent_item['item_id']; ?>">
+                    <?php echo htmlspecialchars($most_recent_item['name']); ?>
+                </a>
+            <?php else: ?>
+                <span style="color:#777;">No items yet</span>
+            <?php endif; ?>
+          </p>
 
           <?php if (!empty($col['description'])): ?>
             <p><strong>Description:</strong>
@@ -181,7 +178,6 @@ if (!empty($col['starting_date'])) {
             </p>
           <?php endif; ?>
 
-          <!-- Tags ainda estão estáticas -->
           <p><strong>Tags:</strong> Pokemon, Cards, Anime, TCG</p>
         </div>
       </div>
@@ -192,14 +188,14 @@ if (!empty($col['starting_date'])) {
             <?php if ($item_result->num_rows > 0): ?>
               <?php while ($item = $item_result->fetch_assoc()): ?>
                 <?php
-                  $item_img = !empty($item['item_url']) ? $item['item_url'] : 'images/default.png';
+                  $item_img = !empty($item['item_url']) ? $item['item_url'] : 'images/default_item.png';
                 ?>
                 <div class="item-card">
                   <a href="itempage.php?id=<?php echo $item['item_id']; ?>">
                     <img src="<?php echo htmlspecialchars($item_img); ?>" 
                          alt="<?php echo htmlspecialchars($item['name']); ?>">
                     <p class="item-name"><?php echo htmlspecialchars($item['name']); ?></p>
-                    <p class="edit-btn">Remove item</p>
+                    <p class="edit-btn">View Item</p>
                   </a>
                 </div>
               <?php endwhile; ?>
@@ -210,7 +206,6 @@ if (!empty($col['starting_date'])) {
         </div>
 
 
-      <!-- ===== EVENTOS (ainda estáticos) ===== -->
       <div class="events-section">
         <h3>Previous Events</h3>
         <div class="event-cards">
@@ -244,7 +239,6 @@ if (!empty($col['starting_date'])) {
       </div>
     </div>
 
-    <!-- ===== Right Sidebar ===== -->
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>
@@ -256,7 +250,7 @@ if (!empty($col['starting_date'])) {
 
       <div class="sidebar-section friends-section">
         <h3>My friends</h3>
-        <p><a href="userfriendspage.php">Viem Friends</a></p>
+        <p><a href="userfriendspage.php">View Friends</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
       </div>

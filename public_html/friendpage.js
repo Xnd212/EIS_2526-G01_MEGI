@@ -1,15 +1,18 @@
 const btn = document.querySelector(".edit-btn");
 
-btn.addEventListener("click", () => {
-  if (btn.dataset.state !== "added") {
-    btn.innerHTML = "✔️ Friend Added";
-    btn.style.backgroundColor = "#4CAF50";
-    btn.style.color = "white";
-    btn.dataset.state = "added";
-  } else {
-    btn.innerHTML = "👥 Add Friend";
-    btn.style.backgroundColor = "#ffffff";
-    btn.style.color = "#000000";
-    btn.dataset.state = "default";
-  }
-});
+if (btn) {
+  btn.addEventListener("click", () => {
+    if (btn.dataset.state === "default") {
+      // Vai seguir → muda para Friend Added
+      btn.textContent = "✔ Friend Added";
+      btn.dataset.state = "added";
+      btn.classList.add("active");
+    } else if (btn.dataset.state === "added") {
+      // Vai deixar de seguir → muda para Add Friend
+      btn.textContent = "👥 Add Friend";
+      btn.dataset.state = "default";
+      btn.classList.remove("active");
+    }
+    // O link continua a ir para add_friend.php / remove_friend.php normalmente
+  });
+}

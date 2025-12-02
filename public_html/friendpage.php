@@ -266,10 +266,29 @@ $stmtE->close();
                   </p>
 
                   <!-- botão Add Friend (a implementar no add_friend.php) -->
-                  <a class="edit-btn <?php echo $isFriend ? 'active' : ''; ?>"
-                     href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>">
-                    👥 Add Friend
-                  </a>
+                <?php if ($currentUserId !== $profileUserId): ?>
+                  <?php if ($isFriend): ?>
+                    <!-- JÁ SEGUES ESTE USER -->
+                    <a
+                      class="edit-btn active"
+                      href="remove_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
+                      data-state="added"
+                    >
+                      ✔ Friend Added
+                    </a>
+                  <?php else: ?>
+                    <!-- AINDA NÃO SEGUES ESTE USER -->
+                    <a
+                      class="edit-btn"
+                      href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
+                      data-state="default"
+                    >
+                      👥 Add Friend
+                    </a>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+
                 </div>
 
                 <!-- Stats à direita -->

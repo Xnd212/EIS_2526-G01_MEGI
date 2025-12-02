@@ -11,13 +11,13 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
-// ====== BUSCAR ID DA COLEÇÃO ======
+// ======  ID DA COLEÇÃO ======
 $collection_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$collection_id) {
     die("Coleção inválida.");
 }
 
-// ====== BUSCAR DADOS DA COLEÇÃO ======
+// ======  DADOS DA COLEÇÃO ======
 $sql = "SELECT 
             c.collection_id,
             c.user_id,
@@ -43,7 +43,7 @@ if (!$col) {
     die("Coleção não encontrada.");
 }
 
-// ====== BUSCAR ITEM MAIS RECENTE (Novo Código) ======
+// ======  ITEM MAIS RECENTE (Novo Código) ======
 // Ordena por data de aquisição (decrescente) e depois por ID (decrescente)
 $recent_sql = "SELECT i.item_id, i.name 
                FROM item i
@@ -58,7 +58,7 @@ $recent_stmt->execute();
 $recent_result = $recent_stmt->get_result();
 $most_recent_item = $recent_result->fetch_assoc();
 
-// ====== BUSCAR TODOS OS ITENS DA COLEÇÃO ======
+// ======  TODOS OS ITENS DA COLEÇÃO ======
 $item_sql = "SELECT 
                 it.item_id,
                 it.name,
@@ -73,6 +73,23 @@ $item_stmt = $conn->prepare($item_sql);
 $item_stmt->bind_param("i", $collection_id);
 $item_stmt->execute();
 $item_result = $item_stmt->get_result();
+
+// ======  TAGS DA COLEÇÃO ======
+$tags_sql = "SELECT t.name
+             FROM collection_tags ct
+             INNER JOIN tags t ON ct.tag_id = t.tag_id
+             WHERE ct.collection_id = ?";
+
+$tags_stmt = $conn->prepare($tags_sql);
+$tags_stmt->bind_param("i", $collection_id);
+$tags_stmt->execute();
+$tags_result = $tags_stmt->get_result();
+
+$tags = [];
+while ($row = $tags_result->fetch_assoc()) {
+    $tags[] = $row['name'];
+}
+
 
 // formatar data (opcional)
 $starting_date_fmt = "";
@@ -178,7 +195,15 @@ if (!empty($col['starting_date'])) {
             </p>
           <?php endif; ?>
 
-          <p><strong>Tags:</strong> Pokemon, Cards, Anime, TCG</p>
+            
+          <?php if (!empty($tags)): ?>
+            <p><strong>Tags:</strong>
+              <?php echo htmlspecialchars(implode(', ', $tags)); ?>
+            </p>
+          <?php else: ?>
+            <p><strong>Tags:</strong> <span style="color:#777;">No tags yet</span></p>
+          <?php endif; ?>
+
         </div>
       </div>
 

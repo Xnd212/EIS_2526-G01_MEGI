@@ -35,18 +35,30 @@ $sql = "SELECT
             e.date,
             i.url AS event_image,
             c.collection_id,
-            c.name AS collection_name
-        FROM attends a
-        JOIN event e ON a.event_id = e.event_id
-        LEFT JOIN collection c ON a.collection_id = c.collection_id
-        LEFT JOIN image i ON e.image_id = i.image_id
-        WHERE a.user_id = ? AND e.date >= CURDATE()
+            c.name AS collection_name,
+            CASE 
+                WHEN e.user_id = ? THEN 'organizer'
+                ELSE 'participant'
+            END AS role
+        FROM event e
+        LEFT JOIN attends a 
+            ON a.event_id = e.event_id
+           AND a.user_id = ?
+        LEFT JOIN collection c 
+            ON a.collection_id = c.collection_id
+        LEFT JOIN image i 
+            ON e.image_id = i.image_id
+        WHERE 
+              (e.user_id = ? OR a.user_id IS NOT NULL)
+          AND e.date >= CURDATE()
+        GROUP BY e.event_id
         ORDER BY e.date ASC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("iii", $user_id, $user_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>

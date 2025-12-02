@@ -358,17 +358,30 @@ $stmtE->close();
         <section class="friends">
           <h3>Friends</h3>
           <div class="friends-grid">
+
             <?php if (empty($friends)): ?>
+
               <p>This user doesn't have any friends yet.</p>
+
             <?php else: ?>
+
               <?php foreach ($friends as $friend): ?>
                 <?php
+                  // imagem do amigo
                   $friendImgSrc = !empty($friend['friend_image'])
                       ? $friend['friend_image']
                       : 'images/default_avatar.png';
+
+                  // Se este amigo for o user logado → ir para o userpage
+                  if ((int)$friend['user_id'] === $currentUserId) {
+                      $friendLink = "userpage.php";
+                  } else {
+                      $friendLink = "friendpage.php?user_id=" . $friend['user_id'];
+                  }
                 ?>
+
                 <div class="friend">
-                  <a href="friendpage.php?user_id=<?php echo $friend['user_id']; ?>">
+                  <a href="<?php echo $friendLink; ?>">
                     <img src="<?php echo htmlspecialchars($friendImgSrc); ?>"
                          alt="<?php echo htmlspecialchars($friend['username']); ?>">
                     <p class="friend-name">
@@ -376,11 +389,16 @@ $stmtE->close();
                     </p>
                   </a>
                 </div>
+
               <?php endforeach; ?>
+
             <?php endif; ?>
+
           </div>
+
           <a href="userfriendspage.php" class="view-all">+ See more</a>
         </section>
+
       </div>
     
       <!-- ====================== PAST EVENTS ====================== -->

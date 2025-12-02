@@ -76,3 +76,29 @@ Array
 
 )
 
+FORM SUBMITTED at 2025-12-01 19:01:51
+Array
+(
+    [eventName] => Feup week
+    [startDate] => 2025-12-25
+    [theme] => feup
+    [location] => feup
+    [description] => feup
+    [tags] => feup
+    [youtube] => 
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => marcopereira.jpg
+            [full_path] => marcopereira.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php38C3.tmp
+            [error] => 0
+            [size] => 179177
+        )
+
+)
+

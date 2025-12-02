@@ -75,6 +75,16 @@ body {
   border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
 }
 
+/* Link */
+.see-more-link {
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #b54242;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 
 /* ======================
    USER PROFILE PAGE

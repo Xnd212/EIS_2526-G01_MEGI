@@ -59,22 +59,50 @@ $stmt->close();
 
 <body>    
   <!-- HEADER -->
-  <header>
-    <a href="homepage.php" class="logo">
-      <img src="images/TrallE_2.png" alt="logo" />
-    </a>
+<header>
+            <a href="homepage.php" class="logo">
+                <img src="images/TrallE_2.png" alt="logo" />
+            </a>
+            <div class="search-bar">
+                <input type="search" placeholder="Search" />
+            </div>
+            <div class="icons">
+                <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
 
-    <div class="search-bar">
-      <input type="text" placeholder="Search" />
-    </div>
+                <div class="notification-popup" id="notification-popup">
+                    <div class="popup-header">
+                        <h3>Notifications <span>🔔</span></h3>
+                    </div>
+                    <ul class="notification-list">
+                <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+                <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+                <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+                <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+                
+                <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+                <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+                <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+                    </ul>
+                    <a href="#" class="see-more-link">+ See more</a>
+                </div>
 
-    <div class="icons">
-      <button class="icon-btn" id="notification-btn">🔔</button>
+                <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
-      <a href="userpage.php" class="icon-btn">👤</a>
-      <button class="icon-btn" id="logout-btn">🚪</button>
-    </div>
-  </header>
+                <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+
+                <div class="notification-popup logout-popup" id="logout-popup">
+                    <div class="popup-header">
+                        <h3>Logout</h3>
+                    </div>
+                    <p>Are you sure you want to log out?</p>
+                    <div class="logout-btn-wrapper">
+                        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">Cancel</button>
+                        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
   <div class="main">
     <div class="content">    
@@ -144,8 +172,10 @@ $stmt->close();
     </div>
   </aside>
 
+  <script src="userfriendspage.js"></script>
   <script src="homepage.js"></script>
   <script src="logout.js"></script>
+
 
 </body>
 </html>

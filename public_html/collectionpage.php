@@ -17,7 +17,7 @@ if (!$collection_id) {
     die("Coleção inválida.");
 }
 
-// ======  DADOS DA COLEÇÃO ======
+// ====== 1. DADOS DA COLEÇÃO ======
 $sql = "SELECT 
             c.collection_id,
             c.user_id,
@@ -43,8 +43,7 @@ if (!$col) {
     die("Coleção não encontrada.");
 }
 
-// ======  ITEM MAIS RECENTE (Novo Código) ======
-// Ordena por data de aquisição (decrescente) e depois por ID (decrescente)
+// ====== 2. ITEM MAIS RECENTE ======
 $recent_sql = "SELECT i.item_id, i.name 
                FROM item i
                JOIN contains cn ON i.item_id = cn.item_id
@@ -58,7 +57,7 @@ $recent_stmt->execute();
 $recent_result = $recent_stmt->get_result();
 $most_recent_item = $recent_result->fetch_assoc();
 
-// ======  TODOS OS ITENS DA COLEÇÃO ======
+// ====== 3. TODOS OS ITENS ======
 $item_sql = "SELECT 
                 it.item_id,
                 it.name,
@@ -74,7 +73,7 @@ $item_stmt->bind_param("i", $collection_id);
 $item_stmt->execute();
 $item_result = $item_stmt->get_result();
 
-// ======  TAGS DA COLEÇÃO ======
+// ====== 4. TAGS ======
 $tags_sql = "SELECT t.name
              FROM collection_tags ct
              INNER JOIN tags t ON ct.tag_id = t.tag_id
@@ -90,8 +89,34 @@ while ($row = $tags_result->fetch_assoc()) {
     $tags[] = $row['name'];
 }
 
+// ====== 5. EVENTOS PASSADOS (Past Events) ======
+$past_sql = "SELECT e.event_id, e.name, e.date, i.url 
+             FROM event e
+             JOIN attends a ON e.event_id = a.event_id
+             LEFT JOIN image i ON e.image_id = i.image_id
+             WHERE a.collection_id = ? AND e.date < CURDATE()
+             ORDER BY e.date DESC"; 
 
-// formatar data (opcional)
+$past_stmt = $conn->prepare($past_sql);
+$past_stmt->bind_param("i", $collection_id);
+$past_stmt->execute();
+$past_events = $past_stmt->get_result();
+
+// ====== 6. EVENTOS FUTUROS (Next Events) ======
+$future_sql = "SELECT e.event_id, e.name, e.date, i.url 
+               FROM event e
+               JOIN attends a ON e.event_id = a.event_id
+               LEFT JOIN image i ON e.image_id = i.image_id
+               WHERE a.collection_id = ? AND e.date >= CURDATE()
+               ORDER BY e.date ASC"; 
+
+$future_stmt = $conn->prepare($future_sql);
+$future_stmt->bind_param("i", $collection_id);
+$future_stmt->execute();
+$future_events = $future_stmt->get_result();
+
+
+// Formatar data (opcional)
 $starting_date_fmt = "";
 if (!empty($col['starting_date'])) {
     $starting_date_fmt = date("d/m/Y", strtotime($col['starting_date']));
@@ -234,32 +259,38 @@ if (!empty($col['starting_date'])) {
       <div class="events-section">
         <h3>Previous Events</h3>
         <div class="event-cards">
-          <div class="event-card">
-            <a href="pasteventpage.php">
-              <img src="images/amadoraBD.png" alt="Amadora BD">
-              <p>Amadora BD - International Comic</p>
-            </a>
-          </div>
-          <div class="event-card">
-            <a href="pasteventpage.php">
-              <img src="images/iberanime.png" alt="Iberanime">
-              <p>Iberanime Porto</p>
-            </a>
-          </div>
-          <div class="event-card">
-            <a href="pasteventpage.php">
-              <img src="images/lisbon.png" alt="Lisbon Games">
-              <p>Lisbon Games</p>
-            </a>
-          </div>
+          <?php if ($past_events->num_rows > 0): ?>
+            <?php while($p_event = $past_events->fetch_assoc()): ?>
+              <?php 
+                 $p_img = !empty($p_event['url']) ? $p_event['url'] : 'images/default_event.png';
+              ?>
+              <div class="event-card">
+                <a href="pasteventpage.php?id=<?php echo $p_event['event_id']; ?>">
+                  <img src="<?php echo htmlspecialchars($p_img); ?>" alt="<?php echo htmlspecialchars($p_event['name']); ?>">
+                  <p><?php echo htmlspecialchars($p_event['name']); ?></p>
+                </a>
+              </div>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <p style="color: #777;">No previous events.</p>
+          <?php endif; ?>
         </div>
 
         <h3>Next Events</h3>
         <div class="next-event">
-          <a href="eventpage.php">
-            <img src="images/cardmadness.png" alt="Cardmadness 2026">
-            <p><strong>CARDMADNESS 2026</strong></p>
-          </a>
+          <?php if ($future_events->num_rows > 0): ?>
+            <?php while($f_event = $future_events->fetch_assoc()): ?>
+              <?php 
+                 $f_img = !empty($f_event['url']) ? $f_event['url'] : 'images/default_event.png';
+              ?>
+              <a href="eventpage.php?id=<?php echo $f_event['event_id']; ?>">
+                <img src="<?php echo htmlspecialchars($f_img); ?>" alt="<?php echo htmlspecialchars($f_event['name']); ?>">
+                <p><strong><?php echo htmlspecialchars($f_event['name']); ?></strong></p>
+              </a>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <p style="color: #777;">No upcoming events.</p>
+          <?php endif; ?>
         </div>
       </div>
     </div>
@@ -283,7 +314,7 @@ if (!empty($col['starting_date'])) {
       <div class="sidebar-section">
         <h3>Events</h3>
         <p><a href="createevent.php">Create event</a></p>
-        <p>View upcoming events</p>
+        <p><a href="upcomingevents.php">View upcoming events</a></p>
         <p><a href="eventhistory.php">Event history</a></p>
       </div>
     </aside>

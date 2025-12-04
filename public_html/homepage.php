@@ -101,6 +101,39 @@ if (empty($recommendedEvents)) {
     $stmt2->close();
 }
 
+// =====================================
+// RECENTLY EDITED COLLECTIONS (GLOBAL)
+// =====================================
+$sqlRecentCollections = "
+    SELECT
+        c.collection_id,
+        c.name            AS collection_name,
+        c.starting_date,
+        c.image_id,
+        img.url           AS collection_image,
+        u.username
+    FROM collection c
+    LEFT JOIN image img ON c.image_id = img.image_id
+    LEFT JOIN user  u   ON c.user_id = u.user_id
+    WHERE c.user_id <> ?        -- NÃO mostrar coleções do user atual
+    ORDER BY c.starting_date DESC
+    LIMIT 9
+";
+
+$stmt3 = $conn->prepare($sqlRecentCollections);
+$stmt3->bind_param("i", $currentUserId);
+$stmt3->execute();
+$resultCollections = $stmt3->get_result();
+
+$recentCollections = [];
+if ($resultCollections) {
+    while ($row = $resultCollections->fetch_assoc()) {
+        $recentCollections[] = $row;
+    }
+}
+$stmt3->close();
+
+
 ?>
 
 
@@ -219,90 +252,32 @@ if (empty($recommendedEvents)) {
 
             <!-- ========== COLEÇÕES ========= -->       
             <div class="collections-and-collectors">
-                <section class="collections">
-                    <h2 class="section-title1">Recently edited collections 📚</h2>
-                    <div class="collections-grid">
+        <section class="collections">
+            <h2 class="section-title1">Recently edited collections 📚</h2>
+
+            <div class="collections-grid">
+                <?php if (!empty($recentCollections)): ?>
+                    <?php foreach ($recentCollections as $col): ?>
                         <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\pokémon_logo.png" alt="Pokemon Cards">
-                                <p class="collection-name">Pokemon Cards</p>
-                                <span class="collection-author">Rafael_Ameida123</span>
+                            <a href="collectionpage.php?id=<?= htmlspecialchars($col['collection_id']) ?>">
+                                <img
+                                    src="<?= htmlspecialchars($col['collection_image'] ?? 'images/default_collection.png') ?>"
+                                    alt="<?= htmlspecialchars($col['collection_name']) ?>"
+                                >
+                                <p class="collection-name">
+                                    <?= htmlspecialchars($col['collection_name']) ?>
+                                </p>
+                                <span class="collection-author">
+                                    <?= htmlspecialchars($col['username'] ?? 'Unknown user') ?>
+                                </span>
                             </a>
                         </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\championspath.png" alt="Champion's Path">
-                                <p class="collection-name">Champion's Path</p>
-                                <span class="collection-author">Paul_Perez1697</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\Funko.png" alt="Funko Pop" >
-                                <p class="collection-name">Funko Pop</p>
-                                <span class="collection-author">Rafa_Silva147</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\pokemon-pikachu.png" alt="Pokemon Cards" >
-                                <p class="collection-name">Pokemon Cards</p>
-                                <span class="collection-author">Marco_Alex4865</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\SWSH.png" alt="Pokémon SWSH Set">
-                                <p class="collection-name">Pokémon SWSH Set</p>
-                                <span class="collection-author">Ana_SSilva7812</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\stamps.png" alt="Stamp collection">
-                                <p class="collection-name">Stamp collection</p>
-                                <span class="collection-author">John_VVV.741</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\Coins.png" alt="Coins collection" >
-                                <p class="collection-name">Coins collection</p>
-                                <span class="collection-author">Tomás.Freitas_3366</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\funko2.png" alt="Funko Pop" >
-                                <p class="collection-name">Funko Pop</p>
-                                <span class="collection-author">Rafa_Silva147</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\panini.png" alt="Panini Cards" >
-                                <p class="collection-name">Panini Cards</p>
-                                <span class="collection-author">Anne_Land.4826</span>
-                            </a>
-                        </div>
-
-                    </div>
-
-                    <!-- Botão Ver mais -->
-                    <div class="see-more">
-                        <a href="allfriendscollectionspage.php" class="see-more-link">
-                            <span class="see-more-icon">+️</span> See more
-                        </a>
-                    </div>                   
-                </section>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No collections found yet.</p>
+                <?php endif; ?>
+            </div>
+        </section>
 
                 <!-- ========== TOP COLECIONADORES ========= -->
                 <div class="side-ranking">

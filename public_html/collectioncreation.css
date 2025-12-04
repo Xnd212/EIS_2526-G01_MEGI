@@ -3,10 +3,11 @@
 .content {
   padding: 2rem;
   background: #eef0ff;
-  margin-right: 240px; /* mantém o espaço da sidebar */
+  margin-right: 240px;
   flex-grow: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .collection-creation-section {
@@ -18,7 +19,7 @@
   width: 100%;
   max-width: 800px;
   height: auto;
-  min-height: 1020px;
+  min-height: 850px;
 }
 
 .page-title {
@@ -207,6 +208,9 @@ input.error {
   background-color: transparent;
 }
 
+textarea {
+  resize: none;
+}
 
 @media (max-width: 768px) {
   .collection-creation-section {

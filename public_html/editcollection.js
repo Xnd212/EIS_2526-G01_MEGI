@@ -34,6 +34,29 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  
+  // ===========================
+  // 1. SCROLL PARA A MENSAGEM
+  // ===========================
+  const msg = document.getElementById("form-message");
+  if (msg) {
+      msg.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+      });
+
+      // opcional: efeito visual
+      msg.style.transition = "opacity .4s ease";
+      msg.style.opacity = "1";
+    }
+  
+  if (window.redirectAfterSuccess === true) {
+        setTimeout(() => {
+            window.location.href = `collectionpage.php?id=${window.collectionId}`;
+        }, 2000);
+    }
+  
 });
+
 
 

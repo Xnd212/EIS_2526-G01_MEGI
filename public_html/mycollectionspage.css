@@ -93,39 +93,52 @@ body {
 
 .collections h2 {
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .collection-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
   gap: 2rem;
 }
 
 .collection-card {
+  width: 100%;
+  height: 260px;
   background-color: #f3cccc;
   padding: 1rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   text-align: center;
-  max-width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.4rem;
 }
 
 .collection-card img {
-  height: 115px;
-  width: auto;
+  height: 150px;
+  width: 100%;
   object-fit: contain;
-  margin-bottom: 0.6rem;
 }
 
 .collection-card p {
   font-weight: bold;
-  margin-bottom: 0.2rem;
+  margin: 0.25rem 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* max 2 linhas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .collection-card span {
   font-size: 0.8rem;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .collection-card .last-updated {

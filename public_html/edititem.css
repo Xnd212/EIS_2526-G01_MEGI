@@ -5,8 +5,7 @@
   background: #eef0ff;
   margin-right: 240px;
   flex-grow: 1;
-  display: flex;
-  justify-content: center;
+  display: block;
 }
 
 .item-creation-section {
@@ -19,6 +18,7 @@
   max-width: 800px;
   height: auto;
   min-height: 940px;
+  margin: 0 auto;
 }
 
 .page-title {

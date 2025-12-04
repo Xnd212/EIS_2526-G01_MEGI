@@ -6,7 +6,8 @@
   margin-right: 240px;
   flex-grow: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .item-creation-section {

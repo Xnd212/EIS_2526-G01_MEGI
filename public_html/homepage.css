@@ -41,7 +41,7 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .logo {
@@ -118,7 +118,7 @@ header {
   display: none;
   flex-direction: column;
 
-  z-index: 1000;
+  z-index: 9000;
 }
 
 /* When visible */

@@ -9,10 +9,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $currentUserId = (int) $_SESSION['user_id'];
 
-$profileUserId = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
-if (!$profileUserId) {
-    $profileUserId = $currentUserId;
-}
+$profileUserId = $currentUserId;  // ALWAYS your own user
+
 
 
 // ---------- LIGAÇÃO À BD ----------
@@ -361,8 +359,8 @@ $stmtE->close();
 
             <!-- card para ver todas as coleções deste user -->
             <div class="collection-card">
-              <a href="friendscollectionspage.php?user_id=<?php echo (int)$profile['user_id']; ?>" 
-                 class="view-all">+ See more</a>
+              <a href="mycollectionspage.php" class="view-all">+ See more</a>
+
             </div>
           </div>
         </section>

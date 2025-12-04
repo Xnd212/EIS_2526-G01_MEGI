@@ -1,3 +1,143 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['user_id'];
+
+// ===== LIGAÇÃO À BD =====
+$host   = "localhost";
+$user   = "root";
+$pass   = "";
+$dbname = "sie";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+/*
+ * EVENTOS RECOMENDADOS
+ * - Tags das coleções do user atual (collection + collection_tags)
+ * - Eventos futuros (event.date >= CURDATE())
+ * - Eventos em que exista pelo menos uma coleção (de qualquer user)
+ *   com uma dessas tags (attends + collection + collection_tags)
+ */
+$sqlRecommended = "
+    SELECT DISTINCT
+        e.event_id,
+        e.name,
+        e.date,
+        e.theme,
+        e.place,
+        e.teaser_url,
+        e.image_id,
+        img.url AS event_image
+    FROM event e
+    JOIN attends a              ON a.event_id = e.event_id
+    JOIN collection c_evt       ON c_evt.collection_id = a.collection_id
+    JOIN collection_tags ct_evt ON ct_evt.collection_id = c_evt.collection_id
+    LEFT JOIN image img         ON e.image_id = img.image_id
+    WHERE e.date >= CURDATE()
+      AND e.user_id <> ?              -- NÃO mostrar eventos criados pelo user logado
+      AND ct_evt.tag_id IN (
+          SELECT DISTINCT ct_user.tag_id
+          FROM collection c_user
+          JOIN collection_tags ct_user
+                ON ct_user.collection_id = c_user.collection_id
+          WHERE c_user.user_id = ?     -- tags das coleções do user logado
+      )
+    ORDER BY e.date ASC
+    LIMIT 5
+";
+
+$stmt = $conn->prepare($sqlRecommended);
+$stmt->bind_param("ii", $currentUserId, $currentUserId);
+
+$stmt->execute();
+$result = $stmt->get_result();
+
+$recommendedEvents = [];
+while ($row = $result->fetch_assoc()) {
+    $recommendedEvents[] = $row;
+}
+$stmt->close();
+
+/* Fallback: se não houver nenhum evento com tags em comum,
+   mostra simplesmente os próximos eventos futuros. */
+if (empty($recommendedEvents)) {
+    $sqlFallback = "
+        SELECT
+            e.event_id,
+            e.name,
+            e.date,
+            e.theme,
+            e.place,
+            e.teaser_url,
+            e.image_id,
+            img.url AS event_image
+        FROM event e
+        LEFT JOIN image img ON e.image_id = img.image_id
+        WHERE e.date >= CURDATE()
+          AND e.user_id <> ?      -- também aqui só eventos de outros users
+        ORDER BY e.date ASC
+        LIMIT 5
+    ";
+
+    $stmt2 = $conn->prepare($sqlFallback);
+    $stmt2->bind_param("i", $currentUserId);
+    $stmt2->execute();
+    $result2 = $stmt2->get_result();
+
+    if ($result2) {
+        while ($row = $result2->fetch_assoc()) {
+            $recommendedEvents[] = $row;
+        }
+    }
+
+    $stmt2->close();
+}
+
+// =====================================
+// RECENTLY EDITED COLLECTIONS (GLOBAL)
+// =====================================
+$sqlRecentCollections = "
+    SELECT
+        c.collection_id,
+        c.name            AS collection_name,
+        c.starting_date,
+        c.image_id,
+        img.url           AS collection_image,
+        u.username
+    FROM collection c
+    LEFT JOIN image img ON c.image_id = img.image_id
+    LEFT JOIN user  u   ON c.user_id = u.user_id
+    WHERE c.user_id <> ?        -- NÃO mostrar coleções do user atual
+    ORDER BY c.starting_date DESC
+    LIMIT 9
+";
+
+$stmt3 = $conn->prepare($sqlRecentCollections);
+$stmt3->bind_param("i", $currentUserId);
+$stmt3->execute();
+$resultCollections = $stmt3->get_result();
+
+$recentCollections = [];
+if ($resultCollections) {
+    while ($row = $resultCollections->fetch_assoc()) {
+        $recentCollections[] = $row;
+    }
+}
+$stmt3->close();
+
+
+?>
+
+
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -76,148 +216,68 @@
         <div class="content">
 
             <!-- ========== EVENTOS ========= -->
-            <section class="events-section">
-                <h2 class="section-title1">Events you might be interested in 👁️</h2>
-                <div class="events-scroll">
-                    <div class="event-card">
-                        <img src="images/comiccon.png" alt="Comic Con Portugal">
-                        <p>Comic Con Portugal</p>
-                        <div class="see-more">
-                            <a href="eventpage.php" class="see-more-link">
-                                <span class="see-more-icon">+️</span> See more
-                            </a>
-                        </div>
-                    </div>
+        <section class="events-section">
+            <h2 class="section-title1">Events you might be interested in 👁️</h2>
 
-                    <div class="event-card">
-                        <img src="images/amadoraBD.png" alt="Amadora BD">
-                        <p>Amadora BD</p>
-                        <div class="see-more">
-                            <a href="eventpage.php" class="see-more-link">
-                                <span class="see-more-icon">+️</span> See more
+            <div class="events-scroll">
+                <?php if (!empty($recommendedEvents)): ?>
+                    <?php foreach ($recommendedEvents as $event): ?>
+                        <div class="event-card">
+                            <!-- imagem + nome também levam link para o evento -->
+                            <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
+                                <img
+                                    src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
+                                    alt="<?= htmlspecialchars($event['name']) ?>"
+                                >
+                                <p><?= htmlspecialchars($event['name']) ?></p>
                             </a>
-                        </div>
-                    </div>
 
-                    <div class="event-card">
-                        <img src="images/iberanime.png" alt="Iberanime Porto">
-                        <p>Iberanime Porto</p>
-                        <div class="see-more">
-                            <a href="eventpage.php" class="see-more-link">
-                                <span class="see-more-icon">+️</span> See more
-                            </a>
+                            <div class="see-more">
+                                <a
+                                    href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>"
+                                    class="see-more-link"
+                                >
+                                    <span class="see-more-icon">+️</span> See more
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No recommended events found for you yet.</p>
+                <?php endif; ?>
+            </div>
+        </section>
 
-                    <div class="event-card">
-                        <img src="images/lisbon.png" alt="Lisbon Games Week">
-                        <p>Lisbon Games Week</p>
-                        <div class="see-more">
-                            <a href="eventpage.php" class="see-more-link">
-                                <span class="see-more-icon">+️</span> See more
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="event-card">
-                        <img src="images/cardmadness.png" alt="Cardmadness 2026">
-                        <p>Cardmadness 2026</p>
-                        <div class="see-more">
-                            <a href="eventpage.php" class="see-more-link">
-                                <span class="see-more-icon">+️</span> See more
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+            
 
             <!-- ========== COLEÇÕES ========= -->       
             <div class="collections-and-collectors">
-                <section class="collections">
-                    <h2 class="section-title1">Recently edited collections 📚</h2>
-                    <div class="collections-grid">
+        <section class="collections">
+            <h2 class="section-title1">Recently edited collections 📚</h2>
+
+            <div class="collections-grid">
+                <?php if (!empty($recentCollections)): ?>
+                    <?php foreach ($recentCollections as $col): ?>
                         <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\pokémon_logo.png" alt="Pokemon Cards">
-                                <p class="collection-name">Pokemon Cards</p>
-                                <span class="collection-author">Rafael_Ameida123</span>
+                            <a href="collectionpage.php?id=<?= htmlspecialchars($col['collection_id']) ?>">
+                                <img
+                                    src="<?= htmlspecialchars($col['collection_image'] ?? 'images/default_collection.png') ?>"
+                                    alt="<?= htmlspecialchars($col['collection_name']) ?>"
+                                >
+                                <p class="collection-name">
+                                    <?= htmlspecialchars($col['collection_name']) ?>
+                                </p>
+                                <span class="collection-author">
+                                    <?= htmlspecialchars($col['username'] ?? 'Unknown user') ?>
+                                </span>
                             </a>
                         </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\championspath.png" alt="Champion's Path">
-                                <p class="collection-name">Champion's Path</p>
-                                <span class="collection-author">Paul_Perez1697</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\Funko.png" alt="Funko Pop" >
-                                <p class="collection-name">Funko Pop</p>
-                                <span class="collection-author">Rafa_Silva147</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\pokemon-pikachu.png" alt="Pokemon Cards" >
-                                <p class="collection-name">Pokemon Cards</p>
-                                <span class="collection-author">Marco_Alex4865</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\SWSH.png" alt="Pokémon SWSH Set">
-                                <p class="collection-name">Pokémon SWSH Set</p>
-                                <span class="collection-author">Ana_SSilva7812</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\stamps.png" alt="Stamp collection">
-                                <p class="collection-name">Stamp collection</p>
-                                <span class="collection-author">John_VVV.741</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\Coins.png" alt="Coins collection" >
-                                <p class="collection-name">Coins collection</p>
-                                <span class="collection-author">Tomás.Freitas_3366</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\funko2.png" alt="Funko Pop" >
-                                <p class="collection-name">Funko Pop</p>
-                                <span class="collection-author">Rafa_Silva147</span>
-                            </a>
-                        </div>
-
-                        <div class="collection-card">
-                            <a href="collectionpage.php">
-                                <img src="images\panini.png" alt="Panini Cards" >
-                                <p class="collection-name">Panini Cards</p>
-                                <span class="collection-author">Anne_Land.4826</span>
-                            </a>
-                        </div>
-
-                    </div>
-
-                    <!-- Botão Ver mais -->
-                    <div class="see-more">
-                        <a href="allfriendscollectionspage.php" class="see-more-link">
-                            <span class="see-more-icon">+️</span> See more
-                        </a>
-                    </div>                   
-                </section>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No collections found yet.</p>
+                <?php endif; ?>
+            </div>
+        </section>
 
                 <!-- ========== TOP COLECIONADORES ========= -->
                 <div class="side-ranking">

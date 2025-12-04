@@ -5,7 +5,9 @@
   background: #eef0ff;
   margin-right: 240px;
   flex-grow: 1;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .item-creation-section {
@@ -17,8 +19,7 @@
   width: 100%;
   max-width: 800px;
   height: auto;
-  min-height: 940px;
-  margin: 0 auto;
+  min-height: 1020px;
 }
 
 .page-title {
@@ -46,6 +47,7 @@ label {
   color: #b54242;
 }
 
+/* Multiselect dropdown */
 .custom-multiselect {
   position: relative;
   display: inline-block;
@@ -111,6 +113,10 @@ textarea:focus {
   outline: none;
 }
 
+textarea {
+  resize: vertical;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -133,6 +139,7 @@ textarea:focus {
 }
 
 .form-message {
+  margin-top: 1rem;
   font-weight: bold;
   text-align: center;
 }
@@ -150,6 +157,7 @@ input.error {
   background-color: #ffecec;
 }
 
+/* Sidebar (igual às outras páginas) */
 .sidebar {
   position: fixed;
   top: 100px;
@@ -187,16 +195,8 @@ input.error {
   color: #b54242;
 }
 
-.collections-section {
-  background-color: #f9d7d1;
-}
-
-.friends-section {
-  background-color: #f3b8aa;
-}
-
-.events-section {
-  background-color: transparent;
+textarea {
+  resize: none;
 }
 
 @media (max-width: 768px) {

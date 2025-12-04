@@ -217,7 +217,7 @@ $stmt3->close();
 
             <!-- ========== EVENTOS ========= -->
         <section class="events-section">
-            <h2 class="section-title1">Events you might be interested in 👁️</h2>
+            <h2 class="section-title1">Events you might be interested in 👁</h2>
 
             <div class="events-scroll">
                 <?php if (!empty($recommendedEvents)): ?>
@@ -237,7 +237,7 @@ $stmt3->close();
                                     href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>"
                                     class="see-more-link"
                                 >
-                                    <span class="see-more-icon">+️</span> See more
+                                    <span class="see-more-icon">+</span> See more
                                 </a>
                             </div>
                         </div>

@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+// ---------- USER LOGADO ----------
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['user_id'];
+
 // ====== LIGAÇÃO À BASE DE DADOS ======
 $host = "localhost";
 $user = "root";
@@ -10,10 +20,7 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
-// ====== DEFINIR O USER (ajusta depois para sessão) ======
-$user_id = 1; // TODO: trocar por $_SESSION['user_id'] quando tiveres login
-
-// ====== BUSCAR COLEÇÕES DESSE UTILIZADOR ======
+// ====== BUSCAR COLEÇÕES DO USER LOGADO ======
 $sql = "SELECT 
             c.collection_id,
             c.name,
@@ -25,7 +32,10 @@ $sql = "SELECT
         ORDER BY c.starting_date DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
+$stmt->bind_param("i", $currentUserId);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -39,9 +49,7 @@ $result = $stmt->get_result();
 </head>
 
 <body>    
-    <!-- ===========================
-         HEADER
-    ============================ -->
+    <!-- =========================== HEADER ============================ -->
     <header>
         <a href="homepage.php" class="logo">
             <img src="images/TrallE_2.png" alt="logo" />
@@ -52,7 +60,6 @@ $result = $stmt->get_result();
         </div>
 
         <div class="icons">
-            <!-- Botão de notificações -->
             <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
             <div class="notification-popup" id="notification-popup">
                 <div class="popup-header">
@@ -66,33 +73,25 @@ $result = $stmt->get_result();
                     <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
                     <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
                     <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
-                    <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                    <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
                     <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
                 </ul>
                 <a href="#" class="see-more-link">+ See more</a>
             </div>
 
             <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
-            
-                <!-- Logout -->
-    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+            <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
-    <div class="notification-popup logout-popup" id="logout-popup">
-      <div class="popup-header">
-        <h3>Logout</h3>
-      </div>
-
-      <p>Are you sure you want to log out?</p>
-
-      <div class="logout-btn-wrapper">
-        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">
-          Cancel
-        </button>
-        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">
-          Log out
-        </button>
-      </div>
-    </div>
+            <div class="notification-popup logout-popup" id="logout-popup">
+                <div class="popup-header">
+                    <h3>Logout</h3>
+                </div>
+                <p>Are you sure you want to log out?</p>
+                <div class="logout-btn-wrapper">
+                    <button type="button" class="logout-btn cancel-btn" id="cancel-logout">Cancel</button>
+                    <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -102,13 +101,9 @@ $result = $stmt->get_result();
                 <section class="collections">
                     <div class="collections-header">
                         <h2>My Collections</h2>
-
-                        <!-- Botão de filtro -->
                         <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
                             &#128269; Filter ▾
                         </button>
-
-                        <!-- Menu de filtros -->
                         <div class="filter-menu" id="filterMenu">
                             <button type="button" data-sort="alpha-asc">Name: A–Z</button>
                             <button type="button" data-sort="alpha-desc">Name: Z–A</button>
@@ -127,7 +122,6 @@ $result = $stmt->get_result();
                         </div>
                     </div>
 
-                    <!-- ====== GRID DE COLEÇÕES (DINÂMICO) ====== -->
                     <div class="collection-grid">
                         <?php if ($result->num_rows > 0): ?>
                             <?php while ($row = $result->fetch_assoc()): ?>
@@ -138,8 +132,7 @@ $result = $stmt->get_result();
                                           : '';
                                 ?>
                                 <div class="collection-card">
-                                    <!-- AQUI vai o id na query string -->
-                                    <a href="collectionpage.php?id=<?php echo $row['collection_id']; ?>">
+                                    <a href="collectionpage.php?id=<?php echo (int)$row['collection_id']; ?>">
                                         <img src="<?php echo htmlspecialchars($img); ?>" 
                                              alt="<?php echo htmlspecialchars($row['name']); ?>">
                                         <p><strong><?php echo htmlspecialchars($row['name']); ?></strong></p>
@@ -158,13 +151,13 @@ $result = $stmt->get_result();
         </div>
     </div>
 
-    <!-- ===== Right Sidebar (Under Header) ===== -->
+    <!-- ===== Right Sidebar ===== -->
     <aside class="sidebar">
         <div class="sidebar-section collections-section">
             <h3>My collections</h3>
             <p><a href="collectioncreation.php">Create collection</a></p>
             <p><a href="itemcreation.php">Create item</a></p>
-            <p><a href="mycollection.php">View collections</a></p>
+            <p><a href="mycollectionspage.php">View collections</a></p>
             <p><a href="myitems.php">View items</a></p>
         </div>
 
@@ -183,9 +176,10 @@ $result = $stmt->get_result();
         </div>
     </aside>
 
-    <!-- === JAVASCRIPT === -->
     <script src="mycollectionspage.js"></script>
     <script src="logout.js"></script>
 </body>
 </html>
-
+<?php
+$conn->close();
+?>

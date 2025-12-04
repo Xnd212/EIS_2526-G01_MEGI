@@ -41,7 +41,7 @@ header {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .logo {
@@ -118,7 +118,7 @@ header {
   display: none;
   flex-direction: column;
 
-  z-index: 1000;
+  z-index: 9000;
 }
 
 /* When visible */
@@ -354,13 +354,21 @@ header {
   font-size: 1rem;
 }
 
+.event-card p {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .event-card img {
-  height: 180px;
-  width: auto;
+  height: auto;
+  width: 100%;
   object-fit: contain;
   margin-top: auto;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
   flex-shrink: 0;
+  margin: 0 auto;
 }
 
 /* =======================
@@ -449,7 +457,7 @@ header {
 
 .see-more {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
 }
 
 .see-more-link {

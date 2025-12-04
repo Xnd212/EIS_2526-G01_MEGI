@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+// se quiseres garantir login obrigatório:
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['user_id'];
+
 // ====== LIGAÇÃO À BASE DE DADOS ======
 $host = "localhost";
 $user = "root";
@@ -182,13 +192,19 @@ if (!empty($col['starting_date'])) {
 
       <div class="collection-details">
         <div class="collection-logo-wrapper">
-        <?php
-        $image_src = !empty($col['url']) ? $col['url'] : 'images/default.png';
-        ?>
-        <img src="<?php echo htmlspecialchars($image_src); ?>" 
-             alt="Collection Logo" class="collection-logo">
-        <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">✎ Edit</a>
+          <?php
+          $image_src = !empty($col['url']) ? $col['url'] : 'images/default.png';
+          ?>
+          <img src="<?php echo htmlspecialchars($image_src); ?>" 
+               alt="Collection Logo" class="collection-logo">
+
+          <?php if ((int)$col['user_id'] === $currentUserId): ?>
+              <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
+                ✎ Edit
+              </a>
+          <?php endif; ?>
         </div>
+
 
         <div class="collection-info">
           <p>

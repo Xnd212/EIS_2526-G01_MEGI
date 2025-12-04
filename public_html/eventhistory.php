@@ -22,8 +22,6 @@ if ($conn->connect_error) {
 
 /* ==========================================================
    BUSCAR EVENTOS:
-   - Criados por este user (event.user_id = CURRENT)
-   - Eventos em que este user participou (tabela attends)
    ========================================================== */
 
 $sqlEvents = "
@@ -44,7 +42,11 @@ $sqlEvents = "
         END AS role,
 
         c.collection_id,
-        c.name AS collection_name
+        c.name AS collection_name,
+
+        -- Média e nº de coleções avaliadas no evento
+        r.avg_rating   AS event_avg_rating,
+        r.num_ratings  AS event_num_ratings
 
     FROM event e
     LEFT JOIN image img ON e.image_id = img.image_id
@@ -56,9 +58,19 @@ $sqlEvents = "
     LEFT JOIN collection c 
         ON a.collection_id = c.collection_id
 
+    -- SUBQUERY: média e nº de COLEÇÕES distintas com rating por evento
+    LEFT JOIN (
+        SELECT 
+            event_id,
+            AVG(rating) AS avg_rating,
+            COUNT(DISTINCT collection_id) AS num_ratings
+        FROM rating
+        GROUP BY event_id
+    ) r ON r.event_id = e.event_id
+
     WHERE 
           (e.user_id = ? OR a.user_id IS NOT NULL)
-      AND e.date < CURDATE()   -- << AQUI ESTÁ O FILTRO IMPORTANTE
+      AND e.date < CURDATE()
 
     GROUP BY e.event_id
     ORDER BY e.date DESC, e.event_id DESC
@@ -101,14 +113,13 @@ $stmt->close();
                     <h3>Notifications <span>🔔</span></h3>
                 </div>
                 <ul class="notification-list">
-                    <!-- MANTIVESTE O ESTÁTICO, OK -->
                     <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
                     <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
                     <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
                     <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
                     <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
                     <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
-                    <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                    <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
                     <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
                 </ul>
                 <a href="#" class="see-more-link">+ See more</a>
@@ -146,7 +157,6 @@ $stmt->close();
                         <?php foreach ($events as $ev): ?>
 
                             <?php
-                            // Imagem do evento
                             if (!empty($ev['event_image'])) {
                                 $eventImg = $ev['event_image'];
                             } elseif (!empty($ev['teaser_url'])) {
@@ -154,19 +164,48 @@ $stmt->close();
                             } else {
                                 $eventImg = "images/default_event.png";
                             }
+
+                            // Rating do evento
+                            $avg  = $ev['event_avg_rating'] ?? null;
+                            $nrat = $ev['event_num_ratings'] ?? 0;
+                            $rounded = ($avg !== null) ? round($avg) : 0;
                             ?>
 
                             <div class="event-card">
+
+                                <!-- imagem -->
                                 <div class="event-image" 
                                      style="background-image: url('<?php echo htmlspecialchars($eventImg); ?>');">
                                 </div>
 
                                 <div class="event-info">
-                                    <h3><strong>
-                                        <a href="eventpage.php?id=<?php echo $ev['event_id']; ?>">
-                                            <?php echo htmlspecialchars($ev['name']); ?>
-                                        </a>
-                                    </strong></h3>
+
+                                    <!-- NOVO: Header com rating -->
+                                    <div class="event-header-row">
+                                        <h3 class="event-title">
+                                            <strong>
+                                                <a href="eventpage.php?id=<?php echo $ev['event_id']; ?>">
+                                                    <?php echo htmlspecialchars($ev['name']); ?>
+                                                </a>
+                                            </strong>
+                                        </h3>
+
+                                        <div class="event-rating">
+                                            <?php if ($avg !== null && $nrat > 0): ?>
+                                                <span class="event-stars">
+                                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                        <span class="star <?php echo ($i <= $rounded) ? 'filled' : ''; ?>">★</span>
+                                                    <?php endfor; ?>
+                                                </span>
+                                                <span class="event-rating-text">
+                                                    (<?php echo number_format($avg, 1); ?>/5, 
+                                                     <?php echo $nrat; ?> collection<?php echo $nrat > 1 ? 's' : ''; ?> rated)
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="event-rating-text no-ratings">No ratings</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
 
                                     <p><strong>Date:</strong> 
                                         <?php echo date('d/m/Y', strtotime($ev['date'])); ?>

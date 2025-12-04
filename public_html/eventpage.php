@@ -42,18 +42,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
     // rating 0–5
     if ($collection_id && $rating !== false && $rating >= 0 && $rating <= 5) {
 
-        // Idealmente tens PK (user_id, collection_id, event_id) na tabela rating
-        $sqlRate = "
-            INSERT INTO rating (user_id, collection_id, event_id, rating)
-            VALUES (?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE rating = VALUES(rating)
-        ";
-
-        $stmtRate = $conn->prepare($sqlRate);
-        $stmtRate->bind_param("iiii", $user_id, $collection_id, $event_id, $rating);
-        $stmtRate->execute();
-        $stmtRate->close();
+        if ($rating == 0) {
+            // Se o user clicar em Clear, apagamos o rating dessa coleção neste evento
+            $sqlRate = "
+                DELETE FROM rating
+                WHERE user_id = ? AND collection_id = ? AND event_id = ?
+            ";
+            $stmtRate = $conn->prepare($sqlRate);
+            $stmtRate->bind_param("iii", $user_id, $collection_id, $event_id);
+            $stmtRate->execute();
+            $stmtRate->close();
+        } else {
+            // 1 a 5 → insere / atualiza rating
+            $sqlRate = "
+                INSERT INTO rating (user_id, collection_id, event_id, rating)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE rating = VALUES(rating)
+            ";
+            $stmtRate = $conn->prepare($sqlRate);
+            $stmtRate->bind_param("iiii", $user_id, $collection_id, $event_id, $rating);
+            $stmtRate->execute();
+            $stmtRate->close();
+        }
     }
+
 
     // Evita re-submit no refresh
     header("Location: eventpage.php?id=" . $event_id);
@@ -83,6 +95,7 @@ $stmt->close();
 
 // ==========================================
 // 3. FETCH COLLECTIONS (Others bringing)
+//     -> exclui as coleções do user logado
 // ==========================================
 $collections_sql = "SELECT 
                         c.collection_id, 
@@ -93,10 +106,13 @@ $collections_sql = "SELECT
                     JOIN user u ON a.user_id = u.user_id
                     JOIN collection c ON a.collection_id = c.collection_id
                     LEFT JOIN image i ON c.image_id = i.image_id
-                    WHERE a.event_id = ? AND a.collection_id IS NOT NULL";
+                    WHERE a.event_id = ?
+                      AND a.collection_id IS NOT NULL
+                      AND a.user_id <> ?";  
 
 $col_stmt = $conn->prepare($collections_sql);
-$col_stmt->bind_param("i", $event_id);
+$col_stmt->bind_param("ii", $event_id, $user_id);
+
 $col_stmt->execute();
 $collections_result = $col_stmt->get_result();
 $collections = $collections_result->fetch_all(MYSQLI_ASSOC);
@@ -158,7 +174,12 @@ $check_stmt->close();
 // ==========================================
 // 5. HELPER LOGIC
 // ==========================================
-$event_date = date("d/m/Y", strtotime($event['date']));
+$eventDateObj = new DateTime($event['date']);
+$today        = new DateTime('today');
+
+$isPast   = $eventDateObj < $today;                 // true se já passou
+$event_date = $eventDateObj->format("d/m/Y");       // só para mostrar no ecrã
+
 
 // Video Logic
 $video_id = null;
@@ -310,7 +331,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
         <!-- COLLECTIONS -->
 <?php if (count($collections) > 0): ?>
-<h3 class="collections-others">Collections others are bringing:</h3>
+<h3 class="collections-others">Collections others brought:</h3>
 <div class="collections-brought">
   <?php foreach ($collections as $collection): ?>
     <?php
@@ -323,6 +344,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         $numRatings = $avgInfo['num_ratings'] ?? 0;
         $avgRounded = $avgValue !== null ? round($avgValue) : 0;
     ?>
+    
     <div class="collection-bring">
       <!-- Card da coleção (link completo) -->
       <a href="collectionpage.php?id=<?php echo $colId; ?>">
@@ -337,55 +359,44 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
       <!-- Rating POR BAIXO do card -->
       <div class="collection-rating">
-        <!-- Média -->
-        <div class="avg-rating">
-          <?php if ($avgValue !== null): ?>
-            <span class="stars">
-              <?php for ($i = 1; $i <= 5; $i++): ?>
-                <?php if ($i <= $avgRounded): ?>
-                  <span class="star filled">★</span>
-                <?php else: ?>
-                  <span class="star">☆</span>
-                <?php endif; ?>
-              <?php endfor; ?>
-            </span>
-            <span class="avg-value">
-              (<?php echo number_format($avgValue, 1); ?>/5,
-               <?php echo $numRatings; ?> rating<?php echo $numRatings == 1 ? '' : 's'; ?>)
-            </span>
-          <?php else: ?>
-            <span class="no-ratings">No ratings yet.</span>
-          <?php endif; ?>
-        </div>
+        <?php
+            $colId      = (int)$collection['collection_id'];
+            $userRating = $userRatings[$colId] ?? 0;
+        ?>
 
-        <!-- Rating do utilizador -->
         <form method="post" class="rating-form">
-          <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
-          <div class="user-stars">
-            <span class="your-rating-text">Your rating:</span>
-            <?php for ($i = 1; $i <= 5; $i++): ?>
-              <?php $filled = $userRating >= $i; ?>
-              <button
-                  type="submit"
-                  name="rating"
-                  value="<?php echo $i; ?>"
-                  class="star-btn <?php echo $filled ? 'filled' : 'empty'; ?>"
-              >
-                ★
-              </button>
-            <?php endfor; ?>
-            <!-- 0 = limpar rating -->
-            <button
-                type="submit"
-                name="rating"
-                value="0"
-                class="clear-rating"
-            >
-              Clear
-            </button>
-          </div>
+            <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
+
+            <div class="user-stars">
+                <span class="your-rating-text">
+                    <?php echo ($userRating > 0) ? 'Your rating:' : 'Rate this collection:'; ?>
+                </span>
+
+                <?php for ($i = 1; $i <= 5; $i++): ?>
+                    <button
+                        type="submit"
+                        name="rating"
+                        value="<?php echo $i; ?>"
+                        class="star-btn <?php echo ($userRating >= $i) ? 'filled' : 'empty'; ?>"
+                    >
+                        ★
+                    </button>
+                <?php endfor; ?>
+
+                <?php if ($userRating > 0): ?>
+                    <button
+                        type="submit"
+                        name="rating"
+                        value="0"
+                        class="clear-rating"
+                    >
+                        Clear
+                    </button>
+                <?php endif; ?>
+            </div>
         </form>
       </div>
+
     </div>
   <?php endforeach; ?>
 </div>
@@ -404,18 +415,30 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         <?php endif; ?>
 
         <!-- REGISTRATION SECTION -->
-        <div class="register-section">
-          <div class="register-row">
-            <?php if ($is_attending): ?>
-              <p class="register-text">✅ You're signed up!</p>
-              <!-- MODIFIED: Uses button with ID and data-id attribute -->
-              <button id="leave-event-btn" class="register-button registered" data-id="<?php echo $event_id; ?>">Leave Event</button>
-            <?php else: ?>
-              <p class="register-text">🎟️ Want to join? Sign up now!</p>
-              <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=join" class="register-button">Sign up</a>
-            <?php endif; ?>
-          </div>
-        </div>
+        <?php if (!$isPast): ?>
+            <div class="register-section">
+              <div class="register-row">
+                <?php if ($is_attending): ?>
+                  <p class="register-text">✅ You're signed up!</p>
+                  <button id="leave-event-btn" class="register-button registered" data-id="<?php echo $event_id; ?>">
+                    Leave Event
+                  </button>
+                <?php else: ?>
+                  <p class="register-text">🎟️ Want to join? Sign up now!</p>
+                  <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=join" class="register-button">
+                    Sign up
+                  </a>
+                <?php endif; ?>
+              </div>
+            </div>
+        <?php else: ?>
+            <div class="register-section">
+              <p class="register-text">
+                ✅ This event has already taken place<?php echo $is_attending ? " and you attended it." : "."; ?>
+              </p>
+            </div>
+        <?php endif; ?>
+
 
       </div>
     </div>

@@ -1,5 +1,13 @@
 <?php
-// ====== CONEXÃO À BD ======
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$currentUserId = (int) $_SESSION['user_id'];
+
+// ====== LIGAÇÃO À BD ======
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -23,6 +31,7 @@ $sql = "
         c.collection_id,
         c.name      AS collection_name,
         c.image_id  AS collection_image_id,
+        c.user_id   AS owner_id,          -- <--- ADICIONADO
         u.username  AS collector_name,
         t.name      AS type_name
     FROM item i
@@ -33,6 +42,7 @@ $sql = "
     WHERE i.item_id = ?
     LIMIT 1
 ";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $item_id);
 $stmt->execute();
@@ -152,9 +162,13 @@ function fmtDate($d) {
           <img src="<?php echo htmlspecialchars($item_img_url); ?>" 
                alt="<?php echo htmlspecialchars($item['name']); ?>" 
                class="item-image">
-          <a href="edititem.php?id=<?php echo $item_id; ?>" 
-             id="editRedirectBtn" class="edit-link">✎ Edit</a>
+
+          <?php if ((int)$item['owner_id'] === $currentUserId): ?>
+              <a href="edititem.php?id=<?php echo $item_id; ?>" 
+                 id="editRedirectBtn" class="edit-link">✎ Edit</a>
+          <?php endif; ?>
         </div>
+
 
         <div class="item-info">
           <p><strong>Collector:</strong> 

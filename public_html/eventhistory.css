@@ -175,3 +175,44 @@
 .events-section {
   background-color: transparent;
 }
+
+/* ===== Event rating no histórico ===== */
+
+.event-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.event-title {
+    margin: 0;
+}
+
+.event-rating {
+    text-align: right;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.event-rating .event-stars {
+    font-size: 1.1rem;
+    margin-right: 4px;
+}
+
+.event-rating .star {
+    color: #ccc;
+}
+
+.event-rating .star.filled {
+    color: #FFD700; /* dourado */
+}
+
+.event-rating-text {
+    color: #333;
+}
+
+.event-rating-text.no-ratings {
+    font-style: italic;
+    color: #777;
+}

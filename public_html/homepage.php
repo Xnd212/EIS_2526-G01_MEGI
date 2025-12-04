@@ -133,6 +133,59 @@ if ($resultCollections) {
 }
 $stmt3->close();
 
+// =====================================
+// TOP COLLECTORS (GLOBAL)
+// =====================================
+$sqlTopCollectors = "
+    SELECT 
+        u.user_id,
+        u.username,
+        COUNT(DISTINCT con.item_id) AS total_items
+    FROM user u
+    JOIN collection c  ON c.user_id = u.user_id
+    JOIN contains  con ON con.collection_id = c.collection_id
+    GROUP BY u.user_id, u.username
+    ORDER BY total_items DESC
+    LIMIT 3
+";
+$resTopCollectors = $conn->query($sqlTopCollectors);
+
+$topCollectors = [];
+if ($resTopCollectors) {
+    while ($row = $resTopCollectors->fetch_assoc()) {
+        $topCollectors[] = $row;
+    }
+}
+
+// =====================================
+// TOP 3 ITEMS MAIS CAROS (GLOBAL)
+// =====================================
+$sqlTopItems = "
+    SELECT 
+        i.item_id,
+        i.name,
+        i.price,
+        img.url      AS item_image,
+        u.username   AS owner_name
+    FROM item i
+    JOIN contains con   ON con.item_id = i.item_id
+    JOIN collection c   ON c.collection_id = con.collection_id
+    JOIN user u         ON u.user_id = c.user_id
+    LEFT JOIN image img ON img.image_id = i.image_id
+    WHERE i.price IS NOT NULL
+    GROUP BY i.item_id, i.name, i.price, img.url, u.username
+    ORDER BY i.price DESC
+    LIMIT 3
+";
+$resTopItems = $conn->query($sqlTopItems);
+
+$topItems = [];
+if ($resTopItems) {
+    while ($row = $resTopItems->fetch_assoc()) {
+        $topItems[] = $row;
+    }
+}
+
 
 ?>
 
@@ -281,66 +334,73 @@ $stmt3->close();
 
                 <!-- ========== TOP COLECIONADORES ========= -->
                 <div class="side-ranking">
+                <section class="top-collectors-card">
+                    <h2 class="section-title1">Top collectors of the week 🤝</h2>
 
-                    <section class="top-collectors-card">
-                        <h2 class="section-title1">Top collectors of the week 🤝</h2>
+                    <?php if (!empty($topCollectors)): ?>
                         <ol class="top-collector-list">
-                            <li>
-                                <span class="medal gold">🥇</span>
-                                <div class="collector-info">
-                                    <span class="collector-name">Rafael_Ameida123</span>
-                                    <span class="collector-items">101 items</span>
-                                </div>
-                            </li>
-                            <li>
-                                <span class="medal silver">🥈</span>
-                                <div class="collector-info">
-                                    <span class="collector-name">AnaAlmeida.889</span>
-                                    <span class="collector-items">87 items</span>
-                                </div>
-                            </li>
-                            <li>
-                                <span class="medal bronze">🥉</span>
-                                <div class="collector-info">
-                                    <span class="collector-name">Gaby_Soares97</span>
-                                    <span class="collector-items">84 items</span>
-                                </div>
-                            </li>
+                            <?php foreach ($topCollectors as $idx => $collector): ?>
+                                <?php
+                                    $pos = $idx + 1;
+                                    if     ($pos === 1) { $medal = "🥇"; $medalClass = "gold"; }
+                                    elseif ($pos === 2) { $medal = "🥈"; $medalClass = "silver"; }
+                                    else                { $medal = "🥉"; $medalClass = "bronze"; }
+                                ?>
+                                <li>
+                                    <span class="medal <?php echo $medalClass; ?>">
+                                        <?php echo $medal; ?>
+                                    </span>
+                                    <div class="collector-info">
+                                        <span class="collector-name">
+                                            <?php echo htmlspecialchars($collector['username']); ?>
+                                        </span>
+                                        <span class="collector-items">
+                                            <?php echo (int)$collector['total_items']; ?> items
+                                        </span>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
                         </ol>
-                    </section>
+                    <?php else: ?>
+                        <p style="padding: 0 1rem;">No collectors found yet.</p>
+                    <?php endif; ?>
+                </section>
 
 
                     <!-- ========== TOP ITENS ========= -->
-                    <section class="top-items-card">
-                        <h2 class="section-title1">Top 3 Items 💶</h2>
+            <section class="top-items-card">
+                <h2 class="section-title1">Top 3 Items 💶</h2>
 
+                <?php if (!empty($topItems)): ?>
+                    <?php foreach ($topItems as $top): ?>
+                        <?php
+                            $img = !empty($top['item_image'])
+                                ? $top['item_image']
+                                : 'images/default_item.png';
+                        ?>
                         <div class="top-item">
-                            <img src="images\1.png" alt="One Piece Card Game">
+                            <a href="itempage.php?id=<?php echo (int)$top['item_id']; ?>">
+                                <img src="<?php echo htmlspecialchars($img); ?>"
+                                     alt="<?php echo htmlspecialchars($top['name']); ?>">
+                            </a>
                             <div class="item-info">
-                                <p class="item-name">One Piece Card Game <br><span>SR Super Parallel</span></p>
-                                <p class="item-user">Rafael_Ameida123</p>
-                                <p class="item-price">999,90€</p>
+                                <p class="item-name">
+                                    <?php echo htmlspecialchars($top['name']); ?>
+                                </p>
+                                <p class="item-user">
+                                    <?php echo htmlspecialchars($top['owner_name']); ?>
+                                </p>
+                                <p class="item-price">
+                                    <?php echo number_format((float)$top['price'], 2, ',', ''); ?>€
+                                </p>
                             </div>
                         </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="padding: 0 1rem;">No items found yet.</p>
+                <?php endif; ?>
+            </section>
 
-                        <div class="top-item">
-                            <img src="images\2.png" alt="Magic Spider-Man">
-                            <div class="item-info">
-                                <p class="item-name">Magic the Gathering Marvel's <br><span>Spider-Man Collector Booster</span></p>
-                                <p class="item-user">AnaAlmeida.889</p>
-                                <p class="item-price">662,97€</p>
-                            </div>
-                        </div>
-
-                        <div class="top-item">
-                            <img src="images\3.png" alt="Charizard 1st Edition Holo">
-                            <div class="item-info">
-                                <p class="item-name">Charizard 1st <br><span>Edition Holo</span></p>
-                                <p class="item-user">Gaby_Soares97</p>
-                                <p class="item-price">651,17€</p>
-                            </div>
-                        </div>
-                    </section>
                 </div>
             </div>
 

@@ -265,6 +265,85 @@
 }
 
 
+/* ===== RATING DAS COLEÇÕES ===== */
+
+.collection-rating {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.collection-rating .avg-rating,
+.collection-rating .user-stars {
+    line-height: 1.4;
+}
+
+.collection-rating .stars {
+    font-size: 18px;
+    margin-right: 4px;
+}
+
+.collection-rating .star {
+    color: #ccc;
+}
+
+.collection-rating .star.filled {
+    color: #FFD700; /* dourado */
+}
+
+/* Botões das estrelas (tirar aspeto de botão cinzento) */
+.collection-rating .star-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0 2px !important;
+    margin: 0;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color: #ccc;
+}
+
+.collection-rating .star-btn.filled {
+    color: #FFD700;
+}
+
+.collection-rating .star-btn.empty {
+    color: #ccc;
+}
+
+/* “Your rating:” + estrelas alinhados em linha */
+.collection-rating .user-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.collection-rating .your-rating-text {
+    margin-right: 4px;
+}
+
+/* Botão Clear mais discreto (sem quadrado cinzento) */
+.collection-rating .clear-rating {
+    background: none !important;
+    border: none !important;
+    padding: 0 4px !important;
+    font-size: 12px;
+    cursor: pointer;
+    color: #666;
+    text-decoration: underline;
+}
+
+.collection-rating .clear-rating:hover {
+    color: #c76a59;
+}
+
+
+
 /* === RESPONSIVO === */
 @media (max-width: 768px) {
   .video-thumbnail, .register-section {

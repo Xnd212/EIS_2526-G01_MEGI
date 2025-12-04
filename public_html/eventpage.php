@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = (int) $_SESSION['user_id'];
 
 // Get ID from URL
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -25,11 +25,39 @@ if (!$event_id) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "sie"; 
+$dbname = "sie";
 $conn = new mysqli($host, $user, $pass, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
+}
+
+// ==========================================
+// 1.A  HANDLE COLLECTION RATING (POST)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_POST['rating'])) {
+    $collection_id = filter_input(INPUT_POST, 'collection_id', FILTER_VALIDATE_INT);
+    $rating        = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
+
+    // rating 0–5
+    if ($collection_id && $rating !== false && $rating >= 0 && $rating <= 5) {
+
+        // Idealmente tens PK (user_id, collection_id, event_id) na tabela rating
+        $sqlRate = "
+            INSERT INTO rating (user_id, collection_id, event_id, rating)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE rating = VALUES(rating)
+        ";
+
+        $stmtRate = $conn->prepare($sqlRate);
+        $stmtRate->bind_param("iiii", $user_id, $collection_id, $event_id, $rating);
+        $stmtRate->execute();
+        $stmtRate->close();
+    }
+
+    // Evita re-submit no refresh
+    header("Location: eventpage.php?id=" . $event_id);
+    exit();
 }
 
 // ==========================================
@@ -75,6 +103,49 @@ $collections = $collections_result->fetch_all(MYSQLI_ASSOC);
 $col_stmt->close();
 
 // ==========================================
+// 3.B  FETCH RATINGS FOR THESE COLLECTIONS
+// ==========================================
+
+// Médias por coleção neste evento
+$avgRatings = [];
+$avgSql = "
+    SELECT 
+        collection_id,
+        AVG(rating) AS avg_rating,
+        COUNT(*)    AS num_ratings
+    FROM rating
+    WHERE event_id = ?
+    GROUP BY collection_id
+";
+$avgStmt = $conn->prepare($avgSql);
+$avgStmt->bind_param("i", $event_id);
+$avgStmt->execute();
+$avgRes = $avgStmt->get_result();
+while ($row = $avgRes->fetch_assoc()) {
+    $avgRatings[(int)$row['collection_id']] = [
+        'avg_rating'  => (float)$row['avg_rating'],
+        'num_ratings' => (int)$row['num_ratings']
+    ];
+}
+$avgStmt->close();
+
+// Rating do utilizador logado para cada coleção neste evento
+$userRatings = [];
+$userRateSql = "
+    SELECT collection_id, rating
+    FROM rating
+    WHERE event_id = ? AND user_id = ?
+";
+$userRateStmt = $conn->prepare($userRateSql);
+$userRateStmt->bind_param("ii", $event_id, $user_id);
+$userRateStmt->execute();
+$userRateRes = $userRateStmt->get_result();
+while ($row = $userRateRes->fetch_assoc()) {
+    $userRatings[(int)$row['collection_id']] = (int)$row['rating'];
+}
+$userRateStmt->close();
+
+// ==========================================
 // 4. CHECK USER ATTENDANCE
 // ==========================================
 $check_sql = "SELECT * FROM attends WHERE user_id = ? AND event_id = ?";
@@ -97,6 +168,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -237,21 +309,88 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </div>
 
         <!-- COLLECTIONS -->
-        <?php if (count($collections) > 0): ?>
-        <h3 class="collections-others">Collections others are bringing:</h3>
-        <div class="collections-brought">
-          <?php foreach ($collections as $collection): ?>
-          <div class="collection-bring">
-            <a href="collectionpage.php?id=<?php echo $collection['collection_id']; ?>">
-              <?php $colImg = !empty($collection['collection_image_url']) ? $collection['collection_image_url'] : 'images/default_collection.png'; ?>
-              <img src="<?php echo htmlspecialchars($colImg); ?>" alt="Collection">
-              <p class="collection-name"><strong><?php echo htmlspecialchars($collection['collection_name']); ?></strong></p>
-              <p class="collection-user"><?php echo htmlspecialchars($collection['username']); ?></p>
-            </a>
-          </div>
-          <?php endforeach; ?>
+<?php if (count($collections) > 0): ?>
+<h3 class="collections-others">Collections others are bringing:</h3>
+<div class="collections-brought">
+  <?php foreach ($collections as $collection): ?>
+    <?php
+        $colId      = (int)$collection['collection_id'];
+        $colImg     = !empty($collection['collection_image_url']) ? $collection['collection_image_url'] : 'images/default_collection.png';
+
+        $avgInfo    = $avgRatings[$colId] ?? null;
+        $userRating = $userRatings[$colId] ?? 0;
+        $avgValue   = $avgInfo['avg_rating']  ?? null;
+        $numRatings = $avgInfo['num_ratings'] ?? 0;
+        $avgRounded = $avgValue !== null ? round($avgValue) : 0;
+    ?>
+    <div class="collection-bring">
+      <!-- Card da coleção (link completo) -->
+      <a href="collectionpage.php?id=<?php echo $colId; ?>">
+        <img src="<?php echo htmlspecialchars($colImg); ?>" alt="Collection">
+        <p class="collection-name">
+          <strong><?php echo htmlspecialchars($collection['collection_name']); ?></strong>
+        </p>
+        <p class="collection-user">
+          <?php echo htmlspecialchars($collection['username']); ?>
+        </p>
+      </a>
+
+      <!-- Rating POR BAIXO do card -->
+      <div class="collection-rating">
+        <!-- Média -->
+        <div class="avg-rating">
+          <?php if ($avgValue !== null): ?>
+            <span class="stars">
+              <?php for ($i = 1; $i <= 5; $i++): ?>
+                <?php if ($i <= $avgRounded): ?>
+                  <span class="star filled">★</span>
+                <?php else: ?>
+                  <span class="star">☆</span>
+                <?php endif; ?>
+              <?php endfor; ?>
+            </span>
+            <span class="avg-value">
+              (<?php echo number_format($avgValue, 1); ?>/5,
+               <?php echo $numRatings; ?> rating<?php echo $numRatings == 1 ? '' : 's'; ?>)
+            </span>
+          <?php else: ?>
+            <span class="no-ratings">No ratings yet.</span>
+          <?php endif; ?>
         </div>
-        <?php endif; ?>
+
+        <!-- Rating do utilizador -->
+        <form method="post" class="rating-form">
+          <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
+          <div class="user-stars">
+            <span class="your-rating-text">Your rating:</span>
+            <?php for ($i = 1; $i <= 5; $i++): ?>
+              <?php $filled = $userRating >= $i; ?>
+              <button
+                  type="submit"
+                  name="rating"
+                  value="<?php echo $i; ?>"
+                  class="star-btn <?php echo $filled ? 'filled' : 'empty'; ?>"
+              >
+                ★
+              </button>
+            <?php endfor; ?>
+            <!-- 0 = limpar rating -->
+            <button
+                type="submit"
+                name="rating"
+                value="0"
+                class="clear-rating"
+            >
+              Clear
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
 
         <!-- MAP -->
         <?php if(isset($event['place']) && !empty($event['place'])): ?>

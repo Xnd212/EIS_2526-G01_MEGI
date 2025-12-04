@@ -163,7 +163,7 @@ $stmt->close();
 
                                 <div class="event-info">
                                     <h3><strong>
-                                        <a href="pasteventpage.php?id=<?php echo $ev['event_id']; ?>">
+                                        <a href="eventpage.php?id=<?php echo $ev['event_id']; ?>">
                                             <?php echo htmlspecialchars($ev['name']); ?>
                                         </a>
                                     </strong></h3>

@@ -29,6 +29,23 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
+$user_id = $_SESSION['user_id']; // Store user_id early for use in fetch and insert
+
+// ==========================================
+// 1. FETCH USER COLLECTIONS FOR DROPDOWN
+// ==========================================
+$user_collections = [];
+// Assuming 'name' is the column for the collection name. Change if needed.
+$coll_sql = "SELECT collection_id, name FROM collection WHERE user_id = ?";
+$coll_stmt = $conn->prepare($coll_sql);
+$coll_stmt->bind_param("i", $user_id);
+$coll_stmt->execute();
+$result = $coll_stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $user_collections[] = $row;
+}
+$coll_stmt->close();
+
 $error = "";
 $success = false;
 $new_event_id = null;
@@ -36,16 +53,16 @@ $new_event_id = null;
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $event_name = trim($_POST['eventName']);
-    $start_date = $_POST['startDate']; // Already in YYYY-MM-DD format from date input
+    $start_date = $_POST['startDate']; 
     $theme = trim($_POST['theme']);
     $place = trim($_POST['location']);
     $description = trim($_POST['description']);
     $teaser_url = !empty($_POST['youtube']) ? trim($_POST['youtube']) : null;
-    $user_id = $_SESSION['user_id'];
+    $collection_id = isset($_POST['collection_id']) ? $_POST['collection_id'] : null; // Get the selected collection
     
     // Validate required fields
-    if (empty($event_name) || empty($start_date) || empty($theme) || empty($place) || empty($description)) {
-        $error = "Please fill in all required fields";
+    if (empty($event_name) || empty($start_date) || empty($theme) || empty($place) || empty($description) || empty($collection_id)) {
+        $error = "Please fill in all required fields, including the collection.";
     } 
     // Validate date format (YYYY-MM-DD)
     elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start_date)) {
@@ -119,6 +136,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             if ($event_stmt->execute()) {
                 $new_event_id = $event_stmt->insert_id;
+                
+                // ==========================================
+                // 2. INSERT INTO 'ATTENDS' TABLE
+                // ==========================================
+                // The creator attends their own event with the selected collection
+                if ($new_event_id && $collection_id) {
+                    $attend_stmt = $conn->prepare("INSERT INTO attends (user_id, event_id, collection_id) VALUES (?, ?, ?)");
+                    $attend_stmt->bind_param("iii", $user_id, $new_event_id, $collection_id);
+                    if(!$attend_stmt->execute()){
+                         // Optional: log error if attendance fails, though event was created
+                         error_log("Failed to add creator to attends table: " . $attend_stmt->error);
+                    }
+                    $attend_stmt->close();
+                }
+
                 $success = true;
             } else {
                 $error = "Error creating event: " . $event_stmt->error;
@@ -141,9 +173,6 @@ $conn->close();
 </head>
 
 <body>
-  <!-- ===========================
-       HEADER
-  ============================ -->
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -175,8 +204,7 @@ $conn->close();
 
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       
-          <!-- Logout -->
-    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+          <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
     <div class="notification-popup logout-popup" id="logout-popup">
       <div class="popup-header">
@@ -197,21 +225,16 @@ $conn->close();
     </div>
   </header>
 
-  <!-- ===========================
-       MAIN CONTENT
-  ============================ -->
   <div class="main">
-    <!-- Conteúdo principal (lado esquerdo) -->
     <div class="content">
       <section class="item-creation-section">
         <h2 class="page-title">Create a Event</h2>
 
         <?php if ($success): ?>
-          <!-- ==== SUCCESS MODAL ==== -->
           <div id="eventSuccessModal" class="event-success-modal" style="display: flex;">
             <div class="success-box">
               <h2>Event created successfully ✅</h2>
-              <p>Your event has been created.</p>
+              <p>Your event has been created and your collection added.</p>
               <div class="success-buttons">
                 <a href="eventpage.php?event_id=<?php echo $new_event_id; ?>" class="btn-primary">Go to event page</a>
                 <a href="homepage.php" class="btn-secondary">Go to homepage</a>
@@ -225,7 +248,6 @@ $conn->close();
         <?php endif; ?>
 
         <form id="eventForm" method="POST" action="" enctype="multipart/form-data" novalidate>
-          <!-- Name -->
           <div class="form-group">
             <label for="eventName">Event Name <span class="required">*</span></label>
             <input
@@ -238,7 +260,6 @@ $conn->close();
             />
           </div>
 
-          <!-- Date -->
           <div class="form-group">
             <label for="startDate">Date <span class="required">*</span></label>
             <input 
@@ -250,7 +271,6 @@ $conn->close();
             />
           </div>
 
-          <!-- Theme -->
           <div class="form-group">
             <label for="theme">Theme <span class="required">*</span></label>
             <input
@@ -263,7 +283,21 @@ $conn->close();
             />
           </div>
 
-          <!-- Location -->
+          <div class="form-group">
+            <label for="collection_id">Collection to Bring <span class="required">*</span></label>
+            <select id="collection_id" name="collection_id" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="">-- Select one of your collections --</option>
+                <?php foreach ($user_collections as $coll): ?>
+                    <option value="<?php echo $coll['collection_id']; ?>" <?php echo (isset($_POST['collection_id']) && $_POST['collection_id'] == $coll['collection_id']) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($coll['name']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php if(empty($user_collections)): ?>
+                <small style="color:red;">You have no collections to bring. Please create one first.</small>
+            <?php endif; ?>
+          </div>
+
           <div class="form-group">
             <label for="location">Place <span class="required">*</span></label>
             <input
@@ -276,7 +310,6 @@ $conn->close();
             />
           </div>
 
-          <!-- Description -->
           <div class="form-group">
             <label for="description">Description <span class="required">*</span></label>
             <textarea
@@ -288,19 +321,8 @@ $conn->close();
             ><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
           </div>
 
-          <!-- Tags (not saved to database) -->
-          <div class="form-group">
-            <label for="tags">Tags</label>
-            <input
-              type="text"
-              id="tags"
-              name="tags"
-              placeholder="e.g. Pokemon, Anime, TCG"
-              value="<?php echo isset($_POST['tags']) ? htmlspecialchars($_POST['tags']) : ''; ?>"
-            />
-          </div>
 
-          <!-- YouTube Embed -->
+
           <div class="form-group">
             <label for="youtube">YouTube video embed link</label>
             <input
@@ -312,7 +334,6 @@ $conn->close();
             />
           </div>
 
-          <!-- Image Upload -->
           <div class="form-group">
             <label for="coverImage">Cover Image <span class="required">*</span></label>
             <input
@@ -335,7 +356,6 @@ $conn->close();
 
     
     
-    <!-- ===== Right Sidebar (Under Header) ===== -->
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>

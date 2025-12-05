@@ -102,3 +102,30 @@ Array
 
 )
 
+FORM SUBMITTED at 2025-12-05 15:12:09
+Array
+(
+    [eventName] => Aniversário Surpresa da Rita 
+    [startDate] => 2026-05-29
+    [theme] => Birthday
+    [collection_id] => 5
+    [location] => Casa da Rita
+    [description] => A birthday party for my dear friend Rita
+    [tags] => Rita
+    [youtube] => https://www.youtube.com/watch?v=_fw8AUMed7A
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => ri_tinha.jpg
+            [full_path] => ri_tinha.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php6E93.tmp
+            [error] => 0
+            [size] => 3247
+        )
+
+)
+

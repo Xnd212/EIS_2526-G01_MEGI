@@ -1,73 +1,47 @@
-
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ============================================================
-     POPUP AO PASSAR O RATO NAS TOP COLLECTIONS
+     POPUP AO PASSAR O RATO NAS TOP COLLECTIONS (DINÂMICO)
   ============================================================ */
   const hoverPopup = document.getElementById("hover-popup");
 
-  const collectionData = {
-    "price-card": {
-      collection: 'Pokemon Cards',
-      user: 'Rafael_Ameida123',
-      title: '1st Edition Machamp',
-      price: '2000€',
-      date: '03/10/2025',
-      place: 'Comic Con 2025',
-      items: '51',
-      image: 'images/1st Edition Machamp.png',
-      updated: '27/03/2025'
-    },
-    "recent-card": {
-      collection: "Pokemon Champion's Path",
-      user: 'Paul_Perez1697',
-      title: 'Charizard V',
-      price: '300,25€',
-      date: '29/10/2025',
-      place: 'Local vintage store',
-      items: '14',
-      image: 'images/CharizardV.png',
-      updated: '31/10/2025'
-    },
-    "items-card": {
-      collection: 'Funko Pop',
-      user: 'Ana_SSilva7812',
-      title: 'Friends: Joey w/ Pizza',
-      price: '20€',
-      date: '17/05/2025',
-      place: 'Online shop',
-      items: '152',
-      image: 'images/joeyfunko.png',
-      updated: '01/10/2025'
-    }
-  };
-
   document.querySelectorAll(".top-collection-block").forEach(block => {
     block.addEventListener("mousemove", e => {
-      const id = block.getAttribute("data-id");
-      const data = collectionData[id];
-      if (!data || !hoverPopup) return;
+      if (!hoverPopup) return;
+
+      // Lê os data-* do bloco
+      const d = block.dataset;
+
+      const collection = d.collection || "";
+      const user       = d.user || "";
+      const title      = d.title || "";
+      const price      = d.price || "";
+      const date       = d.date || "";
+      const place      = d.place || "";
+      const items      = d.items || "";
+      const image      = d.image || "";
+      const updated    = d.updated || "";
 
       hoverPopup.innerHTML = `
         <div class="popup-content-flex">
           <div class="popup-text">
-            <h3 class="popup-title">${data.collection}</h3>
-            <p class="popup-user">${data.user}</p>
-            <p><strong>Price:</strong> ${data.price}</p>
-            <p><strong>Acquisition Date:</strong> ${data.date}</p>
-            <p><strong>Acquisition Place:</strong> ${data.place}</p>
-            <p><strong>Items:</strong> ${data.items}</p>
+            <h3 class="popup-title">${collection}</h3>
+            <p class="popup-user">${user}</p>
+            ${price   ? `<p><strong>Price:</strong> ${price}</p>` : ""}
+            ${date    ? `<p><strong>Acquisition Date:</strong> ${date}</p>` : ""}
+            ${place   ? `<p><strong>Acquisition Place:</strong> ${place}</p>` : ""}
+            ${items   ? `<p><strong>Items:</strong> ${items}</p>` : ""}
           </div>
           <div class="popup-image">
-            <h4 class="popup-subtitle">${data.title}</h4>
-            <img src="${data.image}" alt="${data.title}">
-            <p class="popup-date">Last updated: ${data.updated}</p>
+            ${title ? `<h4 class="popup-subtitle">${title}</h4>` : ""}
+            ${image ? `<img src="${image}" alt="${title || collection}">` : ""}
+            ${updated ? `<p class="popup-date">Last updated: ${updated}</p>` : ""}
           </div>
         </div>
       `;
 
       hoverPopup.style.left = e.pageX + 20 + "px";
-      hoverPopup.style.top = e.pageY + 20 + "px";
+      hoverPopup.style.top  = e.pageY + 20 + "px";
       hoverPopup.classList.add("active");
     });
 
@@ -120,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       seeMoreLink.textContent = notifPopup.classList.contains("expanded")
         ? "Show less"
         : "+ See more";
-});
-}
+    });
+  }
 
 });

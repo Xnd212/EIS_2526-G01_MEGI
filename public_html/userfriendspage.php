@@ -7,6 +7,13 @@ if (!isset($_SESSION['user_id'])) {
 }
 $currentUserId = (int) $_SESSION['user_id'];
 
+// --- Utilizador cujos amigos queremos ver (perfil) ---
+$profileUserId = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
+if (!$profileUserId) {
+    // se não vier nada no URL, mostra os amigos do user logado
+    $profileUserId = $currentUserId;
+}
+
 // --- Ligação à base de dados ---
 $host   = "localhost";
 $user   = "root";
@@ -35,7 +42,8 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $currentUserId);
+$stmt->bind_param("i", $profileUserId);
+
 $stmt->execute();
 $result = $stmt->get_result();
 

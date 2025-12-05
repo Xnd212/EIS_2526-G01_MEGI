@@ -185,8 +185,7 @@ while ($row = $resultE->fetch_assoc()) {
 }
 $stmtE->close();
 
-// You may close connection here or at the end
-//$conn->close();
+
 ?>
 <!DOCTYPE html>
 

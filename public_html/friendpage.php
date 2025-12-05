@@ -396,7 +396,11 @@ $stmtE->close();
 
           </div>
 
-          <a href="userfriendspage.php" class="view-all">+ See more</a>
+          <a href="userfriendspage.php?user_id=<?php echo (int)$profile['user_id']; ?>" 
+        class="view-all">
+       + See more
+        </a>
+
         </section>
 
       </div>

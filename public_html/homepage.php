@@ -232,6 +232,54 @@ foreach ($collectionsStats as $col) {
     }
 }
 
+// ================== ITEM EM DESTAQUE PARA CADA TOP COLLECTION ==================
+$featuredByValue    = null;
+$featuredMostRecent = null;
+$featuredByItems    = null;
+
+$featuredSql = "
+    SELECT 
+        i.name,
+        i.price,
+        i.acc_date,
+        i.acc_place,
+        img.url AS item_image
+    FROM contains con
+    JOIN item i       ON i.item_id = con.item_id
+    LEFT JOIN image img ON img.image_id = i.image_id
+    WHERE con.collection_id = ?
+    ORDER BY i.price DESC, i.item_id DESC   -- aqui escolhemos o mais caro dessa coleção
+    LIMIT 1
+";
+
+if ($topByValue) {
+    $stmtF = $conn->prepare($featuredSql);
+    $stmtF->bind_param('i', $topByValue['collection_id']);
+    $stmtF->execute();
+    $resF = $stmtF->get_result();
+    $featuredByValue = $resF->fetch_assoc() ?: null;
+    $stmtF->close();
+}
+
+if ($topMostRecent) {
+    $stmtF = $conn->prepare($featuredSql);
+    $stmtF->bind_param('i', $topMostRecent['collection_id']);
+    $stmtF->execute();
+    $resF = $stmtF->get_result();
+    $featuredMostRecent = $resF->fetch_assoc() ?: null;
+    $stmtF->close();
+}
+
+if ($topByItems) {
+    $stmtF = $conn->prepare($featuredSql);
+    $stmtF->bind_param('i', $topByItems['collection_id']);
+    $stmtF->execute();
+    $resF = $stmtF->get_result();
+    $featuredByItems = $resF->fetch_assoc() ?: null;
+    $stmtF->close();
+}
+
+
 ?>
 
 
@@ -377,39 +425,45 @@ foreach ($collectionsStats as $col) {
             </div>
         </section>
 
-                <!-- ========== TOP COLECIONADORES ========= -->
-                <div class="side-ranking">
-                <section class="top-collectors-card">
-                    <h2 class="section-title1">Top collectors of the week 🤝</h2>
+<!-- ========== TOP COLECIONADORES ========= -->
+<div class="side-ranking">
+<section class="top-collectors-card">
+    <h2 class="section-title1">Top collectors of the week 🤝</h2>
 
-                    <?php if (!empty($topCollectors)): ?>
-                        <ol class="top-collector-list">
-                            <?php foreach ($topCollectors as $idx => $collector): ?>
-                                <?php
-                                    $pos = $idx + 1;
-                                    if     ($pos === 1) { $medal = "🥇"; $medalClass = "gold"; }
-                                    elseif ($pos === 2) { $medal = "🥈"; $medalClass = "silver"; }
-                                    else                { $medal = "🥉"; $medalClass = "bronze"; }
-                                ?>
-                                <li>
-                                    <span class="medal <?php echo $medalClass; ?>">
-                                        <?php echo $medal; ?>
-                                    </span>
-                                    <div class="collector-info">
-                                        <span class="collector-name">
-                                            <?php echo htmlspecialchars($collector['username']); ?>
-                                        </span>
-                                        <span class="collector-items">
-                                            <?php echo (int)$collector['total_items']; ?> items
-                                        </span>
-                                    </div>
-                                </li>
-                            <?php endforeach; ?>
-                        </ol>
-                    <?php else: ?>
-                        <p style="padding: 0 1rem;">No collectors found yet.</p>
-                    <?php endif; ?>
-                </section>
+    <?php if (!empty($topCollectors)): ?>
+        <ol class="top-collector-list"
+            id="top-collectors-list"
+            data-current-user-id="<?php echo (int)$currentUserId; ?>">
+
+            <?php foreach ($topCollectors as $idx => $collector): ?>
+                <?php
+                    $pos = $idx + 1;
+                    if     ($pos === 1) { $medal = "🥇"; $medalClass = "gold"; }
+                    elseif ($pos === 2) { $medal = "🥈"; $medalClass = "silver"; }
+                    else                { $medal = "🥉"; $medalClass = "bronze"; }
+                ?>
+                <li data-user-id="<?php echo (int)$collector['user_id']; ?>">
+                    <span class="medal <?php echo $medalClass; ?>">
+                        <?php echo $medal; ?>
+                    </span>
+
+                    <div class="collector-info">
+                        <span class="collector-name">
+                            <?php echo htmlspecialchars($collector['username']); ?>
+                        </span>
+
+                        <span class="collector-items">
+                            <?php echo (int)$collector['total_items']; ?> items
+                        </span>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    <?php else: ?>
+        <p style="padding: 0 1rem;">No collectors found yet.</p>
+    <?php endif; ?>
+</section>
+
 
 
                     <!-- ========== TOP ITENS ========= -->
@@ -450,127 +504,167 @@ foreach ($collectionsStats as $col) {
             </div>
 
 
-            <!-- ========== TOP COLLECTIONS (POPUP INCL.) ========= -->
-           <section class="top-collections-section">
-               <h2 class="section-title2">Top Collections ⭐</h2>
+<!-- ========== TOP COLLECTIONS ========= -->
+<section class="top-collections-section">
+    <h2 class="section-title2">Top Collections ⭐</h2>
 
-               <div class="top-collections-grid">
+    <div class="top-collections-grid">
 
-                   <!-- ======= Price (coleção com maior valor total) ======= -->
-                   <?php if ($topByValue): ?>
-                       <?php
-                           $imgPrice = !empty($topByValue['collection_image'])
-                               ? $topByValue['collection_image']
-                               : 'images/default_collection.png';
+        <!-- ======= Price (coleção com maior valor total) ======= -->
+        <?php if ($topByValue): ?>
+            <?php
+                $imgPrice = !empty($topByValue['collection_image'])
+                    ? $topByValue['collection_image']
+                    : 'images/default_collection.png';
 
-                           $lastUpdPrice = $topByValue['last_updated']
-                               ? date('d/m/Y', strtotime($topByValue['last_updated']))
-                               : '—';
-                       ?>
-                       <div class="top-collection-block"
-                            id="price-card"
-                            data-id="price-card"
-                            data-collection-name="<?= htmlspecialchars($topByValue['collection_name']); ?>"
-                            data-collection-user="<?= htmlspecialchars($topByValue['username']); ?>"
-                            data-collection-value="<?= number_format($topByValue['total_value'], 2, ',', ''); ?>€"
-                            data-collection-items="<?= (int)$topByValue['num_items']; ?>"
-                            data-collection-lastupdated="<?= $lastUpdPrice; ?>"
-                       >
-                           <h3 class="top-collection-title">Price</h3>
-                           <img src="<?= htmlspecialchars($imgPrice); ?>"
-                                alt="<?= htmlspecialchars($topByValue['collection_name']); ?>">
-                           <p class="collection-name"><?= htmlspecialchars($topByValue['collection_name']); ?></p>
-                           <p class="collection-author"><?= htmlspecialchars($topByValue['username']); ?></p>
-                           <p class="collection-extra">
-                               Value: <?= number_format($topByValue['total_value'], 2, ',', ''); ?>€
-                           </p>
-                           <p class="collection-extra">
-                               Items: <?= (int)$topByValue['num_items']; ?>
-                           </p>
-                           <p class="collection-date">
-                               Last updated: <?= $lastUpdPrice; ?>
-                           </p>
-                       </div>
-                   <?php endif; ?>
+                $lastUpdPrice = $topByValue['last_updated']
+                    ? date('d/m/Y', strtotime($topByValue['last_updated']))
+                    : '—';
+
+                $feat      = $featuredByValue;
+                $itemTitle = $feat['name'] ?? '';
+                $itemPrice = isset($feat['price']) ? number_format($feat['price'], 2, ',', '') : '';
+                $itemDate  = !empty($feat['acc_date']) ? date('d/m/Y', strtotime($feat['acc_date'])) : '';
+                $itemPlace = $feat['acc_place'] ?? '';
+                $itemImg   = !empty($feat['item_image']) ? $feat['item_image'] : 'images/default_item.png';
+            ?>
+            <div class="top-collection-block"
+                 id="price-card"
+                 onclick="window.location.href='collectionpage.php?id=<?php echo (int)$topByValue['collection_id']; ?>'"
+                 data-id="price-card"
+                 data-collection-name="<?php echo htmlspecialchars($topByValue['collection_name']); ?>"
+                 data-collection-user="<?php echo htmlspecialchars($topByValue['username']); ?>"
+                 data-collection-value="<?php echo number_format($topByValue['total_value'], 2, ',', ''); ?>"
+                 data-collection-items="<?php echo (int)$topByValue['num_items']; ?>"
+                 data-collection-lastupdated="<?php echo $lastUpdPrice; ?>"
+                 data-item-title="<?php echo htmlspecialchars($itemTitle); ?>"
+                 data-item-price="<?php echo $itemPrice; ?>"
+                 data-item-date="<?php echo $itemDate; ?>"
+                 data-item-place="<?php echo htmlspecialchars($itemPlace); ?>"
+                 data-item-image="<?php echo htmlspecialchars($itemImg); ?>"
+            >
+                <h3 class="top-collection-title">Price</h3>
+                <img src="<?php echo htmlspecialchars($imgPrice); ?>"
+                     alt="<?php echo htmlspecialchars($topByValue['collection_name']); ?>">
+                <p class="collection-name"><?php echo htmlspecialchars($topByValue['collection_name']); ?></p>
+                <p class="collection-author"><?php echo htmlspecialchars($topByValue['username']); ?></p>
+                <p class="collection-extra">
+                    Value: <?php echo number_format($topByValue['total_value'], 2, ',', ''); ?>€
+                </p>
+                <p class="collection-extra">
+                    Items: <?php echo (int)$topByValue['num_items']; ?>
+                </p>
+                <p class="collection-date">
+                    Last updated: <?php echo $lastUpdPrice; ?>
+                </p>
+            </div>
+        <?php endif; ?>
+
+        <!-- ======= Most recent (coleção mais recentemente atualizada) ======= -->
+        <?php if ($topMostRecent): ?>
+            <?php
+                $imgRecent = !empty($topMostRecent['collection_image'])
+                    ? $topMostRecent['collection_image']
+                    : 'images/default_collection.png';
+
+                $lastUpdRecent = $topMostRecent['last_updated']
+                    ? date('d/m/Y', strtotime($topMostRecent['last_updated']))
+                    : '—';
+
+                $featR      = $featuredMostRecent;
+                $itemTitleR = $featR['name'] ?? '';
+                $itemPriceR = isset($featR['price']) ? number_format($featR['price'], 2, ',', '') : '';
+                $itemDateR  = !empty($featR['acc_date']) ? date('d/m/Y', strtotime($featR['acc_date'])) : '';
+                $itemPlaceR = $featR['acc_place'] ?? '';
+                $itemImgR   = !empty($featR['item_image']) ? $featR['item_image'] : 'images/default_item.png';
+            ?>
+            <div class="top-collection-block"
+                 id="recent-card"
+                 onclick="window.location.href='collectionpage.php?id=<?php echo (int)$topMostRecent['collection_id']; ?>'"
+                 data-id="recent-card"
+                 data-collection-name="<?php echo htmlspecialchars($topMostRecent['collection_name']); ?>"
+                 data-collection-user="<?php echo htmlspecialchars($topMostRecent['username']); ?>"
+                 data-collection-value="<?php echo number_format($topMostRecent['total_value'], 2, ',', ''); ?>"
+                 data-collection-items="<?php echo (int)$topMostRecent['num_items']; ?>"
+                 data-collection-lastupdated="<?php echo $lastUpdRecent; ?>"
+                 data-item-title="<?php echo htmlspecialchars($itemTitleR); ?>"
+                 data-item-price="<?php echo $itemPriceR; ?>"
+                 data-item-date="<?php echo $itemDateR; ?>"
+                 data-item-place="<?php echo htmlspecialchars($itemPlaceR); ?>"
+                 data-item-image="<?php echo htmlspecialchars($itemImgR); ?>"
+            >
+                <h3 class="top-collection-title">Most recent</h3>
+                <img src="<?php echo htmlspecialchars($imgRecent); ?>"
+                     alt="<?php echo htmlspecialchars($topMostRecent['collection_name']); ?>">
+                <p class="collection-name"><?php echo htmlspecialchars($topMostRecent['collection_name']); ?></p>
+                <p class="collection-author"><?php echo htmlspecialchars($topMostRecent['username']); ?></p>
+                <p class="collection-extra">
+                    Value: <?php echo number_format($topMostRecent['total_value'], 2, ',', ''); ?>€
+                </p>
+                <p class="collection-extra">
+                    Items: <?php echo (int)$topMostRecent['num_items']; ?>
+                </p>
+                <p class="collection-date">
+                    Last updated: <?php echo $lastUpdRecent; ?>
+                </p>
+            </div>
+        <?php endif; ?>
+
+        <!-- ======= More items (coleção com mais items) ======= -->
+        <?php if ($topByItems): ?>
+            <?php
+                $imgItems = !empty($topByItems['collection_image'])
+                    ? $topByItems['collection_image']
+                    : 'images/default_collection.png';
+
+                $lastUpdItems = $topByItems['last_updated']
+                    ? date('d/m/Y', strtotime($topByItems['last_updated']))
+                    : '—';
+
+                $featI      = $featuredByItems;
+                $itemTitleI = $featI['name'] ?? '';
+                $itemPriceI = isset($featI['price']) ? number_format($featI['price'], 2, ',', '') : '';
+                $itemDateI  = !empty($featI['acc_date']) ? date('d/m/Y', strtotime($featI['acc_date'])) : '';
+                $itemPlaceI = $featI['acc_place'] ?? '';
+                $itemImgI   = !empty($featI['item_image']) ? $featI['item_image'] : 'images/default_item.png';
+            ?>
+            <div class="top-collection-block"
+                 id="items-card"
+                 onclick="window.location.href='collectionpage.php?id=<?php echo (int)$topByItems['collection_id']; ?>'"
+                 data-id="items-card"
+                 data-collection-name="<?php echo htmlspecialchars($topByItems['collection_name']); ?>"
+                 data-collection-user="<?php echo htmlspecialchars($topByItems['username']); ?>"
+                 data-collection-value="<?php echo number_format($topByItems['total_value'], 2, ',', ''); ?>"
+                 data-collection-items="<?php echo (int)$topByItems['num_items']; ?>"
+                 data-collection-lastupdated="<?php echo $lastUpdItems; ?>"
+                 data-item-title="<?php echo htmlspecialchars($itemTitleI); ?>"
+                 data-item-price="<?php echo $itemPriceI; ?>"
+                 data-item-date="<?php echo $itemDateI; ?>"
+                 data-item-place="<?php echo htmlspecialchars($itemPlaceI); ?>"
+                 data-item-image="<?php echo htmlspecialchars($itemImgI); ?>"
+            >
+                <h3 class="top-collection-title">More items</h3>
+                <img src="<?php echo htmlspecialchars($imgItems); ?>"
+                     alt="<?php echo htmlspecialchars($topByItems['collection_name']); ?>">
+                <p class="collection-name"><?php echo htmlspecialchars($topByItems['collection_name']); ?></p>
+                <p class="collection-author"><?php echo htmlspecialchars($topByItems['username']); ?></p>
+                <p class="collection-extra">
+                    Value: <?php echo number_format($topByItems['total_value'], 2, ',', ''); ?>€
+                </p>
+                <p class="collection-extra">
+                    Items: <?php echo (int)$topByItems['num_items']; ?>
+                </p>
+                <p class="collection-date">
+                    Last updated: <?php echo $lastUpdItems; ?>
+                </p>
+            </div>
+        <?php endif; ?>
+
+    </div>
+</section>
 
 
-                   <!-- ======= Most recent (coleção mais recentemente atualizada) ======= -->
-                   <?php if ($topMostRecent): ?>
-                       <?php
-                           $imgRecent = !empty($topMostRecent['collection_image'])
-                               ? $topMostRecent['collection_image']
-                               : 'images/default_collection.png';
 
-                           $lastUpdRecent = $topMostRecent['last_updated']
-                               ? date('d/m/Y', strtotime($topMostRecent['last_updated']))
-                               : '—';
-                       ?>
-                       <div class="top-collection-block"
-                            id="recent-card"
-                            data-id="recent-card"
-                            data-collection-name="<?= htmlspecialchars($topMostRecent['collection_name']); ?>"
-                            data-collection-user="<?= htmlspecialchars($topMostRecent['username']); ?>"
-                            data-collection-value="<?= number_format($topMostRecent['total_value'], 2, ',', ''); ?>€
-                            data-collection-items="<?= (int)$topMostRecent['num_items']; ?>"
-                            data-collection-lastupdated="<?= $lastUpdRecent; ?>"
-                       >
-                           <h3 class="top-collection-title">Most recent</h3>
-                           <img src="<?= htmlspecialchars($imgRecent); ?>"
-                                alt="<?= htmlspecialchars($topMostRecent['collection_name']); ?>">
-                           <p class="collection-name"><?= htmlspecialchars($topMostRecent['collection_name']); ?></p>
-                           <p class="collection-author"><?= htmlspecialchars($topMostRecent['username']); ?></p>
-                           <p class="collection-extra">
-                               Value: <?= number_format($topMostRecent['total_value'], 2, ',', ''); ?>€
-                           </p>
-                           <p class="collection-extra">
-                               Items: <?= (int)$topMostRecent['num_items']; ?>
-                           </p>
-                           <p class="collection-date">
-                               Last updated: <?= $lastUpdRecent; ?>
-                           </p>
-                       </div>
-                   <?php endif; ?>
-
-
-                   <!-- ======= More items (coleção com mais items) ======= -->
-                   <?php if ($topByItems): ?>
-                       <?php
-                           $imgItems = !empty($topByItems['collection_image'])
-                               ? $topByItems['collection_image']
-                               : 'images/default_collection.png';
-
-                           $lastUpdItems = $topByItems['last_updated']
-                               ? date('d/m/Y', strtotime($topByItems['last_updated']))
-                               : '—';
-                       ?>
-                       <div class="top-collection-block"
-                            id="items-card"
-                            data-id="items-card"
-                            data-collection-name="<?= htmlspecialchars($topByItems['collection_name']); ?>"
-                            data-collection-user="<?= htmlspecialchars($topByItems['username']); ?>"
-                            data-collection-value="<?= number_format($topByItems['total_value'], 2, ',', ''); ?>€
-                            data-collection-items="<?= (int)$topByItems['num_items']; ?>"
-                            data-collection-lastupdated="<?= $lastUpdItems; ?>"
-                       >
-                           <h3 class="top-collection-title">More items</h3>
-                           <img src="<?= htmlspecialchars($imgItems); ?>"
-                                alt="<?= htmlspecialchars($topByItems['collection_name']); ?>">
-                           <p class="collection-name"><?= htmlspecialchars($topByItems['collection_name']); ?></p>
-                           <p class="collection-author"><?= htmlspecialchars($topByItems['username']); ?></p>
-                           <p class="collection-extra">
-                               Value: <?= number_format($topByItems['total_value'], 2, ',', ''); ?>€
-                           </p>
-                           <p class="collection-extra">
-                               Items: <?= (int)$topByItems['num_items']; ?>
-                           </p>
-                           <p class="collection-date">
-                               Last updated: <?= $lastUpdItems; ?>
-                           </p>
-                       </div>
-                   <?php endif; ?>
-
-               </div>
-           </section>
 
 
 

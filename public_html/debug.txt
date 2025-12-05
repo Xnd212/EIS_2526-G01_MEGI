@@ -129,3 +129,29 @@ Array
 
 )
 
+FORM SUBMITTED at 2025-12-05 23:30:08
+Array
+(
+    [eventName] => 1q21345t
+    [startDate] => 2025-12-17
+    [theme] => teste
+    [collection_id] => 3
+    [location] => isep
+    [description] => teste teste
+    [youtube] => 
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => placeholdereventpicture.png
+            [full_path] => placeholdereventpicture.png
+            [type] => image/png
+            [tmp_name] => C:\xampp\tmp\phpE552.tmp
+            [error] => 0
+            [size] => 1201659
+        )
+
+)
+

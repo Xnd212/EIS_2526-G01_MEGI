@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    
+    console.log("Sign Up Event Script Loaded");
+
     // ============================================
     // 1. NAVBAR LOGIC (Notifications & Logout)
     // ============================================
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelLogout = document.getElementById("cancel-logout");
     const confirmLogout = document.getElementById("confirm-logout");
 
-    // Close helper
+    // Helper to close all popups
     function closePopups() {
         if (notifPopup) notifPopup.style.display = "none";
         if (logoutPopup) {
@@ -23,8 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
         bellBtn.addEventListener("click", (e) => {
             e.preventDefault(); e.stopPropagation();
             const isVisible = notifPopup.style.display === 'flex' || notifPopup.style.display === 'block';
-            closePopups();
-            notifPopup.style.display = isVisible ? 'none' : 'flex';
+            closePopups(); // Close others
+            notifPopup.style.display = isVisible ? 'none' : 'block';
         });
     }
 
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         logoutBtn.addEventListener("click", (e) => {
             e.preventDefault(); e.stopPropagation();
             const isVisible = logoutPopup.classList.contains("active");
-            closePopups();
+            closePopups(); // Close others
             if (!isVisible) {
                 logoutPopup.classList.add("active");
                 logoutPopup.style.display = "block";
@@ -42,6 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (cancelLogout) {
         cancelLogout.addEventListener("click", closePopups);
+    }
+    
+    if (confirmLogout) {
+        confirmLogout.addEventListener("click", () => {
+             window.location.href = "logout.php";
+        });
     }
     
     // Close on click outside
@@ -189,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Show success message and button to go to event page
                     summarySection.innerHTML = `
                         <h3>🎉 Registration Completed!</h3>
                         <p>Thank you for signing up.</p>
@@ -198,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                 } else {
                     alert("Error: " + data.message);
+                    // On error, let them try again
                     summarySection.style.display = 'none';
                     form.style.display = 'block';
                 }

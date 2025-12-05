@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("iii", $user_id, $p_event_id, $p_coll_id);
 
     if ($stmt->execute()) {
+        // === FIX IS HERE: Changed 'event_id' to 'id' ===
         echo json_encode(['status' => 'success', 'redirect' => 'eventpage.php?id=' . $p_event_id]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
@@ -86,8 +87,8 @@ if (!$event_id) {
     exit();
 }
 
-// 1. Get User Name (Check 'name' column, fallback to 'username')
-$u_sql = "SELECT name FROM user WHERE user_id = ?"; 
+// 1. Get User Name (Using 'username' column)
+$u_sql = "SELECT username FROM user WHERE user_id = ?"; 
 $u_stmt = $conn->prepare($u_sql);
 $u_stmt->bind_param("i", $user_id);
 $u_stmt->execute();
@@ -95,10 +96,8 @@ $u_res = $u_stmt->get_result();
 
 if ($u_res->num_rows > 0) {
     $row = $u_res->fetch_assoc();
-    // If 'name' is empty/null, check if there is a username column or just display "User"
-    $username_display = !empty($row['name']) ? $row['name'] : "User";
+    $username_display = !empty($row['username']) ? $row['username'] : "User";
 } else {
-    // Attempt fallback to username if 'name' didn't exist or query failed
     $username_display = "User"; 
 }
 
@@ -120,15 +119,11 @@ $conn->close();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Sign up for event</title>
   <link rel="stylesheet" href="sign_up_event.css" />
-  <!-- Reuse header styles -->
   <link rel="stylesheet" href="homepage.css" /> 
 </head>
 
 <body>
 
-  <!-- ===========================
-       HEADER
-  ============================ -->
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -149,7 +144,6 @@ $conn->close();
       </div>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       
-      <!-- Logout -->
       <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
       <div class="notification-popup logout-popup" id="logout-popup">
@@ -165,9 +159,6 @@ $conn->close();
     </div>
   </header>
 
-  <!-- ===========================
-       MAIN CONTENT
-  ============================ -->
   <div class="main">
     <div class="content">
       <section class="event-signup-section">
@@ -175,13 +166,11 @@ $conn->close();
 
         <form id="eventSignUpForm" novalidate data-event-id="<?php echo $event_id; ?>">
           
-          <!-- User Name (Auto-filled from DB, Readonly) -->
           <div class="form-group">
             <label for="userName">User Name</label>
             <input type="text" id="userName" name="userName" readonly value="<?php echo htmlspecialchars($username_display); ?>" />
           </div>
 
-          <!-- Collection (Dynamic Dropdown) -->
           <div class="form-group">
             <label for="collection">Collection <span class="required">*</span></label>
             <select id="collection" name="collection" required>
@@ -195,13 +184,11 @@ $conn->close();
             </select>
           </div>
 
-          <!-- Participants -->
           <div class="form-group">
             <label for="participants">Number of Participants</label>
             <input type="number" id="participants" name="participants" value="1" min="1" />
           </div>
 
-          <!-- Notifications Toggle -->
           <div class="form-group">
             <label>Do you want to receive notifications? <span class="required">*</span></label>
             <div class="radio-group">
@@ -210,7 +197,6 @@ $conn->close();
             </div>
           </div>
 
-          <!-- Notification Options (Hidden by default) -->
           <div id="notificationFields" class="conditional-section hidden" style="display:none; margin-top:10px;">
             <label>Preferred method: <span class="required">*</span></label>
             <div class="radio-group">
@@ -229,13 +215,11 @@ $conn->close();
             </div>
           </div>
 
-          <!-- Comments -->
           <div class="form-group">
             <label for="comments">Comments or Notes</label>
             <textarea id="comments" name="comments" rows="4" placeholder="Add any comments about your participation..."></textarea>
           </div>
 
-          <!-- Terms -->
           <div class="form-group">
             <label>
               <input type="checkbox" id="terms" name="terms" required />
@@ -243,14 +227,12 @@ $conn->close();
             </label>
           </div>
 
-          <!-- Confirm Button -->
           <div class="form-actions">
             <button type="submit" class="btn-primary">Confirm Registration</button>
           </div>
           <p id="formMessage" class="form-message"></p>
         </form>
 
-        <!-- Summary Section (Hidden initially) -->
         <div id="summarySection" class="summary-section hidden" style="display:none; margin-top:20px; border:1px solid #ccc; padding:20px; border-radius:8px;">
           <h3>Registration Summary</h3>
           <div id="summaryContent" style="margin-bottom:20px; line-height:1.6;"></div>
@@ -264,7 +246,6 @@ $conn->close();
     </div>
   </div>
 
-  <!-- Sidebar -->
   <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>
@@ -287,7 +268,6 @@ $conn->close();
       </div>
   </aside>
 
-  <!-- === JAVASCRIPT === -->
   <script src="sign_up_event.js"></script>
   <script src="logout.js"></script>
 

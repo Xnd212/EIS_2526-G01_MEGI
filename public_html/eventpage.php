@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
     if ($collection_id && $rating !== false && $rating >= 0 && $rating <= 5) {
 
         if ($rating == 0) {
-            // Se o user clicar em Clear, apagamos o rating dessa coleção neste evento
+            // If user clicks Clear
             $sqlRate = "
                 DELETE FROM rating
                 WHERE user_id = ? AND collection_id = ? AND event_id = ?
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
             $stmtRate->execute();
             $stmtRate->close();
         } else {
-            // 1 a 5 → insere / atualiza rating
+            // 1 to 5 -> Insert/Update
             $sqlRate = "
                 INSERT INTO rating (user_id, collection_id, event_id, rating)
                 VALUES (?, ?, ?, ?)
@@ -66,16 +66,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
         }
     }
 
-    // Evita re-submit no refresh
+    // Prevent re-submit on refresh
     header("Location: eventpage.php?id=" . $event_id);
     exit();
 }
 
 // ==========================================
-// 2. FETCH EVENT DETAILS (UPGRADE #1: Added Creator Join)
+// 2. FETCH EVENT DETAILS
 // ==========================================
-// Added: u.username as creator_name
-// Added: JOIN user u ON e.user_id = u.user_id
+// UPGRADE: Joined 'user' table to get creator_name
 $sql = "SELECT e.*, i.url as image_url, u.username as creator_name
         FROM event e 
         LEFT JOIN image i ON e.image_id = i.image_id
@@ -97,7 +96,6 @@ $stmt->close();
 
 // ==========================================
 // 3. FETCH COLLECTIONS (Others bringing)
-//     -> exclui as coleções do user logado
 // ==========================================
 $collections_sql = "SELECT 
                         c.collection_id, 
@@ -124,7 +122,7 @@ $col_stmt->close();
 // 3.B  FETCH RATINGS FOR THESE COLLECTIONS
 // ==========================================
 
-// Médias por coleção neste evento
+// Average ratings
 $avgRatings = [];
 $avgSql = "
     SELECT 
@@ -147,7 +145,7 @@ while ($row = $avgRes->fetch_assoc()) {
 }
 $avgStmt->close();
 
-// Rating do utilizador logado para cada coleção neste evento
+// User's own ratings
 $userRatings = [];
 $userRateSql = "
     SELECT collection_id, rating
@@ -179,9 +177,11 @@ $check_stmt->close();
 $eventDateObj = new DateTime($event['date']);
 $today        = new DateTime('today');
 
-$isPast   = $eventDateObj < $today;                 // true se já passou
-$event_date = $eventDateObj->format("d/m/Y");       // só para mostrar no ecrã
+$isPast     = $eventDateObj < $today;
+$event_date = $eventDateObj->format("d/m/Y");
 
+// UPGRADE: Check if current user is the creator
+$isCreator  = ($event['user_id'] == $user_id);
 
 // Video Logic
 $video_id = null;
@@ -213,12 +213,18 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
           color: white;
           cursor: pointer;
       }
-      /* Reusing popup styles for consistency */
+      /* Style for the Edit Button */
+      .register-button.edit-btn {
+          background-color: #f0ad4e; /* Orange/Yellow */
+          color: white;
+      }
+      
+      /* Reusing popup styles */
       .leave-popup {
           display: none;
           position: absolute;
           top: 60px;
-          right: 20px; /* Or center it if you prefer */
+          right: 20px;
           width: 300px;
           background: white;
           border: 1px solid #ddd;
@@ -308,7 +314,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             <div class="event-info">
               
               <p><strong>Created by:</strong> <?php echo htmlspecialchars($event['creator_name']); ?></p>
-              
+
               <p><strong>Date:</strong> <?php echo $event_date; ?></p>
               
               <?php if(isset($event['place'])): ?>
@@ -336,12 +342,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
     <?php
         $colId      = (int)$collection['collection_id'];
         $colImg     = !empty($collection['collection_image_url']) ? $collection['collection_image_url'] : 'images/default_collection.png';
-
-        $avgInfo    = $avgRatings[$colId] ?? null;
         $userRating = $userRatings[$colId] ?? 0;
-        $avgValue   = $avgInfo['avg_rating']  ?? null;
-        $numRatings = $avgInfo['num_ratings'] ?? 0;
-        $avgRounded = $avgValue !== null ? round($avgValue) : 0;
     ?>
     
     <div class="collection-bring">
@@ -357,11 +358,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
       <?php if ($isPast): ?>
           <div class="collection-rating">
-            <?php
-                $colId      = (int)$collection['collection_id'];
-                $userRating = $userRatings[$colId] ?? 0;
-            ?>
-
             <form method="post" class="rating-form">
                 <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
 
@@ -394,7 +390,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
                 </div>
             </form>
           </div>
-      <?php endif; // End $isPast check ?>
+      <?php endif; ?>
 
     </div>
   <?php endforeach; ?>
@@ -415,17 +411,26 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         <?php if (!$isPast): ?>
             <div class="register-section">
               <div class="register-row">
-                <?php if ($is_attending): ?>
+                
+                <?php if ($isCreator): ?>
+                  <p class="register-text">✏️ You created this event.</p>
+                  <a href="editevent.php?id=<?php echo $event_id; ?>" class="register-button edit-btn">
+                    Edit Event
+                  </a>
+
+                <?php elseif ($is_attending): ?>
                   <p class="register-text">✅ You're signed up!</p>
                   <button id="leave-event-btn" class="register-button registered" data-id="<?php echo $event_id; ?>">
                     Leave Event
                   </button>
+
                 <?php else: ?>
                   <p class="register-text">🎟️ Want to join? Sign up now!</p>
                   <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=join" class="register-button">
                     Sign up
                   </a>
                 <?php endif; ?>
+
               </div>
             </div>
         <?php else: ?>

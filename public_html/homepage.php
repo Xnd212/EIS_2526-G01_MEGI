@@ -186,6 +186,51 @@ if ($resTopItems) {
     }
 }
 
+// ================= TOP COLLECTIONS (VALUE, MOST RECENT, MORE ITEMS) =================
+$sqlCollectionsStats = "
+    SELECT
+        c.collection_id,
+        c.name                         AS collection_name,
+        c.image_id,
+        u.username,
+        img.url                        AS collection_image,
+        COALESCE(SUM(i.price), 0)      AS total_value,
+        COUNT(i.item_id)               AS num_items,
+        MAX(i.registration_date)       AS last_updated
+    FROM collection c
+    JOIN user u           ON u.user_id      = c.user_id
+    LEFT JOIN image img   ON img.image_id   = c.image_id
+    LEFT JOIN contains con ON con.collection_id = c.collection_id
+    LEFT JOIN item i      ON i.item_id      = con.item_id
+    GROUP BY c.collection_id
+";
+
+$resStats = $conn->query($sqlCollectionsStats);
+
+$collectionsStats = [];
+if ($resStats) {
+    while ($row = $resStats->fetch_assoc()) {
+        $collectionsStats[] = $row;
+    }
+}
+
+$topByValue    = null;
+$topMostRecent = null;
+$topByItems    = null;
+
+foreach ($collectionsStats as $col) {
+    if ($topByValue === null || $col['total_value'] > $topByValue['total_value']) {
+        $topByValue = $col;
+    }
+    if (!empty($col['last_updated'])) {
+        if ($topMostRecent === null || $col['last_updated'] > $topMostRecent['last_updated']) {
+            $topMostRecent = $col;
+        }
+    }
+    if ($topByItems === null || $col['num_items'] > $topByItems['num_items']) {
+        $topByItems = $col;
+    }
+}
 
 ?>
 
@@ -406,47 +451,127 @@ if ($resTopItems) {
 
 
             <!-- ========== TOP COLLECTIONS (POPUP INCL.) ========= -->
-            <section class="top-collections-section">
-                <h2 class="section-title2">Top Collections ⭐</h2>
+           <section class="top-collections-section">
+               <h2 class="section-title2">Top Collections ⭐</h2>
 
-                <div class="top-collections-grid">
+               <div class="top-collections-grid">
 
-                    <!-- Preço -->
-                    <div class="top-collection-block" id="price-card" data-id="price-card">
-                        <h3 class="top-collection-title">Price</h3>
-                        <img src="images\pokémon_logo.png" alt="Pokemon Cards">
-                        <p class="collection-name">Pokemon Cards</p>
-                        <p class="collection-author">Rafael_Ameida123</p>
-                        <p class="collection-extra">Value: 5312€</p>
-                        <p class="collection-extra">Items: 51</p>
-                        <p class="collection-date">Last updated: 27/03/2025</p>
-                    </div>
+                   <!-- ======= Price (coleção com maior valor total) ======= -->
+                   <?php if ($topByValue): ?>
+                       <?php
+                           $imgPrice = !empty($topByValue['collection_image'])
+                               ? $topByValue['collection_image']
+                               : 'images/default_collection.png';
 
-                    <!-- Mais recente -->
-                    <div class="top-collection-block" id="recent-card" data-id="recent-card">
-                        <h3 class="top-collection-title">Most recent</h3>
-                        <img src="images\championspath.png" alt="Champion's Path">
-                        <p class="collection-name">Pokemon Champion's Path</p>
-                        <p class="collection-author">Paul_Perez1697</p>
-                        <p class="collection-extra">Value: 875€</p>
-                        <p class="collection-extra">Items: 14</p>
-                        <p class="collection-date">Last updated: 31/10/2025</p>
+                           $lastUpdPrice = $topByValue['last_updated']
+                               ? date('d/m/Y', strtotime($topByValue['last_updated']))
+                               : '—';
+                       ?>
+                       <div class="top-collection-block"
+                            id="price-card"
+                            data-id="price-card"
+                            data-collection-name="<?= htmlspecialchars($topByValue['collection_name']); ?>"
+                            data-collection-user="<?= htmlspecialchars($topByValue['username']); ?>"
+                            data-collection-value="<?= number_format($topByValue['total_value'], 2, ',', ''); ?>€"
+                            data-collection-items="<?= (int)$topByValue['num_items']; ?>"
+                            data-collection-lastupdated="<?= $lastUpdPrice; ?>"
+                       >
+                           <h3 class="top-collection-title">Price</h3>
+                           <img src="<?= htmlspecialchars($imgPrice); ?>"
+                                alt="<?= htmlspecialchars($topByValue['collection_name']); ?>">
+                           <p class="collection-name"><?= htmlspecialchars($topByValue['collection_name']); ?></p>
+                           <p class="collection-author"><?= htmlspecialchars($topByValue['username']); ?></p>
+                           <p class="collection-extra">
+                               Value: <?= number_format($topByValue['total_value'], 2, ',', ''); ?>€
+                           </p>
+                           <p class="collection-extra">
+                               Items: <?= (int)$topByValue['num_items']; ?>
+                           </p>
+                           <p class="collection-date">
+                               Last updated: <?= $lastUpdPrice; ?>
+                           </p>
+                       </div>
+                   <?php endif; ?>
 
-                    </div>
 
-                    <!-- Mais itens -->
-                    <div class="top-collection-block" id="items-card" data-id="items-card">
-                        <h3 class="top-collection-title">More items</h3>
-                        <img src="images\funko3.png" alt="Funko Pop">
-                        <p class="collection-name">Funko Pop</p>
-                        <p class="collection-author">Ana_SSilva7812</p>
-                        <p class="collection-extra">Value: 103€</p>
-                        <p class="collection-extra">Items: 152</p>     
-                        <p class="collection-date">Last updated: 01/10/2025</p>
+                   <!-- ======= Most recent (coleção mais recentemente atualizada) ======= -->
+                   <?php if ($topMostRecent): ?>
+                       <?php
+                           $imgRecent = !empty($topMostRecent['collection_image'])
+                               ? $topMostRecent['collection_image']
+                               : 'images/default_collection.png';
 
-                    </div>
-                </div>
-            </section>
+                           $lastUpdRecent = $topMostRecent['last_updated']
+                               ? date('d/m/Y', strtotime($topMostRecent['last_updated']))
+                               : '—';
+                       ?>
+                       <div class="top-collection-block"
+                            id="recent-card"
+                            data-id="recent-card"
+                            data-collection-name="<?= htmlspecialchars($topMostRecent['collection_name']); ?>"
+                            data-collection-user="<?= htmlspecialchars($topMostRecent['username']); ?>"
+                            data-collection-value="<?= number_format($topMostRecent['total_value'], 2, ',', ''); ?>€
+                            data-collection-items="<?= (int)$topMostRecent['num_items']; ?>"
+                            data-collection-lastupdated="<?= $lastUpdRecent; ?>"
+                       >
+                           <h3 class="top-collection-title">Most recent</h3>
+                           <img src="<?= htmlspecialchars($imgRecent); ?>"
+                                alt="<?= htmlspecialchars($topMostRecent['collection_name']); ?>">
+                           <p class="collection-name"><?= htmlspecialchars($topMostRecent['collection_name']); ?></p>
+                           <p class="collection-author"><?= htmlspecialchars($topMostRecent['username']); ?></p>
+                           <p class="collection-extra">
+                               Value: <?= number_format($topMostRecent['total_value'], 2, ',', ''); ?>€
+                           </p>
+                           <p class="collection-extra">
+                               Items: <?= (int)$topMostRecent['num_items']; ?>
+                           </p>
+                           <p class="collection-date">
+                               Last updated: <?= $lastUpdRecent; ?>
+                           </p>
+                       </div>
+                   <?php endif; ?>
+
+
+                   <!-- ======= More items (coleção com mais items) ======= -->
+                   <?php if ($topByItems): ?>
+                       <?php
+                           $imgItems = !empty($topByItems['collection_image'])
+                               ? $topByItems['collection_image']
+                               : 'images/default_collection.png';
+
+                           $lastUpdItems = $topByItems['last_updated']
+                               ? date('d/m/Y', strtotime($topByItems['last_updated']))
+                               : '—';
+                       ?>
+                       <div class="top-collection-block"
+                            id="items-card"
+                            data-id="items-card"
+                            data-collection-name="<?= htmlspecialchars($topByItems['collection_name']); ?>"
+                            data-collection-user="<?= htmlspecialchars($topByItems['username']); ?>"
+                            data-collection-value="<?= number_format($topByItems['total_value'], 2, ',', ''); ?>€
+                            data-collection-items="<?= (int)$topByItems['num_items']; ?>"
+                            data-collection-lastupdated="<?= $lastUpdItems; ?>"
+                       >
+                           <h3 class="top-collection-title">More items</h3>
+                           <img src="<?= htmlspecialchars($imgItems); ?>"
+                                alt="<?= htmlspecialchars($topByItems['collection_name']); ?>">
+                           <p class="collection-name"><?= htmlspecialchars($topByItems['collection_name']); ?></p>
+                           <p class="collection-author"><?= htmlspecialchars($topByItems['username']); ?></p>
+                           <p class="collection-extra">
+                               Value: <?= number_format($topByItems['total_value'], 2, ',', ''); ?>€
+                           </p>
+                           <p class="collection-extra">
+                               Items: <?= (int)$topByItems['num_items']; ?>
+                           </p>
+                           <p class="collection-date">
+                               Last updated: <?= $lastUpdItems; ?>
+                           </p>
+                       </div>
+                   <?php endif; ?>
+
+               </div>
+           </section>
+
 
 
             <!-- ===== Right Sidebar (Under Header) ===== -->

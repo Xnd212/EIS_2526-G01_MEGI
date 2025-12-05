@@ -66,18 +66,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
         }
     }
 
-
     // Evita re-submit no refresh
     header("Location: eventpage.php?id=" . $event_id);
     exit();
 }
 
 // ==========================================
-// 2. FETCH EVENT DETAILS
+// 2. FETCH EVENT DETAILS (UPGRADE #1: Added Creator Join)
 // ==========================================
-$sql = "SELECT e.*, i.url as image_url
+// Added: u.username as creator_name
+// Added: JOIN user u ON e.user_id = u.user_id
+$sql = "SELECT e.*, i.url as image_url, u.username as creator_name
         FROM event e 
         LEFT JOIN image i ON e.image_id = i.image_id
+        JOIN user u ON e.user_id = u.user_id
         WHERE e.event_id = ?";
 
 $stmt = $conn->prepare($sql);
@@ -248,7 +250,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 </head>
 <body>
 
-  <!-- ===== Header ===== -->
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -269,7 +270,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         
         <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
         
-        <!-- LOGOUT POPUP -->
         <div class="notification-popup logout-popup" id="logout-popup">
             <div class="popup-header"><h3>Logout</h3></div>
             <p>Are you sure you want to log out?</p>
@@ -279,7 +279,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             </div>
         </div>
 
-        <!-- NEW: LEAVE EVENT POPUP (Hidden by default) -->
         <div class="leave-popup" id="leave-popup">
             <div class="popup-header"><h3>Leave Event</h3></div>
             <p>Are you sure you want to leave this event? You will be removed from the list.</p>
@@ -292,7 +291,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
     </div>
   </header>
 
-  <!-- ===== Main Content ===== -->
   <div class="main">
     <div class="content">
       <div class="event-details-box">
@@ -308,6 +306,9 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
           <div class="event-details-content">
             <div class="event-info">
+              
+              <p><strong>Created by:</strong> <?php echo htmlspecialchars($event['creator_name']); ?></p>
+              
               <p><strong>Date:</strong> <?php echo $event_date; ?></p>
               
               <?php if(isset($event['place'])): ?>
@@ -318,7 +319,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             </div>
           </div>
 
-          <!-- VIDEO TEASER -->
           <?php if ($video_id): ?>
           <div class="video-thumbnail">
             <a href="<?php echo htmlspecialchars($event['teaser_url']); ?>" target="_blank">
@@ -329,8 +329,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
           <?php endif; ?>
         </div>
 
-        <!-- COLLECTIONS -->
-<?php if (count($collections) > 0): ?>
+        <?php if (count($collections) > 0): ?>
 <h3 class="collections-others">Collections others brought:</h3>
 <div class="collections-brought">
   <?php foreach ($collections as $collection): ?>
@@ -346,7 +345,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
     ?>
     
     <div class="collection-bring">
-      <!-- Card da coleção (link completo) -->
       <a href="collectionpage.php?id=<?php echo $colId; ?>">
         <img src="<?php echo htmlspecialchars($colImg); ?>" alt="Collection">
         <p class="collection-name">
@@ -357,45 +355,46 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </p>
       </a>
 
-      <!-- Rating POR BAIXO do card -->
-      <div class="collection-rating">
-        <?php
-            $colId      = (int)$collection['collection_id'];
-            $userRating = $userRatings[$colId] ?? 0;
-        ?>
+      <?php if ($isPast): ?>
+          <div class="collection-rating">
+            <?php
+                $colId      = (int)$collection['collection_id'];
+                $userRating = $userRatings[$colId] ?? 0;
+            ?>
 
-        <form method="post" class="rating-form">
-            <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
+            <form method="post" class="rating-form">
+                <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
 
-            <div class="user-stars">
-                <span class="your-rating-text">
-                    <?php echo ($userRating > 0) ? 'Your rating:' : 'Rate this collection:'; ?>
-                </span>
+                <div class="user-stars">
+                    <span class="your-rating-text">
+                        <?php echo ($userRating > 0) ? 'Your rating:' : 'Rate this collection:'; ?>
+                    </span>
 
-                <?php for ($i = 1; $i <= 5; $i++): ?>
-                    <button
-                        type="submit"
-                        name="rating"
-                        value="<?php echo $i; ?>"
-                        class="star-btn <?php echo ($userRating >= $i) ? 'filled' : 'empty'; ?>"
-                    >
-                        ★
-                    </button>
-                <?php endfor; ?>
+                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <button
+                            type="submit"
+                            name="rating"
+                            value="<?php echo $i; ?>"
+                            class="star-btn <?php echo ($userRating >= $i) ? 'filled' : 'empty'; ?>"
+                        >
+                            ★
+                        </button>
+                    <?php endfor; ?>
 
-                <?php if ($userRating > 0): ?>
-                    <button
-                        type="submit"
-                        name="rating"
-                        value="0"
-                        class="clear-rating"
-                    >
-                        Clear
-                    </button>
-                <?php endif; ?>
-            </div>
-        </form>
-      </div>
+                    <?php if ($userRating > 0): ?>
+                        <button
+                            type="submit"
+                            name="rating"
+                            value="0"
+                            class="clear-rating"
+                        >
+                            Clear
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </form>
+          </div>
+      <?php endif; // End $isPast check ?>
 
     </div>
   <?php endforeach; ?>
@@ -403,7 +402,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 <?php endif; ?>
 
 
-        <!-- MAP -->
         <?php if(isset($event['place']) && !empty($event['place'])): ?>
             <h3 class="map-title">Where to find us:</h3>
             <div class="map-container">
@@ -414,7 +412,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
             </div>
         <?php endif; ?>
 
-        <!-- REGISTRATION SECTION -->
         <?php if (!$isPast): ?>
             <div class="register-section">
               <div class="register-row">
@@ -443,7 +440,6 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
       </div>
     </div>
 
-    <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="sidebar-section collections-section">
         <h3>My collections</h3>

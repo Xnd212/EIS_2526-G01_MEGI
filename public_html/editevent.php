@@ -31,13 +31,12 @@ if ($conn->connect_error) {
 // We need the ID to know what to edit
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-// If ID is missing, we might be submitting the form (POST), so check hidden input or URL
+// If ID is missing, we might be submitting the form (POST), so check hidden input
 if (!$event_id && isset($_POST['event_id'])) {
     $event_id = (int)$_POST['event_id'];
 }
 
 if (!$event_id) {
-    // No ID found anywhere -> Redirect
     header("Location: upcomingevents.php");
     exit();
 }
@@ -155,7 +154,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             if ($stmtUpd->execute()) {
                 // UPDATE Attendance (Collection choice)
-                // We use UPDATE here because the creator is already in the 'attends' table
                 $att_sql = "UPDATE attends SET collection_id = ? WHERE event_id = ? AND user_id = ?";
                 $stmtAtt = $conn->prepare($att_sql);
                 $stmtAtt->bind_param("iii", $collection_id, $event_id, $user_id);
@@ -163,9 +161,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmtAtt->close();
 
                 $success = true;
-                // Refetch data to show updated values in form if we stay on page
+                
+                // Refetch data so the form shows new values
                 $eventData['name'] = $event_name;
-                // ... (you could update the other vars, but usually we show success message)
+                $eventData['date'] = $start_date;
+                $eventData['theme'] = $theme;
+                $eventData['place'] = $place;
+                $eventData['description'] = $description;
+                $eventData['teaser_url'] = $teaser_url;
+                $current_collection_id = $collection_id;
+                // If image changed, we'd need to refetch URL, but success message usually redirects anyway.
+                
             } else {
                 $error = "Error updating event: " . $stmtUpd->error;
             }
@@ -337,14 +343,18 @@ $conn->close();
               id="coverImage"
               name="coverImage"
               accept="image/*"
-              /* Removed required because we might keep the old one */
             />
             <small style="color:#666;">Leave empty to keep the current image.</small>
           </div>
 
-          <div class="form-actions">
+          <div class="form-actions" style="display: flex; gap: 15px; align-items: center;">
             <button type="submit" class="btn-primary">Update Event</button>
-            <a href="eventpage.php?id=<?php echo $event_id; ?>" class="btn-secondary" style="text-decoration:none; padding: 10px 20px;">Cancel</a>
+            
+            <a href="eventpage.php?id=<?php echo $event_id; ?>" 
+               class="btn-secondary" 
+               style="text-decoration:none; padding: 12px 24px; background-color: #6c757d; color: white; border-radius: 5px; font-weight: bold; font-size: 16px; border: none; cursor: pointer;">
+               Cancel
+            </a>
           </div>
         </form>
 

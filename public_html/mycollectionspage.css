@@ -25,7 +25,7 @@ body {
   padding: 0;
   display: none;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 9000;
 }
 
 .notification-popup.active {

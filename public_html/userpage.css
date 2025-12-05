@@ -205,6 +205,7 @@ body {
 .collections {
   flex: 2;
   margin-bottom: 2rem;
+   min-width: 0; /* Prevents flex item from overflowing */
 }
 
 

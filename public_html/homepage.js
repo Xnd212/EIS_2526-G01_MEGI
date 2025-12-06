@@ -91,33 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* =================== LOGOUT POPUP =================== */
-  if (logoutBtn && logoutPopup) {
-    logoutBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      // Fecha notificações se estiverem abertas
-      if (notifPopup) notifPopup.classList.remove("active");
-      logoutPopup.classList.toggle("active");
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
-        logoutPopup.classList.remove("active");
-      }
-    });
-  }
-
-  if (cancelLogout && logoutPopup) {
-    cancelLogout.addEventListener("click", () => {
-      logoutPopup.classList.remove("active");
-    });
-  }
-
-  if (confirmLogout) {
-    confirmLogout.addEventListener("click", () => {
-      window.location.href = "logout.php";
-    });
-  }
   
   
   const topList = document.getElementById("top-collectors-list");

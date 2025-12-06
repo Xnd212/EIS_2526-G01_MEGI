@@ -185,9 +185,11 @@ cre
       <img src="images/TrallE_2.png" alt="logo" />
     </a>
 
-    <div class="search-bar">
-      <input type="search" placeholder="Search" />
-    </div>
+      <div class="search-bar">
+          <form action="search.php" method="GET">
+              <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+          </form>
+      </div>
 
     <div class="icons">
                 <?php include __DIR__ . '/notifications_popup.php'; ?>

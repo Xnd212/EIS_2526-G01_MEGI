@@ -15,9 +15,11 @@
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
     </a>
-    <div class="search-bar">
-      <input type="text" placeholder="Search" />
-    </div>
+      <div class="search-bar">
+          <form action="search.php" method="GET">
+              <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+          </form>
+      </div>
     <div class="icons">
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

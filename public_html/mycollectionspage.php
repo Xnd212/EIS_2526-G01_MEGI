@@ -73,7 +73,9 @@ if ($currentUserId !== null) {
         </a>
 
         <div class="search-bar">
-            <input type="text" placeholder="Search" />
+            <form action="search.php" method="GET">
+                <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+            </form>
         </div>
 
         <div class="icons">

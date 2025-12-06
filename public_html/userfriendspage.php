@@ -26,7 +26,18 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
-// --- Buscar lista de amigos ---
+// --- Procurar username do perfil (para título "X's friends") ---
+$sqlUserName = "SELECT username FROM user WHERE user_id = ?";
+$stmtName = $conn->prepare($sqlUserName);
+$stmtName->bind_param("i", $profileUserId);
+$stmtName->execute();
+$resName = $stmtName->get_result();
+$rowName = $resName->fetch_assoc();
+$stmtName->close();
+
+$profileUsername = $rowName ? $rowName['username'] : 'User';
+
+// --- Procurar lista de amigos ---
 $sql = "
     SELECT 
         u.user_id,
@@ -34,7 +45,7 @@ $sql = "
         u.image_id,
         u.country,
         u.email,
-        img.url AS friend_image   -- AQUI ESTÁ A TUA COLUNA CERTA
+        img.url AS friend_image
     FROM friends f
     INNER JOIN user u ON f.friend_id = u.user_id
     LEFT JOIN image img ON u.image_id = img.image_id
@@ -54,6 +65,8 @@ while ($row = $result->fetch_assoc()) {
 
 $stmt->close();
 ?>
+
+
 
 <!DOCTYPE html>
 
@@ -116,7 +129,16 @@ $stmt->close();
     <div class="content">    
 
       <section class="friends">
-        <h2>Friends</h2>
+        <h2>
+            <?php
+              if ($profileUserId === $currentUserId) {
+                  echo "My friends";
+              } else {
+                  echo htmlspecialchars($profileUsername) . "'s Friends";
+              }
+            ?>
+        </h2>
+
 
         <div class="friends-grid">
 

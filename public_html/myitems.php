@@ -17,36 +17,48 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// ====== 3. CHECK USER SESSION ======
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// ====== 3. CHECK USER SESSION / GUEST ======
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if ($isGuest || !isset($_SESSION['user_id'])) {
+    // guest ou não logado
+    $user_id = null;
 } else {
-    // Redirect to login if not logged in (Uncomment later)
-    // header("Location: login.php"); exit();
-    $user_id = 1; // Fallback for testing
+    $user_id = (int) $_SESSION['user_id'];
 }
 
 // ====== 4. FETCH ITEMS (Using 'contains' table) ======
-// Path: Item -> Contains -> Collection -> User
-// We use GROUP BY item_id to ensure unique items in the list
-$sql = "SELECT 
-            i.item_id,
-            i.name AS item_name,
-            i.price,
-            img.url AS item_url,
-            c.name AS collection_name
-        FROM item i
-        JOIN contains cn ON i.item_id = cn.item_id
-        JOIN collection c ON cn.collection_id = c.collection_id
-        LEFT JOIN image img ON i.image_id = img.image_id
-        WHERE c.user_id = ?
-        GROUP BY i.item_id
-        ORDER BY i.name ASC";
+$items = [];
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+if ($user_id !== null) {
+    $sql = "SELECT 
+                i.item_id,
+                i.name AS item_name,
+                i.price,
+                img.url AS item_url,
+                c.name AS collection_name
+            FROM item i
+            JOIN contains cn ON i.item_id = cn.item_id
+            JOIN collection c ON cn.collection_id = c.collection_id
+            LEFT JOIN image img ON i.image_id = img.image_id
+            WHERE c.user_id = ?
+            GROUP BY i.item_id
+            ORDER BY i.name ASC";
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $items[] = $row;
+    }
+
+    $stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,26 +68,6 @@ $result = $stmt->get_result();
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Trall-E | My Items</title>
         <link rel="stylesheet" href="myitems.css">
-        <style>
-            /* Small fix for item images to look consistent */
-            .item-card img {
-                width: 100%;
-                height: 200px;
-                object-fit: cover;
-                border-radius: 5px;
-            }
-            .item-card {
-                border: 1px solid #ddd;
-                padding: 10px;
-                border-radius: 8px;
-                background: #fff;
-                transition: transform 0.2s;
-            }
-            .item-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            }
-        </style>
     </head>
 
     <body>    
@@ -139,14 +131,34 @@ $result = $stmt->get_result();
                         </div>
 
                         <div class="item-grid" id="itemGrid">
-                            <?php if ($result->num_rows > 0): ?>
-                                <?php while ($row = $result->fetch_assoc()): ?>
+                            <?php if ($user_id === null): ?>
+
+                                <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
+                                    You are browsing as a guest. 
+                                    <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                        Log in
+                                    </a>
+                                    to view and manage your own items.
+                                </p>
+
+                            <?php elseif (empty($items)): ?>
+
+                                <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
+                                    You don’t have any items yet. 
+                                    <a href="itemcreation.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                        Create your first item
+                                    </a>.
+                                </p>
+
+                            <?php else: ?>
+                                <?php foreach ($items as $row): ?>
                                     <?php
-                                    // Handle Image (Check if URL exists, else default)
-                                    $img = !empty($row['item_url']) ? htmlspecialchars($row['item_url']) : 'images/default_item.png';
-                                    $price = number_format($row['price'], 2);
+                                        $img   = !empty($row['item_url']) ? htmlspecialchars($row['item_url']) : 'images/default_item.png';
+                                        $price = number_format($row['price'], 2);
                                     ?>
-                                    <div class="item-card" data-name="<?php echo htmlspecialchars($row['item_name']); ?>" data-price="<?php echo $row['price']; ?>">
+                                    <div class="item-card"
+                                         data-name="<?php echo htmlspecialchars($row['item_name']); ?>"
+                                         data-price="<?php echo $row['price']; ?>">
                                         <a href="itempage.php?id=<?php echo $row['item_id']; ?>" style="text-decoration:none; color:inherit;">
                                             <img src="<?php echo $img; ?>" alt="<?php echo htmlspecialchars($row['item_name']); ?>">
 
@@ -165,9 +177,7 @@ $result = $stmt->get_result();
                                             <?php endif; ?>
                                         </a>
                                     </div>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <p style="padding:20px;">You don't have any items yet. <a href="itemcreation.php">Create one now!</a></p>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
 

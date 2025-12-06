@@ -1,22 +1,37 @@
 <?php
 session_start();
 
-// ---------- USER LOGADO ----------
-if (!isset($_SESSION['user_id'])) {
-    // Se não houver sessão ativa, redireciona para o login
-    header("Location: login.php");
-    exit();
-}
-$currentUserId = (int) $_SESSION['user_id'];
+/* ============================
+   0) LOGIN / GUEST MODE
+   ============================ */
 
-// ---------- PERFIL A MOSTRAR ----------
+// Se não houver user_id, consideramos guest
+$isGuest = !isset($_SESSION['user_id']);
+$currentUserId = $isGuest ? null : (int) $_SESSION['user_id'];
+
+
+/* ============================
+   1) PERFIL A MOSTRAR
+   ============================ */
+
 $profileUserId = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
 if (!$profileUserId) {
-    // se não vier nada no URL, mostra o próprio user logado
-    $profileUserId = $currentUserId;
+    // se não vier nada no URL, e houver user logado, mostra o próprio
+    if (!$isGuest) {
+        $profileUserId = $currentUserId;
+    } else {
+        // guest sem user_id no URL → podes escolher o que fazer
+        // por simplicidade: volta à homepage
+        header("Location: homepage.php");
+        exit();
+    }
 }
 
-// ---------- LIGAÇÃO À BD ----------
+
+/* ============================
+   2) LIGAÇÃO À BD
+   ============================ */
+
 $host   = "localhost";
 $user   = "root";
 $pass   = "";
@@ -27,8 +42,9 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
+
 /* =====================================================
-   1) DADOS DO PERFIL (user + image + contagens)
+   3) DADOS DO PERFIL (user + image + contagens)
    ===================================================== */
 $sqlUser = "
     SELECT 
@@ -73,8 +89,9 @@ $profileImgSrc = !empty($profile['profile_image'])
     ? $profile['profile_image']
     : "images/default_avatar.png";
 
+
 /* ==========================================
-   2) LISTA DE AMIGOS DO PERFIL (friends+user)
+   4) LISTA DE AMIGOS DO PERFIL
    ========================================== */
 $sqlFriends = "
     SELECT 
@@ -89,6 +106,7 @@ $sqlFriends = "
     LEFT JOIN image img ON u.image_id = img.image_id
     WHERE f.user_id = ?
 ";
+
 $stmtF = $conn->prepare($sqlFriends);
 $stmtF->bind_param("i", $profileUserId);
 $stmtF->execute();
@@ -100,11 +118,14 @@ while ($row = $resultF->fetch_assoc()) {
 }
 $stmtF->close();
 
+
 /* ==========================================
-   2.5) CHECK IF CURRENT USER IS FRIENDS WITH PROFILE USER
+   4.5) CHECK IF CURRENT USER IS FRIENDS
    ========================================== */
+
 $isFriend = false;
-if ($currentUserId !== $profileUserId) {
+
+if (!$isGuest && $currentUserId !== $profileUserId) {
     $sqlCheckFriend = "
         SELECT 1 
         FROM friends 
@@ -121,7 +142,7 @@ if ($currentUserId !== $profileUserId) {
 
 
 /* ==========================================
-   3) COLEÇÕES DO PERFIL (tabela collection)
+   5) COLEÇÕES DO PERFIL
    ========================================== */
 $sqlCollections = "
     SELECT 
@@ -147,8 +168,9 @@ while ($row = $resultC->fetch_assoc()) {
 }
 $stmtC->close();
 
+
 /* ==========================================
-   4) EVENTOS DO PERFIL (tabela event)
+   6) EVENTOS DO PERFIL
    ========================================== */
 $sqlEvents = "
     SELECT 
@@ -175,7 +197,6 @@ while ($row = $resultE->fetch_assoc()) {
 }
 $stmtE->close();
 
-// (podes dar $conn->close(); no fim da página se quiseres)
 ?>
 <!DOCTYPE html>
 
@@ -187,7 +208,6 @@ $stmtE->close();
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="userpage.css">
 </head>
-
 
 <body>    
   <!-- ===========================
@@ -265,29 +285,34 @@ $stmtE->close();
                     <?php echo htmlspecialchars($profile['email']); ?>
                   </p>
 
-                  <!-- botão Add Friend (a implementar no add_friend.php) -->
-                <?php if ($currentUserId !== $profileUserId): ?>
-                  <?php if ($isFriend): ?>
-                    <!-- JÁ SEGUES ESTE USER -->
-                    <a
-                      class="edit-btn active"
-                      href="remove_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
-                      data-state="added"
-                    >
-                      ✔ Friend Added
-                    </a>
-                  <?php else: ?>
-                    <!-- AINDA NÃO SEGUES ESTE USER -->
-                    <a
-                      class="edit-btn"
-                      href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
-                      data-state="default"
-                    >
-                      👥 Add Friend
-                    </a>
-                  <?php endif; ?>
-                <?php endif; ?>
+                  <!-- BOTÃO ADD FRIEND -->
+                  <?php if ($isGuest): ?>
+                      <!-- Guest → leva para login -->
+                      <a class="edit-btn" href="login.php">
+                          👥 Add Friend
+                      </a>
 
+                  <?php elseif ($currentUserId !== $profileUserId): ?>
+                      <?php if ($isFriend): ?>
+                          <!-- JÁ É AMIGO -->
+                          <a
+                            class="edit-btn active"
+                            href="remove_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
+                            data-state="added"
+                          >
+                            ✔ Friend Added
+                          </a>
+                      <?php else: ?>
+                          <!-- AINDA NÃO É AMIGO -->
+                          <a
+                            class="edit-btn"
+                            href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
+                            data-state="default"
+                          >
+                            👥 Add Friend
+                          </a>
+                      <?php endif; ?>
+                  <?php endif; ?>
 
                 </div>
 
@@ -373,7 +398,7 @@ $stmtE->close();
                       : 'images/default_avatar.png';
 
                   // Se este amigo for o user logado → ir para o userpage
-                  if ((int)$friend['user_id'] === $currentUserId) {
+                  if (!$isGuest && (int)$friend['user_id'] === $currentUserId) {
                       $friendLink = "userpage.php";
                   } else {
                       $friendLink = "friendpage.php?user_id=" . $friend['user_id'];
@@ -397,9 +422,9 @@ $stmtE->close();
           </div>
 
           <a href="userfriendspage.php?user_id=<?php echo (int)$profile['user_id']; ?>" 
-        class="view-all">
-       + See more
-        </a>
+             class="view-all">
+             + See more
+          </a>
 
         </section>
 
@@ -414,16 +439,11 @@ $stmtE->close();
           <?php else: ?>
             <?php foreach ($events as $ev): ?>
               <?php
-                // 1) imagem vinda da tabela image
                 if (!empty($ev['event_image'])) {
                     $eventImg = $ev['event_image'];
-                }
-                // 2) se não tiver, tenta usar teaser_url
-                elseif (!empty($ev['teaser_url'])) {
+                } elseif (!empty($ev['teaser_url'])) {
                     $eventImg = $ev['teaser_url'];
-                }
-                // 3) fallback
-                else {
+                } else {
                     $eventImg = 'images/default_event.png';
                 }
 

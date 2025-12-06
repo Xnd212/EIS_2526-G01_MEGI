@@ -1,13 +1,14 @@
 <?php
 session_start();
 
-// Verifica login
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+// ===================== LOGIN / GUEST =====================
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 
-$currentUserId = (int) $_SESSION['user_id'];
+if (!$isGuest && isset($_SESSION['user_id'])) {
+    $currentUserId = (int) $_SESSION['user_id'];
+} else {
+    $currentUserId = null; // guest
+}
 
 // ---------------- BD ----------------
 $host = "localhost";
@@ -21,67 +22,71 @@ if ($conn->connect_error) {
 }
 
 /* ==========================================================
-   BUSCAR EVENTOS:
+   BUSCAR EVENTOS (SÓ SE HOUVER USER LOGADO)
    ========================================================== */
 
-$sqlEvents = "
-    SELECT 
-        e.event_id,
-        e.name,
-        e.date,
-        e.theme,
-        e.place,
-        e.description,
-        e.teaser_url,
-        e.image_id,
-        img.url AS event_image,
+$events = [];
 
-        CASE 
-            WHEN e.user_id = ? THEN 'organizer'
-            ELSE 'participant'
-        END AS role,
+if ($currentUserId !== null) {
 
-        c.collection_id,
-        c.name AS collection_name,
-
-        -- Média e nº de coleções avaliadas no evento
-        r.avg_rating   AS event_avg_rating,
-        r.num_ratings  AS event_num_ratings
-
-    FROM event e
-    LEFT JOIN image img ON e.image_id = img.image_id
-
-    LEFT JOIN attends a 
-        ON a.event_id = e.event_id
-       AND a.user_id = ?
-
-    LEFT JOIN collection c 
-        ON a.collection_id = c.collection_id
-
-    -- SUBQUERY: média e nº de COLEÇÕES distintas com rating por evento
-    LEFT JOIN (
+    $sqlEvents = "
         SELECT 
-            event_id,
-            AVG(rating) AS avg_rating,
-            COUNT(DISTINCT collection_id) AS num_ratings
-        FROM rating
-        GROUP BY event_id
-    ) r ON r.event_id = e.event_id
+            e.event_id,
+            e.name,
+            e.date,
+            e.theme,
+            e.place,
+            e.description,
+            e.teaser_url,
+            e.image_id,
+            img.url AS event_image,
 
-    WHERE 
-          (e.user_id = ? OR a.user_id IS NOT NULL)
-      AND e.date < CURDATE()
+            CASE 
+                WHEN e.user_id = ? THEN 'organizer'
+                ELSE 'participant'
+            END AS role,
 
-    GROUP BY e.event_id
-    ORDER BY e.date DESC, e.event_id DESC
-";
+            c.collection_id,
+            c.name AS collection_name,
 
+            -- Média e nº de coleções avaliadas no evento
+            r.avg_rating   AS event_avg_rating,
+            r.num_ratings  AS event_num_ratings
 
-$stmt = $conn->prepare($sqlEvents);
-$stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
-$stmt->execute();
-$events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+        FROM event e
+        LEFT JOIN image img ON e.image_id = img.image_id
+
+        LEFT JOIN attends a 
+            ON a.event_id = e.event_id
+           AND a.user_id = ?
+
+        LEFT JOIN collection c 
+            ON a.collection_id = c.collection_id
+
+        -- SUBQUERY: média e nº de COLEÇÕES distintas com rating por evento
+        LEFT JOIN (
+            SELECT 
+                event_id,
+                AVG(rating) AS avg_rating,
+                COUNT(DISTINCT collection_id) AS num_ratings
+            FROM rating
+            GROUP BY event_id
+        ) r ON r.event_id = e.event_id
+
+        WHERE 
+              (e.user_id = ? OR a.user_id IS NOT NULL)
+          AND e.date < CURDATE()
+
+        GROUP BY e.event_id
+        ORDER BY e.date DESC, e.event_id DESC
+    ";
+
+    $stmt = $conn->prepare($sqlEvents);
+    $stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
+    $stmt->execute();
+    $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
 
 ?>
 <!DOCTYPE html>
@@ -150,10 +155,24 @@ $stmt->close();
 
                 <div class="event-list">
 
-                    <?php if (empty($events)): ?>
-                        <p>This user has no event history.</p>
+                    <?php if ($currentUserId === null): ?>
+
+                        <!-- GUEST VIEW -->
+                        <p style="margin-top:20px; font-size:18px;">
+                            You are browsing as a guest.
+                            <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                Log in
+                            </a>
+                            to view your event history.
+                        </p>
+
+                    <?php elseif (empty($events)): ?>
+
+                        <!-- USER LOGADO MAS SEM HISTÓRICO -->
+                        <p>You have no past events yet.</p>
 
                     <?php else: ?>
+
                         <?php foreach ($events as $ev): ?>
 
                             <?php
@@ -180,7 +199,7 @@ $stmt->close();
 
                                 <div class="event-info">
 
-                                    <!-- NOVO: Header com rating -->
+                                    <!-- Header com rating -->
                                     <div class="event-header-row">
                                         <h3 class="event-title">
                                             <strong>

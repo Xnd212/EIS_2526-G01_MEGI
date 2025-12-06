@@ -1,0 +1,275 @@
+@import url('homepage.css'); /* Reuse global styles */
+
+body {
+  overflow-y: scroll;
+}
+
+/* Conteúdo principal desta página */
+.content {
+  margin-right: 240px;
+  padding: 2rem;
+  background: #eef0ff;
+  margin-top: 80px;
+}
+
+/* ===== Notification Popup  ===== */
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #b54242; /* cor escura da header */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 315px;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  z-index: 9000;
+}
+
+.notification-popup.active {
+  display: flex;
+}
+
+.popup-header {
+  background-color: #fbecec;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid #b54242;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.popup-header h3 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #b54242;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.popup-divider {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem;
+}
+
+.notification-list li {
+  padding: 0.4rem 0;
+  border-bottom: 2px solid #eee;
+  font-size: 0.9rem;
+}
+
+.notification-list li:last-child {
+  border-bottom: none;
+}
+
+.notification-list li:first-child {
+  border-top: none;
+}
+
+/* ==============
+   Friends' collections area
+   (adaptado do layout de coleções)
+   ============== */
+
+.friends {
+  flex: 2;
+  margin-bottom: 1rem;
+}
+
+.friends h2 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* grid dos cards (igual à collection-grid) */
+.friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* cada card de coleção de amigo (igual à collection-card) */
+.friend {
+  width: 100%;
+  height: 260px;
+  background-color: #f3cccc;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+/* imagem da coleção do amigo */
+.friend img {
+  height: 150px;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* nome da coleção */
+.friend-name {
+  font-weight: bold;
+  margin: 0.25rem 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* max 1 linha */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* texto “by username · started on …” */
+.friend p {
+  margin: 0;
+}
+
+/* ===== Filtros (se quiseres usar aqui também) ===== */
+.collections-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative; 
+  z-index: 1000;
+}
+
+.collections-header h2 {
+  font-weight: bold;
+  margin: 0; 
+}
+
+/* Botão de filtro */
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #b54242;
+  background-color: #fbecec;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #b54242;
+  z-index: 1001;
+}
+
+.filter-toggle:hover {
+  background-color: #f3cccc;
+}
+
+/* Dropdown de filtros */
+.filter-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.4rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 0.3rem 0;
+  min-width: 190px; 
+  display: none;
+  z-index: 500;
+  font-size: 0.85rem; 
+}
+
+.filter-menu.show {
+  display: block;
+}
+
+.filter-menu button {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.3rem 0.8rem;  
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-menu button:hover {
+  background-color: #fbecec;
+}
+
+.filter-menu hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 0.25rem 0;
+}
+
+/* =======================
+   Sidebar (Fixed on the Right)
+======================= */
+.sidebar {
+  position: fixed;          
+  top: 100px;                
+  right: 0;                 
+  width: 240px;
+  background: #f8cbc1;
+  padding: 1rem;
+  height: calc(100vh - 80px); 
+  overflow-y: auto;
+  z-index: 10;
+  border-left: 2px solid #e1a79e;
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  padding: 1rem;
+  height: 33.3%;
+}
+
+.sidebar-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.sidebar-section p {
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.3rem 0;
+  transition: color 0.2s ease;
+}
+
+.sidebar-section p:hover {
+  color: #b54242;
+}
+
+/* Section Colors */
+.collections-section {
+  background-color: #f9d7d1;
+}
+
+.friends-section {
+  background-color: #f3b8aa ;
+}
+
+.events-section {
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .friends {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+}

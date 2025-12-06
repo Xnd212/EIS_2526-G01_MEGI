@@ -1,18 +1,22 @@
 <?php
 session_start();
 
-// ---------- USER LOGADO ----------
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+/* ================================
+   CHECK LOGIN STATUS
+   ================================ */
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if ($isGuest || !isset($_SESSION['user_id'])) {
+    // guest ou não logado -> não tem coleções próprias
+    $currentUserId = null;
+} else {
+    $currentUserId = (int) $_SESSION['user_id'];
 }
 
-$currentUserId = (int) $_SESSION['user_id'];
-
 // ====== LIGAÇÃO À BASE DE DADOS ======
-$host = "localhost";
-$user = "root";
-$pass = "";
+$host   = "localhost";
+$user   = "root";
+$pass   = "";
 $dbname = "sie";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
@@ -31,13 +35,25 @@ $sql = "SELECT
         WHERE c.user_id = ?
         ORDER BY c.starting_date DESC";
 
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
+$collections = [];
+
+if ($currentUserId !== null) {
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Prepare failed: " . $conn->error);
+    }
+
+    $stmt->bind_param("i", $currentUserId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $collections[] = $row;
+    }
+
+    $stmt->close();
 }
-$stmt->bind_param("i", $currentUserId);
-$stmt->execute();
-$result = $stmt->get_result();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,6 +62,7 @@ $result = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trall-E | My Collections</title>
     <link rel="stylesheet" href="mycollectionspage.css">
+
 </head>
 
 <body>    
@@ -123,8 +140,24 @@ $result = $stmt->get_result();
                     </div>
 
                     <div class="collection-grid">
-                        <?php if ($result->num_rows > 0): ?>
-                            <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php if ($currentUserId === null): ?>
+                            <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
+                                You are browsing as a guest. 
+                                <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                    Log in
+                                </a>
+                                to create and view your own collections.
+                            </p>
+
+                        <?php elseif (empty($collections)): ?>
+                            <div class="empty-message">
+                                <h3>No collections yet</h3>
+                                <p>You haven’t created any collections so far.</p>
+                                <a href="collectioncreation.php" class="btn-primary">Create your first collection</a>
+                            </div>
+
+                        <?php else: ?>
+                            <?php foreach ($collections as $row): ?>
                                 <?php
                                     $img = !empty($row['url']) ? $row['url'] : 'images/default.png';
                                     $date = !empty($row['starting_date'])
@@ -141,9 +174,7 @@ $result = $stmt->get_result();
                                         <?php endif; ?>
                                     </a>
                                 </div>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <p>You don't have any collections yet.</p>
+                            <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
                 </section>
@@ -180,6 +211,3 @@ $result = $stmt->get_result();
     <script src="logout.js"></script>
 </body>
 </html>
-<?php
-$conn->close();
-?>

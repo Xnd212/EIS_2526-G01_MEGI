@@ -18,47 +18,54 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check Session
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// ==========================================
+// 2. CHECK SESSION / GUEST
+// ==========================================
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if (!$isGuest && isset($_SESSION['user_id'])) {
+    $user_id = (int) $_SESSION['user_id'];
 } else {
-    $user_id = 1; // Fallback
+    // Guest: não há user_id associado
+    $user_id = null;
 }
 
 // ==========================================
-// 2. FETCH UPCOMING EVENTS
+// 3. FETCH UPCOMING EVENTS (APENAS SE LOGADO)
 // ==========================================
-// Removed 'e.location' from the SELECT list
-$sql = "SELECT 
-            e.event_id,
-            e.name AS event_name,
-            e.date,
-            i.url AS event_image,
-            c.collection_id,
-            c.name AS collection_name,
-            CASE 
-                WHEN e.user_id = ? THEN 'organizer'
-                ELSE 'participant'
-            END AS role
-        FROM event e
-        LEFT JOIN attends a 
-            ON a.event_id = e.event_id
-           AND a.user_id = ?
-        LEFT JOIN collection c 
-            ON a.collection_id = c.collection_id
-        LEFT JOIN image i 
-            ON e.image_id = i.image_id
-        WHERE 
-              (e.user_id = ? OR a.user_id IS NOT NULL)
-          AND e.date >= CURDATE()
-        GROUP BY e.event_id
-        ORDER BY e.date ASC";
+$result = null;
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iii", $user_id, $user_id, $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+if ($user_id !== null) {
+    $sql = "SELECT 
+                e.event_id,
+                e.name AS event_name,
+                e.date,
+                i.url AS event_image,
+                c.collection_id,
+                c.name AS collection_name,
+                CASE 
+                    WHEN e.user_id = ? THEN 'organizer'
+                    ELSE 'participant'
+                END AS role
+            FROM event e
+            LEFT JOIN attends a 
+                ON a.event_id = e.event_id
+               AND a.user_id = ?
+            LEFT JOIN collection c 
+                ON a.collection_id = c.collection_id
+            LEFT JOIN image i 
+                ON e.image_id = i.image_id
+            WHERE 
+                  (e.user_id = ? OR a.user_id IS NOT NULL)
+              AND e.date >= CURDATE()
+            GROUP BY e.event_id
+            ORDER BY e.date ASC";
 
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $user_id, $user_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+}
 ?>
 
 <!DOCTYPE html>
@@ -83,6 +90,14 @@ $result = $stmt->get_result();
           padding: 40px;
           color: #666;
       }
+      .empty-state a {
+          color: #7a1b24;
+          font-weight: 600;
+          text-decoration: none;
+      }
+      .empty-state a:hover {
+          text-decoration: underline;
+      }
   </style>
 </head>
 
@@ -102,7 +117,15 @@ $result = $stmt->get_result();
           <h3>Notifications <span>🔔</span></h3>
         </div>
         <ul class="notification-list">
-             <li><strong>Ana_Rita_Lopes</strong> added 3 new items...</li>
+                <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+                <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+                <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+                <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+                
+                <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+                <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+                <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
+                <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
         </ul>
         <a href="#" class="see-more-link">+ See more</a>
       </div>
@@ -130,48 +153,64 @@ $result = $stmt->get_result();
 
         <div class="event-list">
 
-          <?php if ($result->num_rows > 0): ?>
-            <?php while ($row = $result->fetch_assoc()): ?>
-                <?php 
-                    $dateFormatted = date("d/m/Y", strtotime($row['date']));
-                    $bgImage = !empty($row['event_image']) ? $row['event_image'] : 'images/default_event.png';
-                ?>
-                
-                <div class="event-card">
-                    <div class="event-image" style="background-image: url('<?php echo htmlspecialchars($bgImage); ?>');"></div>
-                    
-                    <div class="event-info">
-                        <h3>
-                            <a href="eventpage.php?id=<?php echo $row['event_id']; ?>">
-                                <strong><?php echo htmlspecialchars($row['event_name']); ?></strong>
-                            </a>
-                        </h3>
-                        
-                        <p><strong>Date:</strong> <?php echo $dateFormatted; ?></p>
-                        
-                        <p class="rating">
-                            <strong>Status:</strong>
-                            <span class="status-text">Going</span>
-                        </p>
+          <?php if ($user_id === null): ?>
+              <!-- GUEST VIEW -->
+              <div class="empty-state">
+                  <p>You are browsing as a guest.</p>
+                  <p>
+                      <a href="login.php">Log in</a> to view, join, or create upcoming events.
+                  </p>
+              </div>
 
-                        <p><strong>Collection you are bringing:</strong>
-                            <?php if (!empty($row['collection_name'])): ?>
-                                <a href="collectionpage.php?id=<?php echo $row['collection_id']; ?>">
-                                    <?php echo htmlspecialchars($row['collection_name']); ?>
-                                </a>
-                            <?php else: ?>
-                                <a href="#" style="color:#777; pointer-events:none;">None</a>
-                            <?php endif; ?>
-                        </p>
-                    </div>
-                </div>
+          <?php elseif ($result && $result->num_rows > 0): ?>
+              
+              <?php while ($row = $result->fetch_assoc()): ?>
+                  <?php 
+                      $dateFormatted = date("d/m/Y", strtotime($row['date']));
+                      $bgImage = !empty($row['event_image']) ? $row['event_image'] : 'images/default_event.png';
+                  ?>
+                  
+                  <div class="event-card">
+                      <div class="event-image" style="background-image: url('<?php echo htmlspecialchars($bgImage); ?>');"></div>
+                      
+                      <div class="event-info">
+                          <h3>
+                              <a href="eventpage.php?id=<?php echo $row['event_id']; ?>">
+                                  <strong><?php echo htmlspecialchars($row['event_name']); ?></strong>
+                              </a>
+                          </h3>
+                          
+                          <p><strong>Date:</strong> <?php echo $dateFormatted; ?></p>
+                          
+                          <p class="rating">
+                              <strong>Status:</strong>
+                              <span class="status-text">
+                                  <?php echo ($row['role'] === 'organizer') ? 'Organizer' : 'Going'; ?>
+                              </span>
+                          </p>
 
-            <?php endwhile; ?>
+                          <p><strong>Collection you are bringing:</strong>
+                              <?php if (!empty($row['collection_name'])): ?>
+                                  <a href="collectionpage.php?id=<?php echo $row['collection_id']; ?>">
+                                      <?php echo htmlspecialchars($row['collection_name']); ?>
+                                  </a>
+                              <?php else: ?>
+                                  <span style="color:#777;">None</span>
+                              <?php endif; ?>
+                          </p>
+                      </div>
+                  </div>
+
+              <?php endwhile; ?>
+
           <?php else: ?>
-            <div class="empty-state">
-                <p>You have no upcoming events.</p>
-                <p><a href="createevent.php" style="color:blue;">Create an event</a> or browse existing ones.</p>
-            </div>
+              <!-- USER LOGADO MAS SEM EVENTOS -->
+              <div class="empty-state">
+                  <p>You have no upcoming events.</p>
+                  <p>
+                      <a href="createevent.php">Create an event</a> or browse existing ones.
+                  </p>
+              </div>
           <?php endif; ?>
 
         </div>

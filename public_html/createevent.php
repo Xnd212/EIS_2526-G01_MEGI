@@ -5,31 +5,36 @@ ini_set('display_errors', 1);
 
 session_start();
 
-// DEBUG: Check if form submitted
+/* =========================================
+   1. BLOQUEAR GUEST E NÃO LOGADOS
+   ========================================= */
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if (!isset($_SESSION['user_id']) || $isGuest) {
+    header("Location: login.php");
+    exit();
+}
+
+/* (opcional) DEBUG: Check if form submitted */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     file_put_contents('debug.txt', "FORM SUBMITTED at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
     file_put_contents('debug.txt', print_r($_POST, true) . "\n", FILE_APPEND);
     file_put_contents('debug.txt', print_r($_FILES, true) . "\n", FILE_APPEND);
 }
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
 // Database connection
-$host = "localhost";
-$user = "root";
-$pass = "";
+$host   = "localhost";
+$user   = "root";
+$pass   = "";
 $dbname = "sie"; 
-$conn = new mysqli($host, $user, $pass, $dbname);
+$conn   = new mysqli($host, $user, $pass, $dbname);
 
 if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
-$user_id = $_SESSION['user_id']; // Store user_id early for use in fetch and insert
+$user_id = (int) $_SESSION['user_id']; // Store user_id early for use in fetch and insert
+
 
 // ==========================================
 // 1. FETCH USER COLLECTIONS FOR DROPDOWN
@@ -163,6 +168,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+
+cre
 <!DOCTYPE html>
 <html lang="en">
 <head>

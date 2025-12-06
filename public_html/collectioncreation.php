@@ -8,14 +8,21 @@ error_reporting(E_ALL);
 
 session_start();
 
+$isGuest = !empty($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if (!isset($_SESSION['user_id']) || $isGuest) {
+    header("Location: login.php");
+    exit();
+}
+
 // ==========================================
 // 2. DATABASE CONNECTION
 // ==========================================
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sie"; // Your Database Name
-// Create connection
+$username   = "root";
+$password   = "";
+$dbname     = "sie"; // Your Database Name
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -26,12 +33,9 @@ if ($conn->connect_error) {
 // ==========================================
 // 3. USER ID HANDLING
 // ==========================================
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-} else {
-    // FALLBACK: Use User ID 1 for testing.
-    $user_id = 1;
-}
+
+// aqui já sabemos que existe user_id, porque acima fizemos o check
+$user_id = (int)$_SESSION['user_id'];
 
 $message = "";
 $messageType = "";
@@ -42,36 +46,34 @@ $messageType = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // A. Sanitize Inputs
-    $name = $conn->real_escape_string($_POST['collectionName']);
-    $theme = $conn->real_escape_string($_POST['collectionTheme']);
+    $name        = $conn->real_escape_string($_POST['collectionName']);
+    $theme       = $conn->real_escape_string($_POST['collectionTheme']);
     $description = $conn->real_escape_string($_POST['collectionDescription']);
     $starting_date = $_POST['creationDate']; // YYYY-MM-DD
+
     // B. Image Upload Logic
     $image_id = "NULL";
 
     if (isset($_FILES['collectionImage']) && $_FILES['collectionImage']['error'] == 0) {
         $target_dir = "images/";
-        // Create folder if not exists
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
 
-        $file_name = basename($_FILES["collectionImage"]["name"]);
+        $file_name   = basename($_FILES["collectionImage"]["name"]);
         $target_file = $target_dir . $file_name;
 
-        // Move file
         if (move_uploaded_file($_FILES["collectionImage"]["tmp_name"], $target_file)) {
-            // Insert into DB
-            $url = "images/" . $file_name;
+
+            $url    = "images/" . $file_name;
             $url_db = $conn->real_escape_string($url);
 
-            // --- FIX IS HERE: Changed 'images' to 'image' ---
             $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
 
             if ($conn->query($sql_img) === TRUE) {
                 $image_id = $conn->insert_id;
             } else {
-                $message = "Image DB Error: " . $conn->error;
+                $message     = "Image DB Error: " . $conn->error;
                 $messageType = "error";
             }
         }
@@ -87,16 +89,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $new_collection_id = $conn->insert_id;
 
         if ($new_collection_id == 0) {
-            $message = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
+            $message     = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
             $messageType = "error";
         } else {
-            $message = "Collection created successfully!";
+            $message     = "Collection created successfully!";
             $messageType = "success";
 
             // D. Link Selected Items
             if (!empty($_POST['selectedItems'])) {
                 foreach ($_POST['selectedItems'] as $item_id) {
-                    $item_id = (int) $item_id;
+                    $item_id = (int)$item_id;
                     $sql_contains = "INSERT INTO contains (collection_id, item_id) 
                                      VALUES ('$new_collection_id', '$item_id')";
                     $conn->query($sql_contains);
@@ -104,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     } else {
-        $message = "Database Error: " . $conn->error;
+        $message     = "Database Error: " . $conn->error;
         $messageType = "error";
     }
 }
@@ -129,6 +131,7 @@ if ($result_items && $result_items->num_rows > 0) {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

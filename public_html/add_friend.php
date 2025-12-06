@@ -1,23 +1,38 @@
 <?php
 session_start();
 
-// Tem de estar logado
+/* =========================
+   1) CHECK LOGIN
+   ========================= */
+
 if (!isset($_SESSION['user_id'])) {
+    // Se alguém tentar aceder direto sem login
     header("Location: login.php");
     exit();
 }
 
 $currentUserId = (int) $_SESSION['user_id'];
+if ($currentUserId <= 0) {
+    header("Location: login.php");
+    exit();
+}
 
-// ID do amigo a adicionar (vem no GET)
+/* =========================
+   2) LER ID DO AMIGO
+   ========================= */
+
 $friendId = filter_input(INPUT_GET, 'friend_id', FILTER_VALIDATE_INT);
 
+// Não pode ser vazio nem o próprio user
 if (!$friendId || $friendId === $currentUserId) {
     header("Location: homepage.php");
     exit();
 }
 
-// -------- LIGAÇÃO À BD --------
+/* =========================
+   3) LIGAÇÃO À BD
+   ========================= */
+
 $host   = "localhost";
 $user   = "root";
 $pass   = "";
@@ -29,7 +44,34 @@ if ($conn->connect_error) {
     die("Erro na ligação: " . $conn->connect_error);
 }
 
-// Verificar se já existe follow *nesta direção* (currentUser → friend)
+/* =========================
+   4) VALIDAR QUE AMBOS OS USERS EXISTEM
+   ========================= */
+
+$sqlCheckUsers = "
+    SELECT user_id 
+    FROM user 
+    WHERE user_id IN (?, ?)
+";
+
+$stmtUsers = $conn->prepare($sqlCheckUsers);
+$stmtUsers->bind_param("ii", $currentUserId, $friendId);
+$stmtUsers->execute();
+$resUsers = $stmtUsers->get_result();
+
+if ($resUsers->num_rows < 2) {
+    // Um dos IDs não existe → evita violar FK
+    $stmtUsers->close();
+    $conn->close();
+    header("Location: homepage.php");
+    exit();
+}
+$stmtUsers->close();
+
+/* =========================
+   5) VER SE JÁ É AMIGO
+   ========================= */
+
 $checkSql = "
     SELECT 1 
     FROM friends
@@ -40,6 +82,10 @@ $stmt = $conn->prepare($checkSql);
 $stmt->bind_param("ii", $currentUserId, $friendId);
 $stmt->execute();
 $result = $stmt->get_result();
+
+/* =========================
+   6) SE AINDA NÃO FOR, INSERE
+   ========================= */
 
 if ($result->num_rows === 0) {
     $insertSql = "
@@ -55,6 +101,9 @@ if ($result->num_rows === 0) {
 $stmt->close();
 $conn->close();
 
-// Voltar à página do perfil que estás a seguir
+/* =========================
+   7) VOLTAR À PÁGINA DO AMIGO
+   ========================= */
+
 header("Location: friendpage.php?user_id=" . $friendId);
 exit();

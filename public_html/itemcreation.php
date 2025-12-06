@@ -8,10 +8,24 @@ error_reporting(E_ALL);
 
 session_start();
 
+/* =========================================
+   1.1. BLOQUEAR GUEST E NÃO LOGADOS
+   ========================================= */
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if (!isset($_SESSION['user_id']) || $isGuest) {
+    // se não estiver autenticado (ou for guest), vai para login
+    header("Location: login.php");
+    exit();
+}
+
+// ==========================================
+// 2. DATABASE CONNECTION
+// ==========================================
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sie"; // Your Database Name
+$username   = "root";
+$password   = "";
+$dbname     = "sie"; // Your Database Name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -19,73 +33,64 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check User Session
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-} else {
-    $user_id = 1; // Fallback for testing
-}
+// ===============================
+// 2.1 USER ID (sem fallback)
+// ===============================
+$user_id = (int) $_SESSION['user_id'];
 
 $message = "";
 $messageType = "";
 
 // ==========================================
-// 2. HANDLE FORM SUBMISSION
+// 3. HANDLE FORM SUBMISSION
 // ==========================================
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- A. GET STANDARD INPUTS ---
-    $name = $conn->real_escape_string($_POST['itemName']);
-    $price = !empty($_POST['itemPrice']) ? (float)$_POST['itemPrice'] : 0.00;
-    // Note: We use the number input for importance as it syncs with slider
-    $importance = (int)$_POST['itemImportanceNumber']; 
-    $acc_date = $_POST['acc_date']; 
-    $acc_place = $conn->real_escape_string($_POST['acc_place']);
+    $name        = $conn->real_escape_string($_POST['itemName']);
+    $price       = !empty($_POST['itemPrice']) ? (float)$_POST['itemPrice'] : 0.00;
+    $importance  = (int)$_POST['itemImportanceNumber']; 
+    $acc_date    = $_POST['acc_date']; 
+    $acc_place   = $conn->real_escape_string($_POST['acc_place']);
     $description = $conn->real_escape_string($_POST['itemDescription']);
     
-    // collection_id comes from the <select> dropdown
     $collection_id = isset($_POST['collection_id']) ? (int)$_POST['collection_id'] : 0;
 
     // --- B. HANDLE TYPE (Find or Create) ---
     $typeNameInput = trim($_POST['itemType']);
-    $typeNameSafe = $conn->real_escape_string($typeNameInput);
-    $type_id = 0;
+    $typeNameSafe  = $conn->real_escape_string($typeNameInput);
+    $type_id       = 0;
 
-    // 1. Check if type exists
     $sql_check_type = "SELECT type_id FROM type WHERE name = '$typeNameSafe' LIMIT 1";
-    $result_type = $conn->query($sql_check_type);
+    $result_type    = $conn->query($sql_check_type);
 
-    if ($result_type->num_rows > 0) {
-        // Found it
-        $row = $result_type->fetch_assoc();
+    if ($result_type && $result_type->num_rows > 0) {
+        $row    = $result_type->fetch_assoc();
         $type_id = $row['type_id'];
     } else {
-        // Not found -> Create new type
         $sql_create_type = "INSERT INTO type (name) VALUES ('$typeNameSafe')";
         if ($conn->query($sql_create_type) === TRUE) {
             $type_id = $conn->insert_id;
         } else {
-            $message = "Error creating new Item Type: " . $conn->error;
+            $message     = "Error creating new Item Type: " . $conn->error;
             $messageType = "error";
         }
     }
 
     // --- C. HANDLE IMAGE ---
-    $image_id = "NULL"; // Default SQL string for NULL
+    $image_id = "NULL";
 
     if (isset($_FILES['itemImage']) && $_FILES['itemImage']['error'] == 0) {
         $target_dir = "images/";
-        // Ensure directory exists
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
 
-        $file_name = basename($_FILES["itemImage"]["name"]);
+        $file_name   = basename($_FILES["itemImage"]["name"]);
         $target_file = $target_dir . $file_name;
         
         if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
-            // Save URL to DB
-            $url = "images/" . $file_name;
+            $url    = "images/" . $file_name;
             $url_db = $conn->real_escape_string($url);
             
             $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
@@ -96,48 +101,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // --- D. INSERT ITEM & LINK TO COLLECTION ---
-    // Only proceed if we have a valid type_id and a valid collection_id
     if ($type_id > 0 && $collection_id > 0) {
-        
         $img_val = ($image_id === "NULL") ? "NULL" : $image_id;
 
-        // Insert into 'item' table
         $sql_item = "INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description) 
                      VALUES ('$type_id', $img_val, '$name', '$price', '$importance', '$acc_date', '$acc_place', '$description')";
 
         if ($conn->query($sql_item) === TRUE) {
-            $new_item_id = $conn->insert_id;
-
-            // Link to Collection (table 'contains')
+            $new_item_id  = $conn->insert_id;
             $sql_contains = "INSERT INTO contains (collection_id, item_id) VALUES ('$collection_id', '$new_item_id')";
-            
+
             if ($conn->query($sql_contains) === TRUE) {
-                $message = "Item created successfully!";
+                $message     = "Item created successfully!";
                 $messageType = "success";
             } else {
-                $message = "Item created, but failed to add to collection. Error: " . $conn->error;
+                $message     = "Item created, but failed to add to collection. Error: " . $conn->error;
                 $messageType = "error";
             }
-
         } else {
-            $message = "Error inserting item: " . $conn->error;
+            $message     = "Error inserting item: " . $conn->error;
             $messageType = "error";
         }
     } elseif ($collection_id == 0) {
-        $message = "Please select a valid collection.";
+        $message     = "Please select a valid collection.";
         $messageType = "error";
     }
 }
 
 // ==========================================
-// 3. FETCH COLLECTIONS FOR DROPDOWN
+// 4. FETCH COLLECTIONS FOR DROPDOWN
 // ==========================================
 $user_collections = [];
-$sql_cols = "SELECT collection_id, name FROM collection WHERE user_id = '$user_id'";
+$sql_cols   = "SELECT collection_id, name FROM collection WHERE user_id = '$user_id'";
 $result_cols = $conn->query($sql_cols);
 
 if ($result_cols && $result_cols->num_rows > 0) {
-    while($row = $result_cols->fetch_assoc()) {
+    while ($row = $result_cols->fetch_assoc()) {
         $user_collections[] = $row;
     }
 }

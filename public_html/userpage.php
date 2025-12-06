@@ -1,16 +1,18 @@
 <?php
 session_start();
 
-// ---------- USER LOGADO ----------
-if (!isset($_SESSION['user_id'])) {
+/* ================================
+   BLOQUEAR GUEST E NÃO LOGADOS
+   ================================ */
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
+
+if (!isset($_SESSION['user_id']) || $isGuest) {
     header("Location: login.php");
     exit();
 }
 
-$currentUserId = (int) $_SESSION['user_id'];
-
-$profileUserId = $currentUserId;  // ALWAYS your own user
-
+$currentUserId  = (int) $_SESSION['user_id'];
+$profileUserId  = $currentUserId;  // ALWAYS your own user
 
 
 // ---------- LIGAÇÃO À BD ----------
@@ -187,6 +189,8 @@ $stmtE->close();
 
 
 ?>
+
+
 <!DOCTYPE html>
 
 <html lang="en">

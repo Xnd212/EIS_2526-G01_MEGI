@@ -6,13 +6,14 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+// Guest / user handling
+$isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 
-$user_id = (int) $_SESSION['user_id'];
+if (!$isGuest && isset($_SESSION['user_id'])) {
+    $user_id = (int) $_SESSION['user_id'];
+} else {
+    $user_id = null; // guest
+}
 
 // Get ID from URL
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -34,8 +35,12 @@ if ($conn->connect_error) {
 
 // ==========================================
 // 1.A  HANDLE COLLECTION RATING (POST)
+//      -> only for logged-in users
 // ==========================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_POST['rating'])) {
+if ($user_id !== null &&
+    $_SERVER['REQUEST_METHOD'] === 'POST' &&
+    isset($_POST['collection_id'], $_POST['rating'])) {
+
     $collection_id = filter_input(INPUT_POST, 'collection_id', FILTER_VALIDATE_INT);
     $rating        = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
 
@@ -43,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['collection_id'], $_PO
     if ($collection_id && $rating !== false && $rating >= 0 && $rating <= 5) {
         if ($rating == 0) {
             // Delete rating (Clear)
-            $sqlRate = "DELETE FROM rating WHERE user_id = ? AND collection_id = ? AND event_id = ?";
+            $sqlRate = "DELETE FROM rating 
+                        WHERE user_id = ? AND collection_id = ? AND event_id = ?";
             $stmtRate = $conn->prepare($sqlRate);
             $stmtRate->bind_param("iii", $user_id, $collection_id, $event_id);
             $stmtRate->execute();
@@ -89,6 +95,10 @@ $stmt->close();
 // ==========================================
 // 3. FETCH COLLECTIONS (Others bringing)
 // ==========================================
+$collections = [];
+$userRatings = [];
+
+// base query (everyone who brings a collection)
 $collections_sql = "SELECT 
                         c.collection_id, 
                         c.name as collection_name, 
@@ -99,11 +109,19 @@ $collections_sql = "SELECT
                     JOIN collection c ON a.collection_id = c.collection_id
                     LEFT JOIN image i ON c.image_id = i.image_id
                     WHERE a.event_id = ?
-                      AND a.collection_id IS NOT NULL
-                      AND a.user_id <> ?";  
+                      AND a.collection_id IS NOT NULL";
 
-$col_stmt = $conn->prepare($collections_sql);
-$col_stmt->bind_param("ii", $event_id, $user_id);
+// se for user logado, não mostrar a própria coleção na lista de “others”
+if ($user_id !== null) {
+    $collections_sql .= " AND a.user_id <> ?";
+    $col_stmt = $conn->prepare($collections_sql);
+    $col_stmt->bind_param("ii", $event_id, $user_id);
+} else {
+    // guest: vê todas as coleções
+    $col_stmt = $conn->prepare($collections_sql);
+    $col_stmt->bind_param("i", $event_id);
+}
+
 $col_stmt->execute();
 $collections_result = $col_stmt->get_result();
 $collections = $collections_result->fetch_all(MYSQLI_ASSOC);
@@ -111,28 +129,35 @@ $col_stmt->close();
 
 // ==========================================
 // 3.B  FETCH RATINGS FOR THESE COLLECTIONS
+//      (only for logged-in user)
 // ==========================================
-// User's own ratings
-$userRatings = [];
-$userRateSql = "SELECT collection_id, rating FROM rating WHERE event_id = ? AND user_id = ?";
-$userRateStmt = $conn->prepare($userRateSql);
-$userRateStmt->bind_param("ii", $event_id, $user_id);
-$userRateStmt->execute();
-$userRateRes = $userRateStmt->get_result();
-while ($row = $userRateRes->fetch_assoc()) {
-    $userRatings[(int)$row['collection_id']] = (int)$row['rating'];
+if ($user_id !== null) {
+    $userRateSql = "SELECT collection_id, rating 
+                    FROM rating 
+                    WHERE event_id = ? AND user_id = ?";
+    $userRateStmt = $conn->prepare($userRateSql);
+    $userRateStmt->bind_param("ii", $event_id, $user_id);
+    $userRateStmt->execute();
+    $userRateRes = $userRateStmt->get_result();
+    while ($row = $userRateRes->fetch_assoc()) {
+        $userRatings[(int)$row['collection_id']] = (int)$row['rating'];
+    }
+    $userRateStmt->close();
 }
-$userRateStmt->close();
 
 // ==========================================
-// 4. CHECK USER ATTENDANCE
+// 4. CHECK USER ATTENDANCE (if logged in)
 // ==========================================
-$check_sql = "SELECT * FROM attends WHERE user_id = ? AND event_id = ?";
-$check_stmt = $conn->prepare($check_sql);
-$check_stmt->bind_param("ii", $user_id, $event_id);
-$check_stmt->execute();
-$is_attending = $check_stmt->get_result()->num_rows > 0;
-$check_stmt->close();
+$is_attending = false;
+
+if ($user_id !== null) {
+    $check_sql = "SELECT 1 FROM attends WHERE user_id = ? AND event_id = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("ii", $user_id, $event_id);
+    $check_stmt->execute();
+    $is_attending = $check_stmt->get_result()->num_rows > 0;
+    $check_stmt->close();
+}
 
 // ==========================================
 // 5. HELPER LOGIC
@@ -144,7 +169,7 @@ $isPast     = $eventDateObj < $today;
 $event_date = $eventDateObj->format("d/m/Y");
 
 // Check if current user is the creator
-$isCreator  = ($event['user_id'] == $user_id);
+$isCreator  = ($user_id !== null && $event['user_id'] == $user_id);
 
 // Video Logic
 $video_id = null;
@@ -191,7 +216,16 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         <button class="icon-btn" id="notification-btn">🔔</button>
         <div class="notification-popup" id="notification-popup">
             <div class="popup-header"><h3>Notifications <span>🔔</span></h3></div>
-            <ul class="notification-list"><li>No new notifications</li></ul>
+            <ul class="notification-list">
+                    <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
+                    <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
+                    <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
+                    <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
+                    <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
+                    <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
+                    <li><strong>Telmo_Matos</strong> added 3 new items to the Premier League Stickers collection.</li>
+                    <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
+            </ul>
         </div>
         <a href="userpage.php" class="icon-btn">👤</a>
         <button class="icon-btn" id="logout-btn">🚪</button>
@@ -264,7 +298,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
                 <p class="collection-user"><?php echo htmlspecialchars($collection['username']); ?></p>
               </a>
 
-              <?php if ($isPast): ?>
+              <?php if ($user_id !== null && $isPast): ?>
                   <div class="collection-rating">
                     <form method="post" class="rating-form">
                         <input type="hidden" name="collection_id" value="<?php echo $colId; ?>">
@@ -295,7 +329,16 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         <?php if (!$isPast): ?>
             <div class="register-section">
               <div class="register-row">
-                <?php if ($isCreator): ?>
+
+                <?php if ($user_id === null): ?>
+                    <!-- GUEST VIEW -->
+                    <p class="register-text">🎟️ Want to join? Log in or sign up to participate.</p>
+                    <a href="login.php?redirect=<?php echo urlencode('eventpage.php?id=' . $event_id); ?>" 
+                       class="register-button">
+                        Log in to join
+                    </a>
+
+                <?php elseif ($isCreator): ?>
                   <p class="register-text">✏️ You created this event.</p>
                   <a href="editevent.php?id=<?php echo $event_id; ?>" class="register-button edit-btn">Edit Event</a>
 
@@ -307,6 +350,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
                   <p class="register-text">🎟️ Want to join? Sign up now!</p>
                   <a href="sign_up_event.php?id=<?php echo $event_id; ?>&action=join" class="register-button">Sign up</a>
                 <?php endif; ?>
+
               </div>
             </div>
         <?php else: ?>

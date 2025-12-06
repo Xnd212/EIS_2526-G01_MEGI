@@ -5,13 +5,13 @@ session_start();
 $isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 $currentUserId = isset($_SESSION['user_id']) && !$isGuest ? (int)$_SESSION['user_id'] : null;
 
-/* PERFIL CUJOS AMIGOS VAMOS VER */
+/* PERFIL CUJAS COLEÇÕES DOS AMIGOS VAMOS VER */
 $profileUserId = null;
 if (isset($_GET['user_id']) && ctype_digit($_GET['user_id'])) {
-    // vem de + See more
+    // vem de + See more (perfil de outro user)
     $profileUserId = (int)$_GET['user_id'];
 } elseif ($currentUserId !== null) {
-    // sem user_id no URL, mas há user logado -> “My friends”
+    // sem user_id no URL, mas há user logado -> “My friends' collections”
     $profileUserId = $currentUserId;
 }
 
@@ -41,19 +41,28 @@ if ($profileUserId !== null) {
     $stmtName->close();
 }
 
-/* AMIGOS DESSE PERFIL */
-$friends = [];
+/* COLEÇÕES DOS AMIGOS DESSE PERFIL */
+$friendCollections = [];
 
 if ($profileUserId !== null) {
     $sql = "
         SELECT 
-            u.user_id,
-            u.username,
-            img.url AS friend_image
+            c.collection_id,
+            c.name AS collection_name,
+            c.theme,
+            c.description,
+            img_col.url AS collection_image,
+            u.user_id AS owner_id,
+            u.username AS owner_username
         FROM friends f
-        INNER JOIN user u ON f.friend_id = u.user_id
-        LEFT JOIN image img ON u.image_id = img.image_id
+        INNER JOIN user u 
+            ON f.friend_id = u.user_id          -- amigo
+        INNER JOIN collection c 
+            ON c.user_id = u.user_id            -- coleção do amigo
+        LEFT JOIN image img_col 
+            ON c.image_id = img_col.image_id    -- imagem da coleção
         WHERE f.user_id = ?
+        ORDER BY owner_username, collection_name
     ";
 
     $stmt = $conn->prepare($sql);
@@ -62,7 +71,7 @@ if ($profileUserId !== null) {
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
-        $friends[] = $row;
+        $friendCollections[] = $row;
     }
 
     $stmt->close();
@@ -71,18 +80,16 @@ if ($profileUserId !== null) {
 /* DEBUG TEMPORÁRIO: podes apagar depois */
 echo "<!-- currentUserId = " . var_export($currentUserId, true) .
      " | profileUserId = " . var_export($profileUserId, true) .
-     " | friendsCount = " . count($friends) . " -->";
+     " | friendCollectionsCount = " . count($friendCollections) . " -->";
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | User Friends Page</title>
-  <link rel="stylesheet" href="userfriendspage.css">
+  <title>Trall-E | Friends' Collections</title>
+  <link rel="stylesheet" href="allfriendscollectionspage.css">
 </head>
 
 <body>    
@@ -96,7 +103,7 @@ echo "<!-- currentUserId = " . var_export($currentUserId, true) .
         <input type="search" placeholder="Search" />
     </div>
     <div class="icons">
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+        <?php include __DIR__ . '/notifications_popup.php'; ?>
 
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
@@ -122,95 +129,102 @@ echo "<!-- currentUserId = " . var_export($currentUserId, true) .
         <h2>
             <?php
               if ($profileUserId !== null && $currentUserId !== null && $profileUserId === $currentUserId) {
-                  echo "My friends";
+                  echo "My friends' collections";
               } elseif ($profileUserId !== null) {
-                  echo htmlspecialchars($profileUsername) . "'s Friends";
+                  echo htmlspecialchars($profileUsername) . "'s friends' collections";
               } else {
-                  echo "Friends";
+                  echo "Friends' collections";
               }
             ?>
         </h2>
 
-<div class="friends-grid">
+        <div class="friends-grid">
 
-  <?php if ($currentUserId === null && $profileUserId === null): ?>
+          <?php if ($currentUserId === null && $profileUserId === null): ?>
 
-      <!-- guest clicou em View Friends (sem user_id) -->
-      <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
-          You are browsing as a guest.
-          <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
-              Log in
-          </a>
-          to view your friends list.
-      </p>
-
-  <?php elseif (empty($friends)): ?>
-
-      <p style="margin-top:20px; font-size:18px;">
-          <?php echo htmlspecialchars($profileUsername); ?> does not have any friends to display.
-      </p>
-
-  <?php else: ?>
-
-      <?php foreach ($friends as $friend): ?>
-          <?php
-            $imgSrc = !empty($friend['friend_image'])
-                ? $friend['friend_image']
-                : 'images/default_avatar.png';
-          ?>
-          <div class="friend">
-              <a href="friendpage.php?user_id=<?php echo $friend['user_id']; ?>">
-                  <img src="<?php echo htmlspecialchars($imgSrc); ?>"
-                       alt="<?php echo htmlspecialchars($friend['username']); ?>">
-              </a>
-
-              <p class="friend-name">
-                  <strong>
-                      <a href="friendpage.php?user_id=<?php echo $friend['user_id']; ?>">
-                          <?php echo htmlspecialchars($friend['username']); ?>
-                      </a>
-                  </strong>
+              <!-- guest sem user_id -->
+              <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
+                  You are browsing as a guest.
+                  <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                      Log in
+                  </a>
+                  to view your friends' collections.
               </p>
-          </div>
-      <?php endforeach; ?>
 
-  <?php endif; ?>
+          <?php elseif (empty($friendCollections)): ?>
 
-</div>
+              <p style="margin-top:20px; font-size:18px;">
+                  <?php echo htmlspecialchars($profileUsername); ?> has no friends' collections to display.
+              </p>
 
+          <?php else: ?>
+
+              <?php foreach ($friendCollections as $col): ?>
+                  <?php
+                    $imgSrc = !empty($col['collection_image'])
+                        ? $col['collection_image']
+                        : 'images/default_collection.png';
+                  ?>
+                  <div class="friend">
+                      <a href="collectionpage.php?id=<?php echo $col['collection_id']; ?>">
+                          <img
+                              src="<?php echo htmlspecialchars($imgSrc); ?>"
+                              alt="<?php echo htmlspecialchars($col['collection_name']); ?>"
+                          >
+                      </a>
+
+                      <p class="friend-name">
+                          <strong>
+                              <a href="collectionpage.php?id=<?php echo $col['collection_id']; ?>">
+                                  <?php echo htmlspecialchars($col['collection_name']); ?>
+                              </a>
+                          </strong>
+                      </p>
+
+                      <p class="friend-owner">
+                          by
+                          <a href="friendpage.php?user_id=<?php echo $col['owner_id']; ?>">
+                              <?php echo htmlspecialchars($col['owner_username']); ?>
+                          </a>
+                      </p>
+                  </div>
+              <?php endforeach; ?>
+
+          <?php endif; ?>
+
+        </div>
       </section>
 
     </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section collections-section">
+    <h3>My collections</h3>
+    <p><a href="collectioncreation.php">Create collection</a></p>
+    <p><a href="itemcreation.php">Create item</a></p>
+    <p><a href="mycollectionspage.php">View collections</a></p>
+    <p><a href="myitems.php">View items</a></p>
   </div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-section collections-section">
-      <h3>My collections</h3>
-      <p><a href="collectioncreation.php">Create collection</a></p>
-      <p><a href="itemcreation.php"> Create item</a></p>
-      <p><a href="mycollectionspage.php">View collections</a></p>
-      <p><a href="myitems.php">View items</a></p>
-    </div>
+  <div class="sidebar-section friends-section">
+    <h3>My friends</h3>
+    <p><a href="userfriendspage.php">View Friends</a></p>
+    <p><a href="allfriendscollectionspage.php">View collections</a></p>
+    <p><a href="teampage.php">Team Page</a></p>
+  </div>
 
-    <div class="sidebar-section friends-section">
-      <h3>My friends</h3>
-      <p><a href="userfriendspage.php">View Friends</a></p>
-      <p><a href="allfriendscollectionspage.php">View collections</a></p>
-      <p><a href="teampage.php">Team Page</a></p>
-    </div>
+  <div class="sidebar-section events-section">
+    <h3>Events</h3>
+    <p><a href="createevent.php">Create event</a></p>
+    <p><a href="upcomingevents.php">View upcoming events</a></p>
+    <p><a href="eventhistory.php">Event history</a></p>
+  </div>
+</aside>
 
-    <div class="sidebar-section events-section">
-      <h3>Events</h3>
-      <p><a href="createevent.php">Create event</a></p>
-      <p><a href="upcomingevents.php">View upcoming events</a></p>
-      <p><a href="eventhistory.php">Event history</a></p>
-    </div>
-  </aside>
-
-  <script src="userfriendspage.js"></script>
-  <script src="homepage.js"></script>
-  <script src="logout.js"></script>
+<script src="homepage.js"></script>
+<script src="logout.js"></script>
 
 </body>
 </html>

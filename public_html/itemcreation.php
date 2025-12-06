@@ -22,16 +22,7 @@ if (!isset($_SESSION['user_id']) || $isGuest) {
 // ==========================================
 // 2. DATABASE CONNECTION
 // ==========================================
-$servername = "localhost";
-$username   = "root";
-$password   = "";
-$dbname     = "sie"; // Your Database Name
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 // ===============================
 // 2.1 USER ID (sem fallback)

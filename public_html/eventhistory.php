@@ -11,15 +11,7 @@ if (!$isGuest && isset($_SESSION['user_id'])) {
 }
 
 // ---------------- BD ----------------
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "sie";
-
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Erro: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 /* ==========================================================
    BUSCAR EVENTOS (SÓ SE HOUVER USER LOGADO)

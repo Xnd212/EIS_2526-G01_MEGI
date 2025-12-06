@@ -13,16 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 $currentUserId = (int) $_SESSION['user_id'];
 
 // =================== LIGAÇÃO À BD ===================
-$host   = "localhost";
-$user   = "root";
-$pass   = "";
-$dbname = "sie";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-
-if ($conn->connect_error) {
-    die("Erro na ligação: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 // =================== BUSCAR NOTIFICAÇÕES ===================
 // 1) collections criadas por friends

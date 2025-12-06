@@ -23,15 +23,7 @@ if (!$event_id) {
 }
 
 // Database connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "sie";
-$conn = new mysqli($host, $user, $pass, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 // ==========================================
 // 1.A  HANDLE COLLECTION RATING (POST)

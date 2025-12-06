@@ -16,15 +16,7 @@ if (isset($_GET['user_id']) && ctype_digit($_GET['user_id'])) {
 }
 
 /* BD */
-$host   = "localhost";
-$user   = "root";
-$pass   = "";
-$dbname = "sie";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    die("Erro na ligação: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 /* NOME DO PERFIL */
 $profileUsername = 'User';

@@ -8,10 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "sie");
-if ($conn->connect_error) {
-    die("Erro na ligação: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 $q = trim($_GET['q'] ?? '');
 

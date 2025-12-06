@@ -20,15 +20,7 @@ if (!$event_id) {
 }
 
 // 3. Database Connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "sie";
-$conn = new mysqli($host, $user, $pass, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once __DIR__ . "/db.php";
 
 // 4. VERIFY PERMISSION (Crucial!)
 // Check if the logged-in user is actually the creator of this event

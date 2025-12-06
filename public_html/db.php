@@ -4,6 +4,11 @@ $user = "root";
 $pass = "";
 $dbname = "sie";
 
-$pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+if ($conn->connect_error) {
+    die("Erro na ligação: " . $conn->connect_error);
+}
+
+$conn->set_charset("utf8");
 ?>

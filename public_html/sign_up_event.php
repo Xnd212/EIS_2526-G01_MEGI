@@ -17,9 +17,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // 3. Database Connection
-$host = "localhost"; $user = "root"; $pass = ""; $dbname = "sie";
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
+require_once __DIR__ . "/db.php";
 
 $user_id = $_SESSION['user_id'];
 $event_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);

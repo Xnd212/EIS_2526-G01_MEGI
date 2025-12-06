@@ -23,28 +23,7 @@
             </div>
             <div class="icons">
                 <!-- Botão de notificações -->
-                <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
-                <div class="notification-popup" id="notification-popup">
-
-                    <div class="popup-header">
-                        <h3>Notifications <span>🔔</span></h3>
-                    </div>
-
-                    <hr class="popup-divider">
-                    <ul class="notification-list">
-                        <li><strong>Ana_Rita_Lopes</strong> added 3 new items to the Pokémon Cards collection.</li>
-                        <li><strong>Tomás_Freitas</strong> created a new collection: Vintage Stamps.</li>
-                        <li><strong>David_Ramos</strong> updated his Funko Pop inventory.</li>
-                        <li><strong>Telmo_Matos</strong> joined the event: Iberanime Porto 2025.</li>
-
-                        <li><strong>Marco_Pereira</strong> started following your Panini Stickers collection.</li>
-                        <li><strong>Ana_Rita_Lopes</strong> added 1 new items to the Pokémon Champion’s Path collection.</li>
-                        <li><strong>Telmo_Matos</strong> added added 3 new items to the Premier League Stickers collection.</li>
-                        <li><strong>Marco_Pereira</strong> created a new event: Card Madness Meetup.</li>
-                    </ul>
-
-                    <a href="#" class="see-more-link">+ See more</a>
-                </div>
+                <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
                 

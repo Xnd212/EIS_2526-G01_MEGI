@@ -198,14 +198,7 @@ $conn->close();
             </div>
 
             <div class="icons">
-                <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
-
-                <div class="notification-popup" id="notification-popup">
-                    <div class="popup-header"><h3>Notifications <span>🔔</span></h3></div>
-                    <ul class="notification-list">
-                        <li>No new notifications</li>
-                    </ul>
-                </div>
+                <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
                 <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>

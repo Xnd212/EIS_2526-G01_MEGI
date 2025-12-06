@@ -155,19 +155,7 @@ if (!empty($col['starting_date'])) {
     </div>
 
     <div class="icons">
-      <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
-      <div class="notification-popup" id="notification-popup">
-        <div class="popup-header">
-          <h3>Notifications <span>🔔</span></h3>
-        </div>
-
-        <hr class="popup-divider">
-        <ul class="notification-list">
-          <li><strong>Ana_Rita_Lopes</strong> added 3 new items...</li>
-        </ul>
-
-        <a href="#" class="see-more-link">+ See more</a>
-      </div>
+                <?php include __DIR__ . '/notifications_popup.php'; ?>
 
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       

@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+$loginError  = $_SESSION['login_error']  ?? "";
+$signupError = $_SESSION['signup_error'] ?? "";
+
+// limpa imediatamente depois de ler
+unset($_SESSION['login_error'], $_SESSION['signup_error']);
+
+
 // Check if browsing as guest
 if (isset($_GET['guest']) && $_GET['guest'] == 'true') {
     // Set guest session
@@ -59,15 +66,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$showSignup && isset($_POST['userna
             header("Location: homepage.php");
             exit();
         } else {
-            $error = "Password incorreta";
+            $_SESSION['login_error'] = "Password incorreta";
+            header("Location: login.php");
+            exit();
         }
     } else {
-        $error = "Username ou email não encontrado";
+        $_SESSION['login_error'] = "Username ou email não encontrado";
+        header("Location: login.php");
+        exit();
     }
 
     $stmt->close();
 }
 
+// Handle signup
 // Handle signup
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $showSignup && isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password'])) {
     $username = trim($_POST['username']);
@@ -76,66 +88,71 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $showSignup && isset($_POST['usernam
 
     // Validate all fields are filled
     if (empty($username) || empty($email) || empty($password)) {
-        $error = "Todos os campos são obrigatórios";
+        $_SESSION['signup_error'] = "Todos os campos são obrigatórios";
+        header("Location: login.php?action=signup");
+        exit();
     }
-    // Validate email format
     elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Por favor, insira um email válido";
+        $_SESSION['signup_error'] = "Por favor, insira um email válido";
+        header("Location: login.php?action=signup");
+        exit();
     }
-    // Validate username (alphanumeric and underscores only, 3-20 chars)
     elseif (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username)) {
-        $error = "Username deve ter 3-20 caracteres (apenas letras, números e _)";
+        $_SESSION['signup_error'] = "Username deve ter 3-20 caracteres (apenas letras, números e _)";
+        header("Location: login.php?action=signup");
+        exit();
+    }
+
+    // Check if username already exists
+    $stmt = $conn->prepare("SELECT user_id FROM user WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $stmt->close();
+        $_SESSION['signup_error'] = "Este username já está em uso";
+        header("Location: login.php?action=signup");
+        exit();
+    }
+    $stmt->close();
+
+    // Check if email already exists
+    $stmt = $conn->prepare("SELECT user_id FROM user WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $stmt->close();
+        $_SESSION['signup_error'] = "Este email já está registado";
+        header("Location: login.php?action=signup");
+        exit();
+    }
+    $stmt->close();
+
+    // Insert new user
+    $insert_stmt = $conn->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
+    $insert_stmt->bind_param("sss", $username, $email, $password);
+
+    if ($insert_stmt->execute()) {
+        $new_user_id = $insert_stmt->insert_id;
+
+        $_SESSION['user_id']   = $new_user_id;
+        $_SESSION['username']  = $username;
+        $_SESSION['email']     = $email;
+        $_SESSION['logged_in'] = true;
+        $_SESSION['is_guest']  = false;
+
+        header("Location: homepage.php");
+        exit();
     } else {
-        // Check if username already exists
-        $stmt = $conn->prepare("SELECT user_id FROM user WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $error = "Este username já está em uso";
-            $stmt->close();
-        } else {
-            $stmt->close();
-
-            // Check if email already exists
-            $stmt = $conn->prepare("SELECT user_id FROM user WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result->num_rows > 0) {
-                $error = "Este email já está registado";
-                $stmt->close();
-            } else {
-                $stmt->close();
-
-                // Insert new user
-                $insert_stmt = $conn->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
-                $insert_stmt->bind_param("sss", $username, $email, $password);
-
-                if ($insert_stmt->execute()) {
-                    $new_user_id = $insert_stmt->insert_id;
-
-                    // Set session variables
-                    $_SESSION['user_id'] = $new_user_id;
-                    $_SESSION['username'] = $username;
-                    $_SESSION['email'] = $email;
-                    $_SESSION['logged_in'] = true;
-                    $_SESSION['is_guest'] = false;
-
-                    // Redirect to homepage
-                    header("Location: homepage.php");
-                    exit();
-                } else {
-                    $error = "Erro ao criar conta. Tente novamente.";
-                }
-
-                $insert_stmt->close();
-            }
-        }
+        $_SESSION['signup_error'] = "Erro ao criar conta. Tente novamente.";
+        header("Location: login.php?action=signup");
+        exit();
     }
 }
+
 
 $conn->close();
 ?>
@@ -166,15 +183,19 @@ $conn->close();
                     <!-- LOGIN (ESQUERDA) -->
                     <section class="login-section">
                         <h2>Login to your profile</h2>
-                        <?php if (!empty($error)): ?>
-                            <p style="color: red; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
-                        <?php endif; ?>
                         <form method="post" action="">
                             <label for="username">Username or email</label>
                             <input type="text" id="username" name="username" required>
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" required>
-                            <button type="submit" class="login-btn">Login</button>
+                            <div class="login-row">
+                                    <button type="submit" class="login-btn">Login</button>
+
+                                    <?php if (!empty($loginError)): ?>
+                                        <span class="error-msg"><?php echo htmlspecialchars($loginError); ?></span>
+                                    <?php endif; ?>
+                            </div>
+                            
                         </form>
                     </section>
                     <!-- SIGN UP / GUEST (DIREITA) -->
@@ -191,9 +212,6 @@ $conn->close();
                     <!-- SIGNUP VIEW: ONLY SIGNUP FORM CENTERED -->
                     <section class="login-section signup-centered">
                         <h2>Join other collectors</h2>
-                        <?php if (!empty($error)): ?>
-                            <p style="color: red; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
-                        <?php endif; ?>
                         <form method="post" action="?action=signup">
                             <label for="username">Username</label>
                             <input type="text" id="username" name="username" required>
@@ -201,7 +219,14 @@ $conn->close();
                             <input type="text" id="email" name="email" required>
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" required>
-                            <button type="submit" class="login-btn">Sign Up</button>
+                            <div class="login-row">
+                                    <button type="submit" class="login-btn">Sign Up</button>
+
+                                    <?php if (!empty($signupError)): ?>
+                                        <span class="error-msg"><?php echo htmlspecialchars($signupError); ?></span>
+                                    <?php endif; ?>
+                            </div>
+
                         </form>
                         <p style="margin-top: 20px; text-align: center;">
                             Already have an account? <a href="login.php" style="color: #007bff;">Login here</a>

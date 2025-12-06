@@ -200,9 +200,17 @@ input[type=password] {
     display: none;
 }
 
+.login-row {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* espaço entre botão e erro */
+    margin-top: 5px;
+}
+
 .error-msg {
     color: red;
-    margin-bottom: 15px;
+    font-size: 0.9rem;
+    white-space: nowrap; /* impede que parta a linha */
 }
 
 .back-login {

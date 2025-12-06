@@ -32,15 +32,16 @@ body {
     margin-top: 20px;
 }
 
-/* Tamanhos FIXOS — NÃO DEFORMAM COM ZOOM */
-.fake-searchbar {
-    width: 600px;
+.search-bar.placeholder {
+    width: 500px;
     height: 40px;
+    visibility: hidden;
 }
 
-.fake-icons {
+.icons.placeholder {
     width: 120px;
     height: 40px;
+    visibility: hidden;
 }
 
 /* ---------------- PAGE WRAPPER ---------------- */
@@ -49,7 +50,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: 130px;
+    padding-top: 150px;
     padding-bottom: 40px;
 }
 
@@ -62,6 +63,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 
     display: flex;
+    align-items: center;
     gap: 40px;
     position: relative;
 }
@@ -71,9 +73,10 @@ body {
     content: "";
     position: absolute;
     left: 50%;
-    top: 40px;
-    bottom: 40px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 2px;
+    height: 70%;
     background: black;
 }
 
@@ -84,7 +87,7 @@ body {
     top: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 4px 10px;
+    padding: 4px 5px;
     font-weight: bold;
     border-radius: 20px;
 }
@@ -93,10 +96,14 @@ body {
 
 .login-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 .login-section h2 {
-    margin-bottom: 25px;
+    margin-bottom: 5px;
     font-size: 1.4rem;
 }
 
@@ -131,24 +138,31 @@ input[type=password] {
 
 .alternative-section {
     flex: 1;
-    padding-top: 20px;
-
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    justify-content: center;
+    height: 100%;
+}
+
+.alternative-section h2 {
+    position: absolute;
+    top: 13%;
+    font-size: 1.4rem;
 }
 
 .full-btn {
-    padding: 12px 0;
+    padding: 10px 0;
     width: 100%;
     border-radius: 12px;
     border: 2px solid;
     font-weight: 600;
     text-align: center;
     text-decoration: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
-/* Primary button */
+/* Buttons */
 .primary-outline {
     border-color: #960018;
     color: #960018;
@@ -159,14 +173,15 @@ input[type=password] {
     color: white;
 }
 
-/* Guest button */
 .secondary-outline {
     border-color: #aaa;
     background: #eee;
+    color: black;
 }
 
 .secondary-outline:hover {
-    background: #ddd;
+    background: #aaa;
+    color: #eee;
 }
 
 /* ---------------- SIGNUP MODE ---------------- */

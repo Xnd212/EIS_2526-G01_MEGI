@@ -1,128 +1,98 @@
-
-
-/* ====== GLOBAL ====== */
+/* RESET */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
+    box-sizing: border-box;
 }
 
 body {
-    background-color: #f3f0ff; /* lilás clarinho, tipo a home */
-    color: #222;
+    background: #f3f0ff;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* =======================
-   Header igual ao da home
-======================= */
+/* ---------------- HEADER ---------------- */
+
 .login-header {
-  background-color: #c77462;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  height: 90px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
+    height: 90px;
+    width: 100%;
+    background: #c77462;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 2rem;
+    position: fixed;
+    top: 0;
+    z-index: 999;
 }
 
-/* Logo igual ao da home */
 .login-header .logo img {
-  height: 100px;
-  width: auto;
+    height: 90px;
+    object-fit: contain;
+    margin-top: 20px;
 }
 
-/* Mantém espaço, mas fica invisível */
-.placeholder {
-  visibility: hidden;   /* fica invisível mas mantém tamanho */
-  flex: 1;
-  max-width: 600px;
-  margin: 0 1rem;
+/* Tamanhos FIXOS — NÃO DEFORMAM COM ZOOM */
+.fake-searchbar {
+    width: 600px;
+    height: 40px;
 }
 
-.icons.placeholder {
-  padding-right: 3rem; /* manter igual ao da home */
+.fake-icons {
+    width: 120px;
+    height: 40px;
 }
 
-
-/* ====== PÁGINA DE AUTH ====== */
+/* ---------------- PAGE WRAPPER ---------------- */
 
 .auth-page {
-    min-height: calc(100vh - 70px);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 40px 16px;
+    padding-top: 130px;
+    padding-bottom: 40px;
 }
 
-/* Card central com login + sign up */
 .auth-wrapper {
-    position: relative;
-    background: #ffffff;
     width: 800px;
-    max-width: 100%;
+    background: white;
+
     padding: 40px 50px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
     display: flex;
     gap: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    position: relative;
 }
 
-/* Linha vertical ao centro */
+/* Vertical line */
 .auth-wrapper::before {
     content: "";
     position: absolute;
+    left: 50%;
     top: 40px;
     bottom: 40px;
-    left: 50%;
     width: 2px;
-    background-color: #000;
+    background: black;
 }
 
-/* Texto "OR" */
+/* OR label */
 .or-label {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background-color: #ffffff;
+    background: white;
     padding: 4px 10px;
     font-weight: bold;
-    border-radius: 999px;
+    border-radius: 20px;
 }
 
-/* Colunas */
-.login-section,
-.alternative-section {
-    flex: 1;
-}
+/* ---------------- LOGIN ---------------- */
 
 .login-section {
-    padding-right: 30px;
-}
-
-.alternative-section {
-    padding-left: 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start; 
-    gap: 8px;
-    margin-top: -20px;
-}
-
-
-
-/* ====== LOGIN (ESQUERDA) ====== */
-.alt-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #2d2d2d;
+    flex: 1;
 }
 
 .login-section h2 {
@@ -131,114 +101,96 @@ body {
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
     font-size: 0.9rem;
 }
 
-input[type="text"],
-input[type="password"] {
+input[type=text],
+input[type=password] {
     width: 100%;
-    border: 2px solid #000;
-    padding: 8px 10px;
-    margin-bottom: 18px;
-    font-size: 0.95rem;
+    padding: 10px;
     border-radius: 6px;
+    border: 2px solid #000;
+    margin-bottom: 18px;
 }
 
 .login-btn {
-    border: 2px solid #000;
-    background-color: #ffffff;
-    padding: 8px 25px;
-    font-weight: 600;
-    cursor: pointer;
+    padding: 10px 20px;
+    border: 2px solid black;
     border-radius: 8px;
-    transition: 0.2s;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .login-btn:hover {
-    background-color: #000;
-    color: #ffffff;
+    background: black;
+    color: white;
 }
 
-/* ====== SIGN UP / GUEST (DIREITA) ====== */
+/* ---------------- RIGHT SIDE ---------------- */
 
-.alt-title {
-    font-size: 0.9rem;
-    margin-bottom: 18px;
+.alternative-section {
+    flex: 1;
+    padding-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .full-btn {
-    display: block;
-    width: 100%;
     padding: 12px 0;
-    margin-bottom: 15px;
-    text-align: center;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border: 2px solid;
+    width: 100%;
     border-radius: 12px;
+    border: 2px solid;
+    font-weight: 600;
+    text-align: center;
     text-decoration: none;
 }
 
-/* Botão "Join other collectors" */
+/* Primary button */
 .primary-outline {
-    border-color: #8b0015;          /* bordô semelhante aos teus destaques */
-    color: #8b0015;
-    background-color: #ffffff;
-    font-weight: 600;
+    border-color: #960018;
+    color: #960018;
 }
 
 .primary-outline:hover {
-    background-color: #8b0015;
-    color: #ffffff;
+    background: #960018;
+    color: white;
 }
 
-/* Botão "browse as guest" */
+/* Guest button */
 .secondary-outline {
-    border-color: #b0b0b0;
-    color: #555555;
-    background-color: #f4f4f4;
-    font-weight: 500;
+    border-color: #aaa;
+    background: #eee;
 }
 
 .secondary-outline:hover {
-    background-color: #e0e0e0;
+    background: #ddd;
 }
 
-/* === LOGO ESPECÍFICO DO HEADER NA PÁGINA DE LOGIN === */
-.main-header img {
-    height: 60px;       /* ajusta se quiseres maior/menor */
-    width: auto;
-    display: block;
-    margin: 0;          /* garantir que não vem margem de outro lado */
-    object-fit: contain;
-}
+/* ---------------- SIGNUP MODE ---------------- */
 
 .signup-centered {
-    max-width: 400px;
-    width: 100%;
+    width: 350px;
     margin: 0 auto;
-}
-
-.signup-centered input[type="email"],
-.signup-centered input[type="password"] {
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .auth-wrapper:has(.signup-centered) {
     justify-content: center;
 }
 
+.auth-wrapper:has(.signup-centered)::before,
 .auth-wrapper:has(.signup-centered) .or-label {
     display: none;
 }
 
-.auth-wrapper:has(.signup-centered)::before {
-    display: none;
+.error-msg {
+    color: red;
+    margin-bottom: 15px;
 }
 
-.auth-wrapper:has(.signup-centered)::after {
-    display: none;
+.back-login {
+    margin-top: 20px;
+    text-align: center;
 }

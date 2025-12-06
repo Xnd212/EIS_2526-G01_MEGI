@@ -184,7 +184,7 @@ $conn->close();
                             Join other collectors
                         </a>
                         <a href="?guest=true" class="full-btn secondary-outline">
-                            browse as guest
+                            Browse as guest
                         </a>
                     </section>
                 <?php else: ?>

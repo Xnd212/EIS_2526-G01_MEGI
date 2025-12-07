@@ -117,37 +117,62 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
     /* ============================================================
-     CARROSSEL INFINITO ULTRA-FLUÍDO (requestAnimationFrame)
+     CARROSSEL INFINITO SUAVE + SCROLL NATURAL DO UTILIZADOR
      ============================================================ */
-    const eventsTrack = document.getElementById("events-track");
 
-    if (eventsTrack) {
-        let speed = 1.5;
-        let x = 0;
+    const track = document.getElementById("events-track");
+    const carousel = document.querySelector(".events-carousel");
 
-        
-        const originalHTML = eventsTrack.innerHTML;
-        while (eventsTrack.scrollWidth < window.innerWidth * 3) {
-            eventsTrack.innerHTML += originalHTML;
+    if (track && carousel) {
+
+        /* 1) DUPLICAR CONTEÚDO PARA LOOP INFINITO */
+        const originalHTML = track.innerHTML;
+
+        while (track.scrollWidth < window.innerWidth * 3) {
+            track.innerHTML += originalHTML;
         }
 
-        function animateCarousel() {
-            x -= speed;
+        /* 2) MOVIMENTO AUTOMÁTICO SUAVE */
+        let speed = 1.2;
+        let offset = 0;
 
-            
-            const resetPoint = eventsTrack.scrollWidth / 2;
-            if (Math.abs(x) >= resetPoint) {
-                x = 0;
+        function animateCarousel() {
+            offset += speed;
+
+            // quando chegou ao fim, recomeça suavemente
+            if (offset >= track.scrollWidth / 2) {
+                offset = 0;
             }
 
-            eventsTrack.style.transform = `translateX(${x}px)`;
+            track.style.transform = `translateX(${-offset}px)`;
 
             requestAnimationFrame(animateCarousel);
         }
 
         requestAnimationFrame(animateCarousel);
-    }
 
+        /* ============================================================
+         3) USER SCROLL (wheel, trackpad, touch)
+         O scroll horizontal do user ajusta a posição do offset
+         ============================================================= */
+
+        // Quando o user faz scroll natural (wheel/trackpad)
+        carousel.addEventListener("scroll", () => {
+            offset = carousel.scrollLeft;
+        });
+
+        // Para evitar que o wheel vertical trave o movimento
+        carousel.addEventListener("wheel", (e) => {
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                offset = carousel.scrollLeft;
+            }
+        }, {passive: true});
+
+        // Touch (mobile)
+        carousel.addEventListener("touchmove", () => {
+            offset = carousel.scrollLeft;
+        });
+    }
 
 });
 

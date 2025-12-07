@@ -348,21 +348,28 @@ if ($topByItems) {
                         <?php if (!empty($recommendedEvents)): ?>
                             <?php foreach ($recommendedEvents as $event): ?>
                                 <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>"
-                                            >
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
+                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" class="event-link">
+                                        <div class="event-img-wrapper">
+                                            <img
+                                                src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
+                                                alt="<?= htmlspecialchars($event['name']) ?>"
+                                                >
+                                        </div>
+
+                                        <p class="event-title">
+                                            <?= htmlspecialchars($event['name']) ?>
+                                        </p>
                                     </a>
 
                                     <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
+                                                <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" class="see-more-link">
+                                                    <span class="see-more-icon">+</span>
+                                                    <span>See more</span>
+                                                </a>
                                     </div>
+
                                 </div>
+
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>

@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      hoverPopup.style.left = e.pageX + 20 + "px";
-      hoverPopup.style.top  = e.pageY + 20 + "px";
+      hoverPopup.style.left = e.clientX + 20 + "px";
+      hoverPopup.style.top  = window.scrollY + e.clientY - hoverPopup.offsetHeight - 20 + "px";
       hoverPopup.classList.add("active");
     });
 

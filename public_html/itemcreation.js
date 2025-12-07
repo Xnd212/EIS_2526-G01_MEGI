@@ -20,19 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ============================================
-  // 2. FORM VALIDATION
+// ============================================
+  // 2. FORM VALIDATION (SAFER VERSION)
   // ============================================
   const form = document.getElementById("itemForm");
   const formMessage = document.getElementById("formMessage");
 
   if (form) {
     form.addEventListener("submit", (e) => {
-      // 1. Stop submission initially to check errors
-      e.preventDefault();
+      // NOTE: We do NOT preventDefault here. We assume it's valid until proven otherwise.
 
       // Elements
-      // NOTE: This looks for the <select> ID "collection_id", not checkboxes!
       const collection = document.getElementById("collection_id"); 
       const name = document.getElementById("itemName");
       const price = document.getElementById("itemPrice");
@@ -44,66 +42,78 @@ document.addEventListener("DOMContentLoaded", () => {
           if(el) el.classList.remove("error");
       });
       
-      formMessage.textContent = "";
-      formMessage.className = "form-message";
+      if(formMessage) {
+        formMessage.textContent = "";
+        formMessage.className = "form-message";
+      }
 
       let valid = true;
 
       // --- CHECK FIELDS ---
 
-      // Check Collection (Select Box)
+      // Check Collection
       if (!collection || collection.value === "") { 
           if(collection) collection.classList.add("error"); 
           valid = false; 
       }
 
       // Check Name
-      if (!name.value.trim()) { 
-          name.classList.add("error"); 
+      if (!name || !name.value.trim()) { 
+          if(name) name.classList.add("error"); 
           valid = false; 
       }
 
       // Check Price
-      if (!price.value.trim() || parseFloat(price.value) < 0) { 
-          price.classList.add("error"); 
+      if (!price || !price.value.trim() || parseFloat(price.value) < 0) { 
+          if(price) price.classList.add("error"); 
           valid = false; 
       }
 
       // Check Type
-      if (!type.value.trim()) { 
-          type.classList.add("error"); 
+      if (!type || !type.value.trim()) { 
+          if(type) type.classList.add("error"); 
           valid = false; 
       }
 
-      // Check Date
-      if (!date.value.trim()) { 
-          date.classList.add("error"); 
+      // Check Date (Empty)
+      if (!date || !date.value.trim()) { 
+          if(date) date.classList.add("error"); 
           valid = false; 
       }
 
-      // Date Future Check
-      if (date.value) {
+      // Check Date (Future) - SAFER LOGIC
+      if (date && date.value) {
           const selectedDate = new Date(date.value);
-          const currentDate = new Date();
-          currentDate.setHours(0,0,0,0);
-          selectedDate.setHours(0,0,0,0);
-          
-          if (selectedDate > currentDate) {
-              date.classList.add("error");
-              valid = false;
+          // Check if date is valid before running setHours
+          if (!isNaN(selectedDate.getTime())) { 
+             const currentDate = new Date();
+             currentDate.setHours(0,0,0,0);
+             selectedDate.setHours(0,0,0,0);
+             
+             if (selectedDate > currentDate) {
+                 date.classList.add("error");
+                 valid = false;
+                 if(formMessage) formMessage.textContent = "Date cannot be in the future.";
+             }
           }
       }
 
       // --- FINAL DECISION ---
       if (!valid) {
-        formMessage.textContent = "⚠️ Please fill in all required (*) fields.";
-        formMessage.classList.add("error");
-        return; // Stop here. Do not send to PHP.
-      }
-
-      // IF VALID: Send to PHP!
-      formMessage.textContent = "Processing...";
-      form.submit(); // <--- THIS IS THE MISSING LINE IN YOUR OLD CODE
+        // ONLY NOW do we stop the form from sending
+        e.preventDefault(); 
+        
+        if(formMessage && formMessage.textContent === "") {
+            formMessage.textContent = "⚠️ Please fill in all required (*) fields.";
+        }
+        if(formMessage) formMessage.classList.add("error");
+        
+        // Console log for debugging
+        console.log("Form submission blocked due to validation errors.");
+      } 
+      
+      // If valid is true, we do nothing. 
+      // The browser continues to PHP naturally.
     });
   }
 

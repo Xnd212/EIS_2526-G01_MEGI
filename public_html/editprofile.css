@@ -1,124 +1,46 @@
 @import url('homepage.css'); /* Reuse global styles */
 
-
+/* Permitir scroll vertical */
 body {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
-.content {
-  margin-right: 240px;
-  padding: 2rem;
+/* Wrapper geral para a página de edição */
+.edit-profile-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-right: 240px; /* espaço para a sidebar fixa da direita */
+  padding: 2rem 1rem 4rem;
   background: #eef0ff;
 }
 
-.search-bar {
-  flex: 1;
-  max-width: 600px;
-  margin: 0 1rem;
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: none;
-  font-size: 1rem;
-}
-
-
-/* ===== Notification Popup  ===== */
-.notification-popup {
-  position: absolute;
-  top: 60px;
-  right: 60px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #b54242; /* cor escura da header */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: 315px;
-  padding: 0;
-  display: none;
-  flex-direction: column;
-  z-index: 1000;
-}
-
-.notification-popup.active {
-  display: flex;
-}
-
-.popup-header {
-  background-color: #fbecec;
-  padding: 0.85rem 1.5rem;
-  border-bottom: 1px solid #b54242;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.popup-header h3 {
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin: 0;
-  color: #b54242;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.popup-divider {
-  border: none;
-  border-top: 1px solid #ddd;
-  margin: 0.5rem 0 0.5rem;
-}
-
-.notification-list {
-  list-style: none;
-  padding: 0;
-  margin: 0.75rem;
-}
-
-.notification-list li {
-  padding: 0.4rem 0;
-  border-bottom: 2px solid #eee;
-  font-size: 0.9rem;
-}
-
-.notification-list li:last-child {
-  border-bottom: none;
-}
-
-.notification-list li:first-child {
-  border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
-}
-
-
-
-
+/* Caixa principal do formulário */
 .edit-profile-page {
   background: #fff;
   border: 1.5px solid #b54242;
   border-radius: 12px;
-  padding: 2.5rem 3rem;
+  padding: 2.7rem 3rem;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  
-  max-width: 870px;
+
+  max-width: 880px;
   width: 100%;
-  margin-top: calc(90px + 1rem);
-  margin-left: calc((100% - 240px - 880px) / 2); 
-  margin-bottom: 5rem;
+  margin-top: calc(90px + 1rem); /* abaixo do header fixo */
+  margin-bottom: 3rem;
 }
 
 .edit-profile-page h2 {
   text-align: center;
   color: #333;
   border-bottom: 2px solid #c77462;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
 }
 
-/* Profile photo */
+/* Foto de perfil */
 .photo-section {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .photo-section img {
@@ -146,32 +68,34 @@ body {
   background: #dcdcdc;
 }
 
-
-/* Form layout */
+/* Layout dos grupos de formulário */
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.8rem; 
 }
 
-label {
-  font-weight: bold;
+.form-group label {
+  font-weight: 700;
   color: #444;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.7rem; 
 }
 
 .required {
   color: #b54242;
 }
 
+/* Inputs e selects */
 input[type="text"],
 input[type="email"],
 input[type="date"],
 select {
-  padding: 0.6rem;
+  padding: 0.65rem 0.8rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus,
@@ -180,224 +104,135 @@ select:focus {
   outline: none;
 }
 
+/* Textos de ajuda por baixo dos campos */
 .input-hint {
   font-size: 0.85rem;
   color: #777;
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
 }
 
-/* Email row */
-/* para os campos ficarem alinhados e espaçados */
-.form-group {
-  margin-bottom: 1.5rem; 
-  display: flex;
-  flex-direction: column;
+/* deslocar ligeiramente para a direita */
+.input-hint--indented {
+  margin-left: 0.3rem;
 }
 
-.email-group {
-  margin-bottom: 2rem; 
-}
-
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-}
-
-.form-group input,
-.form-group select {
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #b54242;
-}
-
-.input-hint {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 0.3rem;
-}
-
-.email-row {
-  display: flex;
-  align-items: center; 
-  gap: 0.8rem;         
-}
-
-.email-row input[type="email"] {
-  width: 560px;        
-  max-width: 100%;     
-  height: 40px;        
-}
-
-.email-row button {
-  flex-shrink: 0;     
-  white-space: nowrap; 
-}
-
-.verification-status {
-  font-size: 0.9rem;
-  margin-top: 0.3rem;
-  color: #3d8b3d;
-}
-
-.verification-status.error {
-  color: #b54242;
-}
-
-/* notifications */
-.form-group {
-  display: flex;
-  flex-direction: column; 
-  margin-bottom: 1.2rem;
-}
-
-.required {
-  color: #b54242;
-}
-
+/* Notificações (Yes / No) */
 .radio-group {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   flex-wrap: wrap;
 }
 
 .radio-group label {
-  font-weight: normal;
+  font-weight: 500;
 }
 
-.conditional-section {
-  border-left: 3px solid #c77462;
-  background: #fdf3f1;
-  padding: 1rem;
-  margin-bottom: 1.3rem;
-  border-radius: 6px;
-}
-
-.conditional-input {
-  margin-top: 0.8rem;
-}
-
-.hidden {
-  display: none;
-}
-
-.conditional-input input {
+/* Multi-select (Favourite Collections) */
+.custom-multiselect {
+  position: relative;
+  display: inline-block;
   width: 100%;
-  max-width: 350px; 
+}
+
+#dropdownBtn {
+  width: 100%;
+  text-align: left;
   padding: 0.6rem 0.8rem;
   border: 1px solid #ccc;
   border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
   font-size: 1rem;
-  transition: border-color 0.2s;
-  background-color: #fff;
-  box-sizing: border-box;
 }
 
-.conditional-input input:focus {
+#dropdownBtn:hover {
   border-color: #b54242;
-  outline: none;
 }
 
-/* Theme options */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 5px;
+  z-index: 20;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dropdown-content label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.dropdown-content label:hover {
+  background-color: #f8cbc1;
+  border-radius: 5px;
+}
+
+.no-collections-text {
+  font-size: 0.9rem;
+  color: #555;
+  padding: 0.3rem 0.2rem;
+}
+
+/* Tema (light / dark) */
 .theme-group {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
+  padding-top: 1.2rem;
   border-top: 1px solid #ddd;
-}
-
-.theme-group label {
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 0.5rem;
 }
 
 .theme-options {
   display: flex;
   gap: 1.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
 }
 
 .theme-options label {
-  font-weight: normal;
-  cursor: pointer;
+  font-weight: 500;
 }
 
-
-/* DARK THEME */
-body[data-theme="dark"] {
-  background-color: #2e2e35;       /* cinzento escuro suave */
-  color: #f2f2f2;                  /* texto claro */
+/* Feedback geral (erros / sucesso) */
+.form-feedback {
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  text-align: left;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
 }
 
-/* Caixa principal (formulário, cartões, etc.) */
-body[data-theme="dark"] .edit-profile-page {
-  background-color: #3a3a42;       /* tom ligeiramente mais claro que o fundo */
-  border-color: #555;
-  color: #f2f2f2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.form-feedback.error {
+  background: #ffecec;
+  border: 1px solid #d9534f;
+  color: #a94442;
 }
 
-/* Campos de formulário e áreas condicionais */
-body[data-theme="dark"] .form-group,
-body[data-theme="dark"] .conditional-section {
-  background-color: #3a3a42;
-  color: #f1f1f1;
-  border-color: #555;
+.form-feedback.success {
+  background: #e7f7e8;
+  border: 1px solid #3c763d;
+  color: #2e7d32;
 }
 
-/* Inputs, selects, textareas */
-body[data-theme="dark"] input,
-body[data-theme="dark"] select,
-body[data-theme="dark"] textarea {
-  background-color: #484850;       /* ligeiramente mais claro para contraste */
-  color: #f1f1f1;
-  border: 1px solid #666;
+.form-feedback p {
+  margin: 0.2rem 0;
 }
 
-body[data-theme="dark"] input:focus,
-body[data-theme="dark"] select:focus,
-body[data-theme="dark"] textarea:focus {
-  border-color: #c77462;           /* mantém o tom quente do tema */
-}
-
-body[data-theme="dark"] input::placeholder {
-  color: #bbb;
-}
-
-/* Labels e dicas */
-body[data-theme="dark"] label,
-body[data-theme="dark"] .input-hint {
-  color: #e5e5e5;
+/* Erro nos campos */
+input.error,
+select.error {
+  border-color: #b54242;
+  background-color: #fff8f8;
 }
 
 /* Botões */
-body[data-theme="dark"] .btn-primary {
-  background-color: #c77462;
-  color: #fff;
-  border: none;
-}
-
-body[data-theme="dark"] .btn-primary:hover {
-  background-color: #b86452;
-}
-
-body[data-theme="dark"] .btn-secondary {
-  background-color: #5a5a63;
-  color: #f2f2f2;
-}
-
-body[data-theme="dark"] .btn-secondary:hover {
-  background-color: #6a6a73;
-}
-
-/* ===== BOTÕES GERAIS ===== */
 .btn-primary,
 .btn-secondary,
 .small-btn {
@@ -458,67 +293,31 @@ body[data-theme="dark"] .btn-secondary:hover {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.small-btn {
-  padding: 0.45rem 0.9rem;
-  font-size: 0.9rem;
-}
-
+/* Zona dos botões no fim do form */
 .form-actions {
-  margin-top: 2rem;
-  padding-top: 1.2rem;
+  margin-top: 2.2rem;
+  padding-top: 1.3rem;
   border-top: 1px solid #f3c4b2;
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 0.9rem;
 }
 
-/* ===== FEEDBACK GERAL DO FORM ===== */
-.form-feedback {
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  text-align: center;
-}
-
-.form-feedback.error {
-  color: #b54242;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.form-feedback.success {
-  color: #2e7d32;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-input.error,
-select.error {
-  border-color: #b54242;
-  background-color: #fff;
-}
-
-
-
-/* =======================
-   Sidebar (Fixed on the Right)
-======================= */
+/* Sidebar – herdada do homepage, reforçada aqui só para garantir posição */
 .sidebar {
-  position: fixed;          
-  top: 100px;                
-  right: 0;                 
+  position: fixed;
+  top: 100px;
+  right: 0;
   width: 240px;
   background: #f8cbc1;
   padding: 1rem;
-  height: calc(100vh - 80px); 
+  height: calc(100vh - 80px);
   overflow-y: auto;
   z-index: 10;
   border-left: 2px solid #e1a79e;
-  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
+  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar Sections */
 .sidebar-section {
   padding: 1rem;
   height: 33.3%;
@@ -542,83 +341,83 @@ select.error {
   color: #b54242;
 }
 
-/* Section Colors */
 .collections-section {
   background-color: #f9d7d1;
 }
 
 .friends-section {
-  background-color: #f3b8aa ;
+  background-color: #f3b8aa;
 }
 
 .events-section {
   background-color: transparent;
 }
 
-
-/* Custom Multi-select Dropdown */
-.custom-multiselect {
-  position: relative;
-  display: inline-block;
-  width: 100%;
+/* DARK THEME overrides */
+body[data-theme="dark"] {
+  background-color: #2e2e35;
+  color: #f2f2f2;
 }
 
-#dropdownBtn {
-  width: 100%;
-  text-align: left;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 1rem;
+body[data-theme="dark"] .edit-profile-page {
+  background-color: #3a3a42;
+  border-color: #555;
+  color: #f2f2f2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-#dropdownBtn:hover {
-  border-color: #b54242;
+body[data-theme="dark"] input,
+body[data-theme="dark"] select {
+  background-color: #484850;
+  color: #f1f1f1;
+  border: 1px solid #666;
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  margin-top: 5px;
-  z-index: 20;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
+body[data-theme="dark"] input:focus,
+body[data-theme="dark"] select:focus {
+  border-color: #c77462;
 }
 
-.dropdown-content label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.5rem;
-  cursor: pointer;
-  font-weight: normal;
+body[data-theme="dark"] .input-hint,
+body[data-theme="dark"] label {
+  color: #e5e5e5;
 }
 
-.dropdown-content label:hover {
-  background-color: #f8cbc1;
-  border-radius: 5px;
+body[data-theme="dark"] .btn-primary {
+  background-color: #c77462;
+  border-color: #c77462;
 }
 
-.form-actions {
-  background-color: #b54242;
-  color: white;
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  text-decoration: none;
-  display: inline-block;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-left: 1rem;
+body[data-theme="dark"] .btn-primary:hover {
+  background-color: #b86452;
 }
 
-.form-actions:hover {
-  background-color: #a03030;
-  transform: scale(1.05);
+body[data-theme="dark"] .btn-secondary {
+  background-color: #5a5a63;
+  color: #f2f2f2;
 }
+
+body[data-theme="dark"] .btn-secondary:hover {
+  background-color: #6a6a73;
+}
+
+.form-feedback.success {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* espaço entre mensagens */
+}
+
+.success-main {
+    font-weight: 600;
+}
+
+.redirect-msg {
+    font-size: 0.9rem;
+    color: #555;
+    opacity: 0.85;
+}
+
+body[data-theme="dark"] .redirect-msg {
+    color: #ddd;
+}
+

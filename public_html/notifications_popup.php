@@ -1,26 +1,28 @@
 <?php
 // notifications_popup.php
 
+// 1. SESSION CHECK (Safe version)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 2. CHECK LOGIN
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+    // If used inside an include, we usually don't redirect, just stop output
+    return; 
 }
 
 $currentUserId = (int) $_SESSION['user_id'];
 
-// =================== LIGAÇÃO À BD ===================
-require_once __DIR__ . "/db.php";
+// 3. DATABASE CHECK
+// We assume $conn exists from the parent page. 
+// If it's closed or missing, we stop to avoid a crash.
+if (!isset($conn) || $conn->connect_error) {
+    echo "";
+    return;
+}
 
 // =================== BUSCAR NOTIFICAÇÕES ===================
-// 1) collections criadas por friends
-// 2) events criados por friends
-// 3) items adicionados a coleções de friends
-// 4) friends que vão a eventos (tabela attends)
-
 $sql = "
     SELECT 
         'collection_created' AS type,
@@ -53,8 +55,8 @@ $sql = "
         i.item_id            AS sort_key
     FROM contains ct
     INNER JOIN collection c ON ct.collection_id = c.collection_id
-    INNER JOIN user u       ON c.user_id = u.user_id        -- dono da coleção (friend)
-    INNER JOIN friends f    ON f.friend_id = c.user_id      -- só coleções de friends
+    INNER JOIN user u       ON c.user_id = u.user_id 
+    INNER JOIN friends f    ON f.friend_id = c.user_id
     INNER JOIN item i       ON ct.item_id = i.item_id
     WHERE f.user_id = ?
 
@@ -63,41 +65,35 @@ $sql = "
 ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
+if ($stmt) {
+    $stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-$stmt->execute();
-$result = $stmt->get_result();
+    $notifications = [];
 
-$notifications = [];
-
-while ($row = $result->fetch_assoc()) {
-    $text = '';
-
-switch ($row['type']) {
-    case 'collection_created':
-        $text = "<strong>{$row['actor_name']}</strong> created a new collection: {$row['target_name']}.";
-        break;
-
-    case 'event_created':
-        $text = "<strong>{$row['actor_name']}</strong> created a new event: {$row['target_name']}.";
-        break;
-
-    case 'item_added':
-        $text = "<strong>{$row['actor_name']}</strong> added a new item to the {$row['target_name']} collection.";
-        break;
-}
-
-
-    if ($text !== '') {
-        $notifications[] = $text;
+    while ($row = $result->fetch_assoc()) {
+        $text = '';
+        switch ($row['type']) {
+            case 'collection_created':
+                $text = "<strong>{$row['actor_name']}</strong> created a new collection: {$row['target_name']}.";
+                break;
+            case 'event_created':
+                $text = "<strong>{$row['actor_name']}</strong> created a new event: {$row['target_name']}.";
+                break;
+            case 'item_added':
+                $text = "<strong>{$row['actor_name']}</strong> added a new item to the {$row['target_name']} collection.";
+                break;
+        }
+        if ($text !== '') {
+            $notifications[] = $text;
+        }
     }
+    $stmt->close();
 }
-
-$stmt->close();
-$conn->close();
+// NOTE: DO NOT CLOSE $conn HERE. The parent page needs it!
 ?>
 
-<!-- =================== HTML DO POPUP =================== -->
 <button class="icon-btn" aria-label="Notificações" id="notification-btn">🔔</button>
 
 <div class="notification-popup" id="notification-popup">
@@ -114,6 +110,5 @@ $conn->close();
             <?php endforeach; ?>
         <?php endif; ?>
     </ul>
-
     <a href="#" class="see-more-link">+ See more</a>
 </div>

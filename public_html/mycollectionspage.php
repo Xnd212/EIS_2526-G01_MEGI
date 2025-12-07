@@ -29,8 +29,8 @@ switch ($sort) {
     case 'price-asc':   $orderBy = "total_price ASC"; break;
     case 'price-desc':  $orderBy = "total_price DESC"; break;
     
-    // Sort by Date
-    case 'updated-asc': // Fallthrough to created (assuming starting_date is relevant)
+    // Sort by Collection Date
+    case 'updated-asc': 
     case 'created-asc': $orderBy = "c.starting_date ASC"; break;
     case 'updated-desc':
     case 'created-desc':$orderBy = "c.starting_date DESC"; break;
@@ -38,19 +38,24 @@ switch ($sort) {
     // Sort by Item Count (Calculated in Query)
     case 'items-asc':   $orderBy = "item_count ASC"; break;
     case 'items-desc':  $orderBy = "item_count DESC"; break;
+
+    // NEW: Sort by Recency of Item Addition (using Item ID)
+    case 'recent-item-desc': $orderBy = "latest_item_id DESC"; break; 
+    case 'recent-item-asc':  $orderBy = "latest_item_id ASC"; break;
     
     default:            $orderBy = "c.starting_date DESC";
 }
 
 // ====== FETCH COLLECTIONS ======
-// We use LEFT JOIN to calculate item counts and sum prices
+// We use LEFT JOIN to calculate item counts, sum prices, and find newest item ID
 $sql = "SELECT 
             c.collection_id,
             c.name,
             c.starting_date,
             i.url,
             COUNT(ct.item_id) AS item_count,
-            COALESCE(SUM(it.price), 0) AS total_price
+            COALESCE(SUM(it.price), 0) AS total_price,
+            COALESCE(MAX(ct.item_id), 0) AS latest_item_id
         FROM collection c
         LEFT JOIN image i ON c.image_id = i.image_id
         LEFT JOIN contains ct ON c.collection_id = ct.collection_id
@@ -86,6 +91,7 @@ if ($currentUserId !== null) {
     <title>Trall-E | My Collections</title>
     <link rel="stylesheet" href="mycollectionspage.css">
     <style>
+        /* Inline styles for filter menu links */
         .filter-menu a {
             display: block;
             width: 100%;
@@ -163,6 +169,9 @@ if ($currentUserId !== null) {
                             <hr>
                             <a href="?sort=items-desc">Items: Most</a>
                             <a href="?sort=items-asc">Items: Fewest</a>
+                            <hr>
+                            <a href="?sort=recent-item-desc">Item Added: Recent</a>
+                            <a href="?sort=recent-item-asc">Item Added: Oldest</a>
                         </div>
                     </div>
 
@@ -200,8 +209,7 @@ if ($currentUserId !== null) {
                                         <?php if ($date): ?>
                                             <span class="last-updated">Last updated: <?php echo $date; ?></span>
                                         <?php endif; ?>
-
-                                        </a>
+                                    </a>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>

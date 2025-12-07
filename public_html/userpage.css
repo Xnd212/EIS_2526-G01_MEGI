@@ -233,12 +233,7 @@ body {
   width: 180px;
 }
 
-.collection-card img {
-  height: 115px;
-  width: auto;
-  object-fit: contain;
-  margin-bottom: 0.6rem;
-}
+
 
 .collection-card p {
   font-weight: bold;

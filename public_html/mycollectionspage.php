@@ -7,25 +7,57 @@ session_start();
 $isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 
 if ($isGuest || !isset($_SESSION['user_id'])) {
-    // guest ou não logado -> não tem coleções próprias
+    // guest or not logged in -> no own collections
     $currentUserId = null;
 } else {
     $currentUserId = (int) $_SESSION['user_id'];
 }
 
-// ====== LIGAÇÃO À BASE DE DADOS ======
+// ====== DATABASE CONNECTION ======
 require_once __DIR__ . "/db.php";
 
-// ====== BUSCAR COLEÇÕES DO USER LOGADO ======
+// ====== SORTING LOGIC ======
+// 1. Get sort parameter from URL (default to Date Newest)
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'updated-desc';
+
+// 2. Define SQL Order based on parameter
+switch ($sort) {
+    case 'alpha-asc':   $orderBy = "c.name ASC"; break;
+    case 'alpha-desc':  $orderBy = "c.name DESC"; break;
+    
+    // Sort by Total Price (Calculated in Query)
+    case 'price-asc':   $orderBy = "total_price ASC"; break;
+    case 'price-desc':  $orderBy = "total_price DESC"; break;
+    
+    // Sort by Date
+    case 'updated-asc': // Fallthrough to created (assuming starting_date is relevant)
+    case 'created-asc': $orderBy = "c.starting_date ASC"; break;
+    case 'updated-desc':
+    case 'created-desc':$orderBy = "c.starting_date DESC"; break;
+    
+    // Sort by Item Count (Calculated in Query)
+    case 'items-asc':   $orderBy = "item_count ASC"; break;
+    case 'items-desc':  $orderBy = "item_count DESC"; break;
+    
+    default:            $orderBy = "c.starting_date DESC";
+}
+
+// ====== FETCH COLLECTIONS ======
+// We use LEFT JOIN to calculate item counts and sum prices
 $sql = "SELECT 
             c.collection_id,
             c.name,
             c.starting_date,
-            i.url
+            i.url,
+            COUNT(ct.item_id) AS item_count,
+            COALESCE(SUM(it.price), 0) AS total_price
         FROM collection c
         LEFT JOIN image i ON c.image_id = i.image_id
+        LEFT JOIN contains ct ON c.collection_id = ct.collection_id
+        LEFT JOIN item it ON ct.item_id = it.item_id
         WHERE c.user_id = ?
-        ORDER BY c.starting_date DESC";
+        GROUP BY c.collection_id
+        ORDER BY $orderBy";
 
 $collections = [];
 
@@ -45,7 +77,6 @@ if ($currentUserId !== null) {
 
     $stmt->close();
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -54,11 +85,31 @@ if ($currentUserId !== null) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trall-E | My Collections</title>
     <link rel="stylesheet" href="mycollectionspage.css">
-
+    <style>
+        .filter-menu a {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .filter-menu a:hover {
+            background-color: #fbecec;
+            color: #b54242;
+        }
+        .filter-menu hr {
+            margin: 0.2rem 0;
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+    </style>
 </head>
 
 <body>    
-    <!-- =========================== HEADER ============================ -->
     <header>
         <a href="homepage.php" class="logo">
             <img src="images/TrallE_2.png" alt="logo" />
@@ -71,7 +122,7 @@ if ($currentUserId !== null) {
         </div>
 
         <div class="icons">
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+            <?php include __DIR__ . '/notifications_popup.php'; ?>
 
             <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
             <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
@@ -93,30 +144,29 @@ if ($currentUserId !== null) {
         <div class="content">
             <div class="collections-and-friends">
                 <section class="collections">
+                    
                     <div class="collections-header">
                         <h2>My Collections</h2>
                         <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
                             &#128269; Filter ▾
                         </button>
+                        
                         <div class="filter-menu" id="filterMenu">
-                            <button type="button" data-sort="alpha-asc">Name: A–Z</button>
-                            <button type="button" data-sort="alpha-desc">Name: Z–A</button>
+                            <a href="?sort=alpha-asc">Name: A–Z</a>
+                            <a href="?sort=alpha-desc">Name: Z–A</a>
                             <hr>
-                            <button type="button" data-sort="price-asc">Price: Low–High</button>
-                            <button type="button" data-sort="price-desc">Price: High–Low</button>
+                            <a href="?sort=price-asc">Price: Low–High</a>
+                            <a href="?sort=price-desc">Price: High–Low</a>
                             <hr>
-                            <button type="button" data-sort="updated-desc">Last updated: New</button>
-                            <button type="button" data-sort="updated-asc">Last updated: Old</button>
+                            <a href="?sort=updated-desc">Date: Newest</a>
+                            <a href="?sort=updated-asc">Date: Oldest</a>
                             <hr>
-                            <button type="button" data-sort="created-desc">Created: New</button>
-                            <button type="button" data-sort="created-asc">Created: Old</button>
-                            <hr>
-                            <button type="button" data-sort="items-desc">Items: Most</button>
-                            <button type="button" data-sort="items-asc">Items: Fewest</button>
+                            <a href="?sort=items-desc">Items: Most</a>
+                            <a href="?sort=items-asc">Items: Fewest</a>
                         </div>
                     </div>
 
-                    <div class="collection-grid">
+                    <div class="collection-grid" id="collectionGrid">
                         <?php if ($currentUserId === null): ?>
                             <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
                                 You are browsing as a guest. 
@@ -146,10 +196,12 @@ if ($currentUserId !== null) {
                                         <img src="<?php echo htmlspecialchars($img); ?>" 
                                              alt="<?php echo htmlspecialchars($row['name']); ?>">
                                         <p><strong><?php echo htmlspecialchars($row['name']); ?></strong></p>
+                                        
                                         <?php if ($date): ?>
                                             <span class="last-updated">Last updated: <?php echo $date; ?></span>
                                         <?php endif; ?>
-                                    </a>
+
+                                        </a>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -159,7 +211,6 @@ if ($currentUserId !== null) {
         </div>
     </div>
 
-    <!-- ===== Right Sidebar ===== -->
     <aside class="sidebar">
         <div class="sidebar-section collections-section">
             <h3>My collections</h3>

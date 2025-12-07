@@ -174,7 +174,7 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
   position: relative; 
-  z-index: 1000;
+  z-index: 100;
 }
 
 .collections-header h2 {
@@ -194,7 +194,7 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
   color: #b54242;
-  z-index: 1001;
+  z-index: 600;
 }
 
 .filter-toggle:hover {

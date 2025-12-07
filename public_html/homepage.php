@@ -125,20 +125,23 @@ if ($resultCollections) {
 $stmt3->close();
 
 // =====================================
-// TOP COLLECTORS (GLOBAL)
+// TOP COLLECTORS (SEMANAL)
 // =====================================
 $sqlTopCollectors = "
     SELECT 
         u.user_id,
         u.username,
-        COUNT(DISTINCT con.item_id) AS total_items
+        COUNT(i.item_id) AS items_this_week
     FROM user u
-    JOIN collection c  ON c.user_id = u.user_id
-    JOIN contains  con ON con.collection_id = c.collection_id
+    JOIN collection c ON c.user_id = u.user_id
+    JOIN contains con ON con.collection_id = c.collection_id
+    JOIN item i ON i.item_id = con.item_id
+    WHERE YEARWEEK(i.registration_date, 1) = YEARWEEK(CURDATE(), 1)
     GROUP BY u.user_id, u.username
-    ORDER BY total_items DESC
+    ORDER BY items_this_week DESC
     LIMIT 3
 ";
+
 $resTopCollectors = $conn->query($sqlTopCollectors);
 
 $topCollectors = [];
@@ -426,14 +429,14 @@ if ($topByItems) {
                         </span>
 
                         <span class="collector-items">
-                            <?php echo (int)$collector['total_items']; ?> items
+                            <?php echo (int)$collector['items_this_week']; ?> items
                         </span>
                     </div>
                 </li>
             <?php endforeach; ?>
         </ol>
     <?php else: ?>
-        <p style="padding: 0 1rem;">No collectors found yet.</p>
+        <p style="padding: 0 1rem;">No collectors this week.</p>
     <?php endif; ?>
 </section>
 

@@ -107,7 +107,7 @@ $c_stmt->execute();
 $c_res = $c_stmt->get_result();
 $user_collections = $c_res->fetch_all(MYSQLI_ASSOC);
 
-$conn->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -181,7 +181,7 @@ $conn->close();
           </div>
 
           <div class="form-group">
-            <label>Do you want to receive notifications? <span class="required">*</span></label>
+            <label>Do you want to receive notifications by other means? <span class="required">*</span></label>
             <div class="radio-group">
               <label><input type="radio" name="notify" value="yes" /> Yes</label>
               <label><input type="radio" name="notify" value="no" checked /> No</label>

@@ -115,4 +115,40 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  
+    /* ============================================================
+     CARROSSEL INFINITO ULTRA-FLUÍDO (requestAnimationFrame)
+     ============================================================ */
+    const eventsTrack = document.getElementById("events-track");
+
+    if (eventsTrack) {
+        let speed = 1.5;
+        let x = 0;
+
+        
+        const originalHTML = eventsTrack.innerHTML;
+        while (eventsTrack.scrollWidth < window.innerWidth * 3) {
+            eventsTrack.innerHTML += originalHTML;
+        }
+
+        function animateCarousel() {
+            x -= speed;
+
+            
+            const resetPoint = eventsTrack.scrollWidth / 2;
+            if (Math.abs(x) >= resetPoint) {
+                x = 0;
+            }
+
+            eventsTrack.style.transform = `translateX(${x}px)`;
+
+            requestAnimationFrame(animateCarousel);
+        }
+
+        requestAnimationFrame(animateCarousel);
+    }
+
+
 });
+
+

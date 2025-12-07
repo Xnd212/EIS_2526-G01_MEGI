@@ -829,6 +829,8 @@ a {
 
 /* ============= CARROSSEL INFINITO AUTOMÁTICO ============= */
 
+/* ============= CARROSSEL INFINITO AUTOMÁTICO ============= */
+
 .events-carousel {
     width: 100%;
     overflow: hidden;
@@ -839,20 +841,22 @@ a {
 .events-track {
     display: flex;
     gap: 2.3rem;
-    animation: scrollInfinite 25s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
 }
 
-@keyframes scrollInfinite {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        /* Move metade da largura, porque duplicámos os eventos */
-        transform: translateX(-50%);
-    }
+.event-card {
+    flex: 0 0 220px;
+    height: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-/* event-card já existe — só garantir que tem tamanho fixo */
-.events-track .event-card {
-    flex: 0 0 200px;
-}
+
+

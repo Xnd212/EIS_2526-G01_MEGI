@@ -337,21 +337,19 @@ if ($topByItems) {
         <div class="content">
 
             <!-- ========== EVENTOS ========= -->
-            <!-- ========== EVENTOS ========= -->
             <section class="events-section">
                 <h2 class="section-title1">Events you might be interested in 👁</h2>
 
                 <div class="events-carousel">
-                    <div class="events-track">
-
-                        <!-- PRIMEIRO LOTE DE EVENTOS -->
+                    <div class="events-track" id="events-track">
                         <?php if (!empty($recommendedEvents)): ?>
                             <?php foreach ($recommendedEvents as $event): ?>
                                 <div class="event-card">
                                     <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
                                         <img
                                             src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
+                                            alt="<?= htmlspecialchars($event['name']) ?>"
+                                            >
                                         <p><?= htmlspecialchars($event['name']) ?></p>
                                     </a>
 
@@ -364,158 +362,10 @@ if ($topByItems) {
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
-
-                        <!-- SEGUNDO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-
-                        <!-- TERCEIRO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        
-                        <!-- QUARTO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>                        
-
-                        <!-- QUINTO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        
-                        <!-- SEXTO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        
-                        <!-- SÉTIMO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                                                
-                                                
-                        <!-- OITAVO LOTE (DUPLICADO PARA LOOP INFINITO) -->
-                        <?php if (!empty($recommendedEvents)): ?>
-                            <?php foreach ($recommendedEvents as $event): ?>
-                                <div class="event-card">
-                                    <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>">
-                                        <img
-                                            src="<?= htmlspecialchars($event['event_image'] ?? 'images/default_event.png') ?>"
-                                            alt="<?= htmlspecialchars($event['name']) ?>">
-                                        <p><?= htmlspecialchars($event['name']) ?></p>
-                                    </a>
-
-                                    <div class="see-more">
-                                        <a href="eventpage.php?id=<?= htmlspecialchars($event['event_id']) ?>" 
-                                           class="see-more-link">
-                                            <span class="see-more-icon">+</span> See more
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        
                     </div>
                 </div>
             </section>
+
 
             
 

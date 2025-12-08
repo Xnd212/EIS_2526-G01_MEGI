@@ -204,7 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
         }
 
         // --- C. HANDLE IMAGE ---
-        $image_id = "NULL";
+        $image_id = "42";
 
         if (isset($_FILES['itemImage']) && $_FILES['itemImage']['error'] == 0) {
             $target_dir = "images/";
@@ -228,7 +228,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
 
         // --- D. INSERT ITEM & LINK TO COLLECTION ---
         if ($type_id > 0 && $collection_id > 0) {
-            $img_val = ($image_id === "NULL") ? "NULL" : $image_id;
+            $img_val = ($image_id === "42") ? "42" : $image_id;
 
             $sql_item = "INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description) 
                          VALUES ('$type_id', $img_val, '$name', '$price', '$importance', '$acc_date', '$acc_place', '$description')";

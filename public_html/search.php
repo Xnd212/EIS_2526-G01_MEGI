@@ -129,15 +129,15 @@ $stmt->close();
                     <p class="no-results-text">Please enter a search term.</p>
                 <?php else: ?>
 
-                    <h2 class="section-header">Friends 👥</h2>
+                    <h2 class="section-header">People 👥</h2>
                     <div class="search-list">
                         <?php if (empty($friends)): ?>
-                            <p class="no-results-text">No friends found.</p>
+                            <p class="no-results-text">No people found.</p>
                         <?php else: ?>
                             <?php foreach ($friends as $f): 
                                 $link = ($f['user_id'] == $_SESSION['user_id']) ? "userpage.php" : "friendpage.php?user_id=" . $f['user_id'];
                                 // Use DB image if exists, else default
-                                $imgUrl = !empty($f['user_image']) ? $f['user_image'] : "images/default_user.png"; 
+                                $imgUrl = !empty($f['user_image']) ? $f['user_image'] : "images/placeholderuserpicture.png"; 
                             ?>
                                 <a href="<?= $link ?>" class="search-card">
                                     <div class="search-card-img circle">
@@ -158,7 +158,7 @@ $stmt->close();
                             <p class="no-results-text">No collections found.</p>
                         <?php else: ?>
                             <?php foreach ($collections as $c): 
-                                $imgUrl = !empty($c['collection_image']) ? $c['collection_image'] : "images/default_collection.png";
+                                $imgUrl = !empty($c['collection_image']) ? $c['collection_image'] : "images/placeholdercollectionpicture.png";
                             ?>
                                 <a href="collectionpage.php?id=<?= $c['collection_id'] ?>" class="search-card">
                                     <div class="search-card-img">
@@ -179,7 +179,7 @@ $stmt->close();
                             <p class="no-results-text">No events found.</p>
                         <?php else: ?>
                             <?php foreach ($events as $e): 
-                                $imgUrl = !empty($e['event_image']) ? $e['event_image'] : "images/default_event.png";
+                                $imgUrl = !empty($e['event_image']) ? $e['event_image'] : "images/placeholdereventpicture.png";
                             ?>
                                 <a href="eventpage.php?id=<?= $e['event_id'] ?>" class="search-card">
                                     <div class="search-card-img">
@@ -201,7 +201,7 @@ $stmt->close();
                             <p class="no-results-text">No items found.</p>
                         <?php else: ?>
                             <?php foreach ($items as $i): 
-                                $imgUrl = !empty($i['item_image']) ? $i['item_image'] : "images/default_item.png";
+                                $imgUrl = !empty($i['item_image']) ? $i['item_image'] : "images/placeholderitempicture.png";
                             ?>
                                 <a href="itempage.php?id=<?= $i['item_id'] ?>" class="search-card">
                                     <div class="search-card-img">

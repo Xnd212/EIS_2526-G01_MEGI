@@ -1,13 +1,17 @@
-@import url('homepage.css'); /* Reuse global layout styles */
+@import url('homepage.css');
 
-/* ===========================
-   CONTENT AREA
-=========================== */
+
+body {
+    overflow: hidden; 
+}
+
 .content {
-  margin-right: 240px; /* Space for the fixed sidebar */
+  margin-right: 240px; 
   padding: 2rem;
   background: #eef0ff;
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 10rem; 
 }
 
 /* ===========================

@@ -262,7 +262,7 @@ if (!empty($col['starting_date'])) {
                  $p_img = !empty($p_event['url']) ? $p_event['url'] : 'images/default_event.png';
               ?>
               <div class="event-card">
-                <a href="pasteventpage.php?id=<?php echo $p_event['event_id']; ?>">
+                <a href="eventpage.php?id=<?php echo $p_event['event_id']; ?>">
                   <img src="<?php echo htmlspecialchars($p_img); ?>" alt="<?php echo htmlspecialchars($p_event['name']); ?>">
                   <p><?php echo htmlspecialchars($p_event['name']); ?></p>
                 </a>

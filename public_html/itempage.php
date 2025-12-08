@@ -23,7 +23,7 @@ $sql = "
         c.collection_id,
         c.name      AS collection_name,
         c.image_id  AS collection_image_id,
-        c.user_id   AS owner_id,          -- <--- ADICIONADO
+        c.user_id   AS owner_id,
         u.username  AS collector_name,
         t.name      AS type_name
     FROM item i
@@ -46,7 +46,7 @@ if (!$item) {
 }
 
 // ====== IMAGEM DO ITEM (via item.image_id) ======
-$item_img_url = "images/placeholder.png";  // default
+$item_img_url = "images/placeholder.png";
 if (!empty($item['image_id'])) {
     $sqlImg = "SELECT url FROM image WHERE image_id = ? LIMIT 1";
     $stmtImg = $conn->prepare($sqlImg);
@@ -59,7 +59,7 @@ if (!empty($item['image_id'])) {
 }
 
 // ====== IMAGEM DA COLEÇÃO (via collection.image_id) ======
-$collection_img_url = "images/placeholder_collection.png";  // default
+$collection_img_url = "images/placeholder_collection.png";
 if (!empty($item['collection_image_id'])) {
     $sqlColImg = "SELECT url FROM image WHERE image_id = ? LIMIT 1";
     $stmtColImg = $conn->prepare($sqlColImg);
@@ -71,13 +71,10 @@ if (!empty($item['collection_image_id'])) {
     }
 }
 
-// formatações simples
 function fmtDate($d) {
     return $d ? date("d/m/Y", strtotime($d)) : "-";
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -140,11 +137,15 @@ function fmtDate($d) {
                class="item-image">
 
           <?php if ((int)$item['owner_id'] === $currentUserId): ?>
-              <a href="edititem.php?id=<?php echo $item_id; ?>" 
-                 id="editRedirectBtn" class="edit-link">✎ Edit</a>
+              <div class="item-actions">
+                <a href="edititem.php?id=<?php echo $item_id; ?>" 
+                   id="editRedirectBtn" class="edit-link">✎ Edit</a>
+                <button id="deleteItemBtn" 
+                        class="delete-link" 
+                        data-item-id="<?php echo $item_id; ?>">🗑️ Delete</button>
+              </div>
           <?php endif; ?>
         </div>
-
 
         <div class="item-info">
           <p><strong>Collector:</strong> 
@@ -168,7 +169,6 @@ function fmtDate($d) {
           <p><strong>Description:</strong> 
             <?php echo htmlspecialchars($item['description']); ?>
           </p>
-          <!-- Se tiveres um campo registration_date na tabela -->
           <?php if (!empty($item['registration_date'])): ?>
           <p><strong>Registration Date:</strong> 
             <?php echo fmtDate($item['registration_date']); ?>
@@ -177,7 +177,6 @@ function fmtDate($d) {
         </div>
       </div>
 
-      <!-- Collections em que este item está (pelo teu modelo, pertence a 1, mas deixo em lista) -->
       <div class="collections-and-friends">
         <section class="collections">
           <h3>Collections it belongs to</h3>
@@ -191,9 +190,6 @@ function fmtDate($d) {
                 <p class="collection-name">
                   <?php echo htmlspecialchars($item['collection_name']); ?>
                 </p>
-
-                <!-- se tiveres last_updated na collection, usa-o -->
-                <!-- <span class="last-updated">Last updated: ...</span> -->
               </a>
             </div>
           </div>
@@ -227,7 +223,26 @@ function fmtDate($d) {
     </aside>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="delete-popup" id="delete-popup" style="display: none;">
+    <div class="popup-header">
+      <h3>Delete Item</h3>
+    </div>
+
+    <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+
+    <div class="logout-btn-wrapper">
+      <button type="button" class="logout-btn cancel-btn" id="cancel-delete">
+        Cancel
+      </button>
+      <button type="button" class="logout-btn confirm-btn" id="confirm-delete">
+        Delete
+      </button>
+    </div>
+  </div>
+
   <script src="itempage.js"></script>
   <script src="logout.js"></script>
+  <script src="deleteitem.js"></script>
 </body>
 </html>

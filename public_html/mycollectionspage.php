@@ -154,7 +154,7 @@ if ($currentUserId !== null) {
                     <div class="collections-header">
                         <h2>My Collections</h2>
                         <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
-                            &#128269; Filter ▾
+                            &#128269; Sort ▾
                         </button>
                         
                         <div class="filter-menu" id="filterMenu">

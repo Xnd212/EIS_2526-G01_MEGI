@@ -14,7 +14,31 @@ if (!$isGuest && isset($_SESSION['user_id'])) {
 require_once __DIR__ . "/db.php";
 
 /* ==========================================================
-   BUSCAR EVENTOS (SÓ SE HOUVER USER LOGADO)
+   1. SORTING LOGIC
+   ========================================================== */
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'date-desc';
+
+switch ($sort) {
+    case 'alpha-asc':   $orderBy = "e.name ASC"; break;
+    case 'alpha-desc':  $orderBy = "e.name DESC"; break;
+    
+    // Date sorting
+    case 'date-desc':   $orderBy = "e.date DESC"; break; // Most recent past event first
+    case 'date-asc':    $orderBy = "e.date ASC"; break;  // Oldest event first
+    
+    // Role sorting
+    case 'role-org':    $orderBy = "role ASC, e.date DESC"; break; 
+    case 'role-part':   $orderBy = "role DESC, e.date DESC"; break;
+
+    // Rating sorting (Calculated column)
+    case 'rating-desc': $orderBy = "event_avg_rating DESC"; break;
+    case 'rating-asc':  $orderBy = "event_avg_rating ASC"; break;
+
+    default:            $orderBy = "e.date DESC";
+}
+
+/* ==========================================================
+   2. BUSCAR EVENTOS (SÓ SE HOUVER USER LOGADO)
    ========================================================== */
 
 $events = [];
@@ -67,13 +91,14 @@ if ($currentUserId !== null) {
 
         WHERE 
               (e.user_id = ? OR a.user_id IS NOT NULL)
-          AND e.date < CURDATE()
+          AND e.date <= CURDATE()  -- <= INCLUDES TODAY
 
         GROUP BY e.event_id
-        ORDER BY e.date DESC, e.event_id DESC
+        ORDER BY $orderBy
     ";
 
     $stmt = $conn->prepare($sqlEvents);
+    // Parameters: 1. Role Check, 2. Attends Join, 3. Where Clause (Creator)
     $stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
     $stmt->execute();
     $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -88,11 +113,36 @@ if ($currentUserId !== null) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trall-E | Event History</title>
     <link rel="stylesheet" href="eventhistory.css" />
+    
+    <style>
+      .events-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 20px; position: relative;
+      }
+      .filter-toggle {
+          display: inline-flex; align-items: center; gap: 0.25rem;
+          padding: 0.35rem 0.8rem; border-radius: 999px;
+          border: 1px solid #b54242; background-color: #fbecec;
+          font-size: 0.9rem; cursor: pointer; color: #b54242;
+      }
+      .filter-menu {
+          position: absolute; top: 100%; right: 0; margin-top: 5px;
+          background: white; border-radius: 10px; border: 1px solid #ddd;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 200px;
+          display: none; z-index: 1000;
+      }
+      .filter-menu.show { display: block; }
+      .filter-menu a {
+          display: block; padding: 10px 15px; text-decoration: none;
+          color: #333; font-size: 0.9rem;
+      }
+      .filter-menu a:hover { background: #fbecec; color: #b54242; }
+      .filter-menu hr { margin: 0; border: 0; border-top: 1px solid #eee; }
+    </style>
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
     <header>
         <a href="homepage.php" class="logo">
             <img src="images/TrallE_2.png" alt="logo" />
@@ -105,11 +155,10 @@ if ($currentUserId !== null) {
         </div>
 
         <div class="icons">
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+            <?php include __DIR__ . '/notifications_popup.php'; ?>
 
             <a href="userpage.php" class="icon-btn">👤</a>
 
-            <!-- Logout -->
             <button class="icon-btn" id="logout-btn">🚪</button>
 
             <div class="notification-popup logout-popup" id="logout-popup">
@@ -123,18 +172,39 @@ if ($currentUserId !== null) {
         </div>
     </header>
 
-    <!-- ================= MAIN ================= -->
     <div class="main">
         <div class="content">
 
             <section class="event-history-section">
-                <h2 class="page-title">Event history</h2>
+                
+                <div class="events-header">
+                    <h2 class="page-title" style="margin:0;">Event History</h2>
+
+                    <?php if ($currentUserId !== null): ?>
+                        <button class="filter-toggle" id="filterToggle">
+                            &#128269; Sort ▾
+                        </button>
+
+                        <div class="filter-menu" id="filterMenu">
+                            <a href="?sort=date-desc">Date: Most Recent</a>
+                            <a href="?sort=date-asc">Date: Oldest</a>
+                            <hr>
+                            <a href="?sort=rating-desc">Rating: High–Low</a>
+                            <a href="?sort=rating-asc">Rating: Low–High</a>
+                            <hr>
+                            <a href="?sort=role-org">Show: Organizer First</a>
+                            <a href="?sort=role-part">Show: Participant First</a>
+                            <hr>
+                            <a href="?sort=alpha-asc">Name: A–Z</a>
+                            <a href="?sort=alpha-desc">Name: Z–A</a>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
                 <div class="event-list">
 
                     <?php if ($currentUserId === null): ?>
 
-                        <!-- GUEST VIEW -->
                         <p style="margin-top:20px; font-size:18px;">
                             You are browsing as a guest.
                             <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
@@ -145,7 +215,6 @@ if ($currentUserId !== null) {
 
                     <?php elseif (empty($events)): ?>
 
-                        <!-- USER LOGADO MAS SEM HISTÓRICO -->
                         <p>You have no past events yet.</p>
 
                     <?php else: ?>
@@ -169,14 +238,12 @@ if ($currentUserId !== null) {
 
                             <div class="event-card">
 
-                                <!-- imagem -->
                                 <div class="event-image" 
                                      style="background-image: url('<?php echo htmlspecialchars($eventImg); ?>');">
                                 </div>
 
                                 <div class="event-info">
 
-                                    <!-- Header com rating -->
                                     <div class="event-header-row">
                                         <h3 class="event-title">
                                             <strong>
@@ -230,7 +297,6 @@ if ($currentUserId !== null) {
 
         </div>
 
-        <!-- ============ SIDEBAR ============ -->
         <aside class="sidebar">
             <div class="sidebar-section collections-section">
                 <h3>My collections</h3>
@@ -256,6 +322,25 @@ if ($currentUserId !== null) {
         </aside>
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('filterToggle');
+        const menu = document.getElementById('filterMenu');
+        
+        if(toggle && menu) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if(!menu.contains(e.target) && !toggle.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+        }
+    });
+    </script>
     <script src="eventhistory.js"></script>
     <script src="logout.js"></script>
 

@@ -166,7 +166,7 @@ if ($result_cols && $result_cols->num_rows > 0) {
     </a>
       <div class="search-bar">
           <form action="search.php" method="GET">
-              <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+              <input type="search" name="q" placeholder="Search for friends, collections, events, items..." required>
           </form>
       </div>
     <div class="icons">

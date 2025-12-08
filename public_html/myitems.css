@@ -103,7 +103,7 @@ body {
   gap: 1rem;
   margin-bottom: 1rem;
   position: relative;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .collections-header h2 {

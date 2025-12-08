@@ -155,3 +155,29 @@ Array
 
 )
 
+FORM SUBMITTED at 2025-12-08 00:01:31
+Array
+(
+    [eventName] => SIC Fam Feud
+    [startDate] => 2025-12-07
+    [theme] => Contest
+    [collection_id] => 5
+    [location] => Estúdios Sic
+    [description] => César Mourão na apresentação garante a diversão
+    [youtube] => https://www.youtube.com/watch?v=nFbu4CbGy8I
+)
+
+Array
+(
+    [coverImage] => Array
+        (
+            [name] => famfeud.jpeg
+            [full_path] => famfeud.jpeg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\php50DE.tmp
+            [error] => 0
+            [size] => 113659
+        )
+
+)
+

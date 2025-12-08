@@ -11,21 +11,38 @@ session_start();
 require_once __DIR__ . "/db.php";
 
 // ==========================================
-// 2. CHECK SESSION (GUEST VS LOGGED)
+// 2. CHECK SESSION
 // ==========================================
-
-// Se tiver user_id → logado
 if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     $isGuest = false;
     $user_id = (int) $_SESSION['user_id'];
 } else {
-    // Sem user_id → guest
     $isGuest = true;
     $user_id = null;
 }
 
 // ==========================================
-// 3. FETCH UPCOMING EVENTS (SÓ PARA LOGADO)
+// 3. SORTING LOGIC
+// ==========================================
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'date-asc';
+
+switch ($sort) {
+    case 'alpha-asc':   $orderBy = "e.name ASC"; break;
+    case 'alpha-desc':  $orderBy = "e.name DESC"; break;
+    
+    // Date sorting
+    case 'date-asc':    $orderBy = "e.date ASC"; break;  // Sooner first (Default)
+    case 'date-desc':   $orderBy = "e.date DESC"; break; // Later first
+    
+    // Role sorting (Organizer first or Participant first)
+    case 'role-org':    $orderBy = "role ASC, e.date ASC"; break; // 'organizer' comes before 'participant' alphabetically? No, O comes before P.
+    case 'role-part':   $orderBy = "role DESC, e.date ASC"; break;
+
+    default:            $orderBy = "e.date ASC";
+}
+
+// ==========================================
+// 4. FETCH UPCOMING EVENTS
 // ==========================================
 $result = null;
 
@@ -51,15 +68,16 @@ if (!$isGuest) {
                 ON e.image_id = i.image_id
             WHERE 
                   (e.user_id = ? OR a.user_id = ?)
-              AND e.date >= CURDATE()
+              AND e.date > CURDATE()  -- '>= include today' logic'
             GROUP BY e.event_id
-            ORDER BY e.date ASC";
+            ORDER BY $orderBy";
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("Erro na query: " . $conn->error);
     }
 
+    // Parameters: 1. Role Check, 2. Attends Join, 3. Where Clause (Creator), 4. Where Clause (Attendee)
     $stmt->bind_param("iiii", $user_id, $user_id, $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -73,6 +91,7 @@ if (!$isGuest) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Upcoming Events</title>
   <link rel="stylesheet" href="upcomingevents.css" />
+  
   <style>
       .event-image {
           background-size: cover;
@@ -84,18 +103,37 @@ if (!$isGuest) {
           font-weight: bold;
       }
       .empty-state {
-          text-align: center;
-          padding: 40px;
-          color: #666;
+          text-align: center; padding: 40px; color: #666;
       }
       .empty-state a {
-          color: #7a1b24;
-          font-weight: 600;
-          text-decoration: none;
+          color: #7a1b24; font-weight: 600; text-decoration: none;
       }
-      .empty-state a:hover {
-          text-decoration: underline;
+      .empty-state a:hover { text-decoration: underline; }
+
+      /* Filter Styles */
+      .events-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 20px; position: relative;
       }
+      .filter-toggle {
+          display: inline-flex; align-items: center; gap: 0.25rem;
+          padding: 0.35rem 0.8rem; border-radius: 999px;
+          border: 1px solid #b54242; background-color: #fbecec;
+          font-size: 0.9rem; cursor: pointer; color: #b54242;
+      }
+      .filter-menu {
+          position: absolute; top: 100%; right: 0; margin-top: 5px;
+          background: white; border-radius: 10px; border: 1px solid #ddd;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 200px;
+          display: none; z-index: 1000;
+      }
+      .filter-menu.show { display: block; }
+      .filter-menu a {
+          display: block; padding: 10px 15px; text-decoration: none;
+          color: #333; font-size: 0.9rem;
+      }
+      .filter-menu a:hover { background: #fbecec; color: #b54242; }
+      .filter-menu hr { margin: 0; border: 0; border-top: 1px solid #eee; }
   </style>
 </head>
 
@@ -132,12 +170,31 @@ if (!$isGuest) {
   <div class="main">
     <div class="content">
       <section class="event-history-section">
-        <h2 class="page-title">Upcoming Events</h2>
+        
+        <div class="events-header">
+            <h2 class="page-title" style="margin:0;">Upcoming Events</h2>
+
+            <?php if (!$isGuest): ?>
+                <button class="filter-toggle" id="filterToggle">
+                    &#128269; Sort ▾
+                </button>
+
+                <div class="filter-menu" id="filterMenu">
+                    <a href="?sort=date-asc">Date: Sooner</a>
+                    <a href="?sort=date-desc">Date: Later</a>
+                    <hr>
+                    <a href="?sort=role-org">Show: Organizer First</a>
+                    <a href="?sort=role-part">Show: Participant First</a>
+                    <hr>
+                    <a href="?sort=alpha-asc">Name: A–Z</a>
+                    <a href="?sort=alpha-desc">Name: Z–A</a>
+                </div>
+            <?php endif; ?>
+        </div>
 
         <div class="event-list">
 
           <?php if ($isGuest): ?>
-              <!-- GUEST VIEW -->
               <div class="empty-state">
                   <p>You are browsing as a guest.</p>
                   <p>
@@ -147,7 +204,6 @@ if (!$isGuest) {
 
           <?php else: ?>
               <?php if (!$result || $result->num_rows === 0): ?>
-                  <!-- USER LOGADO MAS SEM EVENTOS -->
                   <div class="empty-state">
                       <p>You have no upcoming events.</p>
                       <p>
@@ -155,7 +211,6 @@ if (!$isGuest) {
                       </p>
                   </div>
               <?php else: ?>
-                  <!-- USER LOGADO COM EVENTOS -->
                   <?php while ($row = $result->fetch_assoc()): ?>
                       <?php 
                           $dateFormatted = date("d/m/Y", strtotime($row['date']));
@@ -226,7 +281,26 @@ if (!$isGuest) {
     </aside>
   </div>
 
-  <script src="upcomingevents.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('filterToggle');
+        const menu = document.getElementById('filterMenu');
+        
+        if(toggle && menu) {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if(!menu.contains(e.target) && !toggle.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+        }
+    });
+  </script>
+    <script src="upcomingevents.js"></script>
   <script src="logout.js"></script>
 
 </body>

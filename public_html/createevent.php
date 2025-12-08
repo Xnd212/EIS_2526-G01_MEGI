@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 session_start();
 
 /* =========================================
-  1. BLOQUEAR GUEST E NÃO LOGADOS
+  1. BLOCK GUEST AND NOT LOGGED IN
   ========================================= */
 $isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 
@@ -15,22 +15,15 @@ if (!isset($_SESSION['user_id']) || $isGuest) {
     exit();
 }
 
-/* (opcional) DEBUG: Check if form submitted */
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    file_put_contents('debug.txt', "FORM SUBMITTED at " . date('Y-m-d H:i:s') . "\n", FILE_APPEND);
-    file_put_contents('debug.txt', print_r($_POST, true) . "\n", FILE_APPEND);
-    file_put_contents('debug.txt', print_r($_FILES, true) . "\n", FILE_APPEND);
-}
-
 // Database connection
 require_once __DIR__ . "/db.php";
 
-$user_id = (int) $_SESSION['user_id']; // Store user_id early for use in fetch and insert
+$user_id = (int) $_SESSION['user_id']; 
+
 // ==========================================
 // 1. FETCH USER COLLECTIONS FOR DROPDOWN
 // ==========================================
 $user_collections = [];
-// Assuming 'name' is the column for the collection name. Change if needed.
 $coll_sql = "SELECT collection_id, name FROM collection WHERE user_id = ?";
 $coll_stmt = $conn->prepare($coll_sql);
 $coll_stmt->bind_param("i", $user_id);
@@ -42,7 +35,6 @@ while ($row = $result->fetch_assoc()) {
 $coll_stmt->close();
 
 $error = "";
-$success = false;
 $new_event_id = null;
 
 // Handle form submission
@@ -53,7 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $place = trim($_POST['location']);
     $description = trim($_POST['description']);
     $teaser_url = !empty($_POST['youtube']) ? trim($_POST['youtube']) : null;
-    $collection_id = isset($_POST['collection_id']) ? $_POST['collection_id'] : null; // Get the selected collection
+    $collection_id = isset($_POST['collection_id']) ? $_POST['collection_id'] : null;
+    
     // Validate required fields
     if (empty($event_name) || empty($start_date) || empty($theme) || empty($place) || empty($description) || empty($collection_id)) {
         $error = "Please fill in all required fields, including the collection.";
@@ -72,19 +65,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (in_array($file_type, $allowed_types)) {
                 $file_extension = pathinfo($_FILES['coverImage']['name'], PATHINFO_EXTENSION);
                 $new_filename = 'event_' . time() . '_' . uniqid() . '.' . $file_extension;
-
-                // Full path for move_uploaded_file
                 $target_path = __DIR__ . '/images/' . $new_filename;
-                // URL path for database
                 $url_path = 'images/' . $new_filename;
 
-                // Create images directory if it doesn't exist
                 if (!file_exists(__DIR__ . '/images')) {
                     mkdir(__DIR__ . '/images', 0777, true);
                 }
 
                 if (move_uploaded_file($_FILES['coverImage']['tmp_name'], $target_path)) {
-                    // Insert image URL into image table
                     $image_stmt = $conn->prepare("INSERT INTO image (url) VALUES (?)");
                     $image_stmt->bind_param("s", $url_path);
 
@@ -92,7 +80,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $image_id = $image_stmt->insert_id;
                     } else {
                         $error = "Error saving image to database: " . $image_stmt->error;
-                        // Delete uploaded file if database insert fails
                         unlink($target_path);
                     }
                     $image_stmt->close();
@@ -103,7 +90,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error = "File type not allowed. Use JPEG, PNG, GIF or WEBP";
             }
         } else {
-            // Check specific upload error
             if (isset($_FILES['coverImage'])) {
                 switch ($_FILES['coverImage']['error']) {
                     case UPLOAD_ERR_INI_SIZE:
@@ -123,7 +109,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Insert event if no errors
         if (empty($error)) {
-            // Insert with or without teaser_url
             $event_stmt = $conn->prepare("INSERT INTO event (user_id, image_id, name, date, theme, place, description, teaser_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $event_stmt->bind_param("iissssss", $user_id, $image_id, $event_name, $start_date, $theme, $place, $description, $teaser_url);
 
@@ -133,18 +118,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // ==========================================
                 // 2. INSERT INTO 'ATTENDS' TABLE
                 // ==========================================
-                // The creator attends their own event with the selected collection
                 if ($new_event_id && $collection_id) {
                     $attend_stmt = $conn->prepare("INSERT INTO attends (user_id, event_id, collection_id) VALUES (?, ?, ?)");
                     $attend_stmt->bind_param("iii", $user_id, $new_event_id, $collection_id);
                     if (!$attend_stmt->execute()) {
-                        // Optional: log error if attendance fails, though event was created
                         error_log("Failed to add creator to attends table: " . $attend_stmt->error);
                     }
                     $attend_stmt->close();
                 }
 
-                $success = true;
+                // === SUCCESS: REDIRECT IMMEDIATELY TO THE NEW EVENT PAGE ===
+                header("Location: eventpage.php?id=" . $new_event_id);
+                exit(); 
+
             } else {
                 $error = "Error creating event: " . $event_stmt->error;
             }
@@ -153,9 +139,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-// Connection remains open for the HTML includes below
 ?>
-<!DOCTYPE html>DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -172,12 +157,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="search-bar">
                 <form action="search.php" method="GET">
-                    <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+                    <input type="search" name="q" placeholder="Search for friends, collections, events, items..." required>
                 </form>
             </div>
 
             <div class="icons">
-<?php include __DIR__ . '/notifications_popup.php'; ?>
+                <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
@@ -207,131 +192,113 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <section class="item-creation-section">
                     <h2 class="page-title">Create a Event</h2>
 
-<?php if ($success): ?>
-                        <div id="eventSuccessModal" class="event-success-modal" style="display: flex;">
-                            <div class="success-box">
-                                <h2>Event created successfully ✅</h2>
-                                <p>Your event has been created and your collection added.</p>
-                                <div class="success-buttons">
-                                    <a href="eventpage.php?event_id=<?php echo $new_event_id; ?>" class="btn-primary">Go to event page</a>
-                                    <a href="homepage.php" class="btn-secondary">Go to homepage</a>
-                                </div>
-                            </div>
+                    <?php if (!empty($error)): ?>
+                        <p class="form-message error" style="color: red; padding: 10px; background: #ffe6e6; border-radius: 5px; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
+                    <?php endif; ?>
+
+                    <form id="eventForm" method="POST" action="" enctype="multipart/form-data" novalidate>
+                        <div class="form-group">
+                            <label for="eventName">Event Name <span class="required">*</span></label>
+                            <input
+                                type="text"
+                                id="eventName"
+                                name="eventName"
+                                placeholder="e.g. Comic Con Portugal"
+                                value="<?php echo isset($_POST['eventName']) ? htmlspecialchars($_POST['eventName']) : ''; ?>"
+                                required
+                            />
                         </div>
-<?php else: ?>
 
-    <?php if (!empty($error)): ?>
-                            <p class="form-message error" style="color: red; padding: 10px; background: #ffe6e6; border-radius: 5px; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
-                        <?php endif; ?>
+                        <div class="form-group">
+                            <label for="startDate">Date <span class="required">*</span></label>
+                            <input 
+                                type="date" 
+                                id="startDate" 
+                                name="startDate" 
+                                value="<?php echo isset($_POST['startDate']) ? htmlspecialchars($_POST['startDate']) : ''; ?>"
+                                required 
+                            />
+                        </div>
 
-                        <form id="eventForm" method="POST" action="" enctype="multipart/form-data" novalidate>
-                            <div class="form-group">
-                                <label for="eventName">Event Name <span class="required">*</span></label>
-                                <input
-                                    type="text"
-                                    id="eventName"
-                                    name="eventName"
-                                    placeholder="e.g. Comic Con Portugal"
-                                    value="<?php echo isset($_POST['eventName']) ? htmlspecialchars($_POST['eventName']) : ''; ?>"
-                                    required
-                                    />
-                            </div>
+                        <div class="form-group">
+                            <label for="theme">Theme <span class="required">*</span></label>
+                            <input
+                                type="text"
+                                id="theme"
+                                name="theme"
+                                placeholder="e.g. Anime, Cards, etc."
+                                value="<?php echo isset($_POST['theme']) ? htmlspecialchars($_POST['theme']) : ''; ?>"
+                                required
+                            />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="startDate">Date <span class="required">*</span></label>
-                                <input 
-                                    type="date" 
-                                    id="startDate" 
-                                    name="startDate" 
-                                    value="<?php echo isset($_POST['startDate']) ? htmlspecialchars($_POST['startDate']) : ''; ?>"
-                                    required 
-                                    />
-                            </div>
+                        <div class="form-group">
+                            <label for="collection_id">Collection to Bring <span class="required">*</span></label>
+                            <select id="collection_id" name="collection_id" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="">-- Select one of your collections --</option>
+                                <?php foreach ($user_collections as $coll): ?>
+                                    <option value="<?php echo $coll['collection_id']; ?>" <?php echo (isset($_POST['collection_id']) && $_POST['collection_id'] == $coll['collection_id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($coll['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php if (empty($user_collections)): ?>
+                                <small style="color:red;">You have no collections to bring. Please create one first.</small>
+                            <?php endif; ?>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="theme">Theme <span class="required">*</span></label>
-                                <input
-                                    type="text"
-                                    id="theme"
-                                    name="theme"
-                                    placeholder="e.g. Anime, Cards, etc."
-                                    value="<?php echo isset($_POST['theme']) ? htmlspecialchars($_POST['theme']) : ''; ?>"
-                                    required
-                                    />
-                            </div>
+                        <div class="form-group">
+                            <label for="location">Place <span class="required">*</span></label>
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                placeholder="e.g. Exponor – Porto"
+                                value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>"
+                                required
+                            />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="collection_id">Collection to Bring <span class="required">*</span></label>
-                                <select id="collection_id" name="collection_id" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <option value="">-- Select one of your collections --</option>
-    <?php foreach ($user_collections as $coll): ?>
-                                        <option value="<?php echo $coll['collection_id']; ?>" <?php echo (isset($_POST['collection_id']) && $_POST['collection_id'] == $coll['collection_id']) ? 'selected' : ''; ?>>
-        <?php echo htmlspecialchars($coll['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                        <?php if (empty($user_collections)): ?>
-                                    <small style="color:red;">You have no collections to bring. Please create one first.</small>
-                                    <?php endif; ?>
-                            </div>
+                        <div class="form-group">
+                            <label for="description">Description <span class="required">*</span></label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="4"
+                                placeholder="Brief description about the event"
+                                required
+                            ><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="location">Place <span class="required">*</span></label>
-                                <input
-                                    type="text"
-                                    id="location"
-                                    name="location"
-                                    placeholder="e.g. Exponor – Porto"
-                                    value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>"
-                                    required
-                                    />
-                            </div>
+                        <div class="form-group">
+                            <label for="youtube">YouTube video embed link</label>
+                            <input
+                                type="url"
+                                id="youtube"
+                                name="youtube"
+                                placeholder="e.g. https://www.youtube.com/watch?v=..."
+                                value="<?php echo isset($_POST['youtube']) ? htmlspecialchars($_POST['youtube']) : ''; ?>"
+                            />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="description">Description <span class="required">*</span></label>
-                                <textarea
-                                    id="description"
-                                    name="description"
-                                    rows="4"
-                                    placeholder="Brief description about the event"
-                                    required
-                                    ><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
-                            </div>
+                        <div class="form-group">
+                            <label for="coverImage">Cover Image <span class="required">*</span></label>
+                            <input
+                                type="file"
+                                id="coverImage"
+                                name="coverImage"
+                                accept="image/*"
+                                required
+                            />
+                        </div>
 
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Create Event</button>
+                        </div>
+                    </form>
 
-
-                            <div class="form-group">
-                                <label for="youtube">YouTube video embed link</label>
-                                <input
-                                    type="url"
-                                    id="youtube"
-                                    name="youtube"
-                                    placeholder="e.g. https://www.youtube.com/watch?v=..."
-                                    value="<?php echo isset($_POST['youtube']) ? htmlspecialchars($_POST['youtube']) : ''; ?>"
-                                    />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="coverImage">Cover Image <span class="required">*</span></label>
-                                <input
-                                    type="file"
-                                    id="coverImage"
-                                    name="coverImage"
-                                    accept="image/*"
-                                    required
-                                    />
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn-primary">Create Event</button>
-                            </div>
-                        </form>
-
-<?php endif; ?>
                 </section>
             </div>
-
-
 
             <aside class="sidebar">
                 <div class="sidebar-section collections-section">

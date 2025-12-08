@@ -179,11 +179,22 @@ if (!empty($col['starting_date'])) {
           <img src="<?php echo htmlspecialchars($image_src); ?>" 
                alt="Collection Logo" class="collection-logo">
 
-          <?php if ((int)$col['user_id'] === $currentUserId): ?>
-              <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
-                ✎ Edit
-              </a>
-          <?php endif; ?>
+<?php if ((int)$col['user_id'] === $currentUserId): ?>
+    
+    <div class="owner-actions">
+        <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
+            ✎ Edit
+        </a>
+
+        <button id="deleteCollectionBtn" 
+                class="delete-link" 
+                data-col-id="<?php echo $col['collection_id']; ?>"
+                style="margin-top: 5px; background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%;">
+            🗑️ Delete
+        </button>
+        </div>
+
+<?php endif; ?>
         </div>
 
 
@@ -319,6 +330,22 @@ if (!empty($col['starting_date'])) {
 
   <div id="hover-popup"></div>
 
+  
+  <div class="delete-popup" id="delete-collection-popup" style="display: none;">
+    <div class="delete-popup-content">
+        <div class="popup-header">
+          <h3>Delete Collection</h3>
+        </div>
+        
+        <p id="delete-message">Are you sure you want to delete this collection?</p>
+        
+        <div class="logout-btn-wrapper">
+          <button type="button" class="logout-btn cancel-btn" id="cancel-col-delete">Cancel</button>
+          <button type="button" class="logout-btn confirm-btn" id="confirm-col-delete">Yes, Delete</button>
+        </div>
+    </div>
+  </div>
+  
   <script src="collectionpage.js"></script>
   <script src="logout.js"></script>
 

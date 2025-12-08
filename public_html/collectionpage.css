@@ -270,4 +270,25 @@
 }
 
 
+.owner-actions .delete-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 100%; /* Match width of container */
+}
+
+.owner-actions .delete-link:hover {
+    background-color: #c0392b;
+}
+
 

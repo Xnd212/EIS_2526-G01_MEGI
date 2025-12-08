@@ -23,24 +23,114 @@ require_once __DIR__ . "/db.php";
 // ==========================================
 // 3. USER ID HANDLING
 // ==========================================
-
 // aqui já sabemos que existe user_id, porque acima fizemos o check
-$user_id = (int)$_SESSION['user_id'];
+$user_id = (int) $_SESSION['user_id'];
 
 $message = "";
 $messageType = "";
 
 // ==========================================
+// CSV IMPORT HANDLER FOR COLLECTIONS
+// ==========================================
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
+
+    if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
+
+        $handle = fopen($_FILES['csvFile']['tmp_name'], "r");
+
+        if ($handle !== FALSE) {
+            $imported = 0;
+            $failed = 0;
+            $errors = [];
+            $row_number = 0;
+
+            // Skip header row
+            $first_row = fgetcsv($handle);
+
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $row_number++;
+
+                // Reconnect if connection is lost
+                if (!$conn->ping()) {
+                    $conn->close();
+                    require_once __DIR__ . "/db.php";
+                }
+
+                // Validate we have enough columns (at least name and theme)
+                if (count($data) < 2) {
+                    $failed++;
+                    $errors[] = "Row $row_number: Not enough columns";
+                    continue;
+                }
+
+                // Check for empty required fields
+                if (empty(trim($data[0])) || empty(trim($data[1]))) {
+                    $failed++;
+                    $errors[] = "Row $row_number: Missing required field (name or theme)";
+                    continue;
+                }
+
+                // Parse CSV columns (matching your form order)
+                $name = trim($data[0]);
+                $theme = trim($data[1]);
+                $starting_date = isset($data[2]) && !empty($data[2]) ? $data[2] : date('Y-m-d');
+                $description = isset($data[3]) ? trim($data[3]) : '';
+
+                // Insert collection using prepared statement (no image_id to use default)
+                $stmt_coll = $conn->prepare("INSERT INTO collection (user_id, Theme, name, starting_date, description) 
+                                             VALUES (?, ?, ?, ?, ?)");
+                $stmt_coll->bind_param("issss", $user_id, $theme, $name, $starting_date, $description);
+
+                if ($stmt_coll->execute()) {
+                    $imported++;
+                } else {
+                    $failed++;
+                    $errors[] = "Row $row_number: Failed to insert collection '$name'";
+                }
+                $stmt_coll->close();
+
+                // Optional: Add a small delay every 50 rows
+                if ($row_number % 50 == 0) {
+                    usleep(10000);
+                }
+            }
+
+            fclose($handle);
+
+            // Build success/error message
+            $message = "Import complete! Successfully imported $imported collections.";
+            if ($failed > 0) {
+                $message .= " $failed collections failed.";
+                $messageType = "error";
+                if (!empty($errors) && count($errors) <= 5) {
+                    $message .= "<br><small>" . implode("<br>", $errors) . "</small>";
+                } elseif (!empty($errors)) {
+                    $message .= "<br><small>Showing first 5 errors:<br>" . implode("<br>", array_slice($errors, 0, 5)) . "</small>";
+                }
+            } else {
+                $messageType = "success";
+            }
+        } else {
+            $message = "Error opening CSV file.";
+            $messageType = "error";
+        }
+    } else {
+        $message = "Please upload a valid CSV file.";
+        $messageType = "error";
+    }
+}
+
+
+// ==========================================
 // 4. HANDLE FORM SUBMISSION
 // ==========================================
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
 
     // A. Sanitize Inputs
-    $name        = $conn->real_escape_string($_POST['collectionName']);
-    $theme       = $conn->real_escape_string($_POST['collectionTheme']);
+    $name = $conn->real_escape_string($_POST['collectionName']);
+    $theme = $conn->real_escape_string($_POST['collectionTheme']);
     $description = $conn->real_escape_string($_POST['collectionDescription']);
     $starting_date = $_POST['creationDate']; // YYYY-MM-DD
-
     // B. Image Upload Logic
     $image_id = "NULL";
 
@@ -50,12 +140,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mkdir($target_dir, 0777, true);
         }
 
-        $file_name   = basename($_FILES["collectionImage"]["name"]);
+        $file_name = basename($_FILES["collectionImage"]["name"]);
         $target_file = $target_dir . $file_name;
 
         if (move_uploaded_file($_FILES["collectionImage"]["tmp_name"], $target_file)) {
 
-            $url    = "images/" . $file_name;
+            $url = "images/" . $file_name;
             $url_db = $conn->real_escape_string($url);
 
             $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
@@ -63,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($conn->query($sql_img) === TRUE) {
                 $image_id = $conn->insert_id;
             } else {
-                $message     = "Image DB Error: " . $conn->error;
+                $message = "Image DB Error: " . $conn->error;
                 $messageType = "error";
             }
         }
@@ -79,16 +169,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $new_collection_id = $conn->insert_id;
 
         if ($new_collection_id == 0) {
-            $message     = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
+            $message = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
             $messageType = "error";
         } else {
-            $message     = "Collection created successfully!";
+            $message = "Collection created successfully!";
             $messageType = "success";
 
             // D. Link Selected Items
             if (!empty($_POST['selectedItems'])) {
                 foreach ($_POST['selectedItems'] as $item_id) {
-                    $item_id = (int)$item_id;
+                    $item_id = (int) $item_id;
                     $sql_contains = "INSERT INTO contains (collection_id, item_id) 
                                      VALUES ('$new_collection_id', '$item_id')";
                     $conn->query($sql_contains);
@@ -96,7 +186,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     } else {
-        $message     = "Database Error: " . $conn->error;
+        $message = "Database Error: " . $conn->error;
         $messageType = "error";
     }
 }
@@ -150,6 +240,64 @@ if ($result_items && $result_items->num_rows > 0) {
             }
         </style>
     </head>
+
+
+    <!-- Popup Overlay -->
+    <div class="popup-overlay" id="csv-overlay"></div>
+
+    <!-- CSV Import Popup -->
+    <div class="csv-import-popup" id="csv-import-popup">
+        <div class="popup-header">
+            <h3>Bulk Import Collections</h3>
+            <button class="close-popup" id="close-csv-popup" type="button">✕</button>
+        </div>
+
+        <div class="popup-content">
+            <h4>CSV Format Instructions</h4>
+            <p>Your CSV file must have columns in this <strong>exact order</strong>:</p>
+
+            <div class="csv-format-box">
+                <code>name, theme, starting_date, description</code>
+            </div>
+
+            <h4>Example CSV:</h4>
+            <div class="csv-example">
+                <pre>name,theme,starting_date,description
+Pokemon Cards,Trading Cards,2024-01-15,My Pokemon card collection
+Action Figures,Toys,2024-02-20,Collection of superhero action figures
+Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
+            </div>
+
+            <h4>Field Details:</h4>
+            <ul>
+                <li><strong>name</strong> <span class="required">*</span> - Collection name (required)</li>
+                <li><strong>theme</strong> <span class="required">*</span> - Collection theme (required)</li>
+                <li><strong>starting_date</strong> - Date in format YYYY-MM-DD (defaults to today if empty)</li>
+                <li><strong>description</strong> - Collection description (optional)</li>
+            </ul>
+
+            <p><strong>Important Notes:</strong></p>
+            <ul>
+                <li>The first row should be the header (it will be skipped)</li>
+                <li>Required fields (name and theme) must not be empty</li>
+                <li>Cover images will use the database default value</li>
+                <li>Items can be added to collections later</li>
+            </ul>
+
+            <form method="POST" action="" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="csvFile">Upload CSV File <span class="required">*</span></label>
+                    <input type="file" id="csvFile" name="csvFile" accept=".csv" required />
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" name="import_csv" class="btn-primary">Import Collections</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <body>
 
@@ -225,18 +373,18 @@ if ($result_items && $result_items->num_rows > 0) {
                                 <button type="button" id="dropdownBtn">Select from existing items ⮟</button>
                                 <div class="dropdown-content" id="dropdownContent">
 
-<?php
-if (empty($user_items)) {
-    echo "<div style='padding:10px; color:#555;'>No items found in your inventory.</div>";
-} else {
-    foreach ($user_items as $item) {
-        echo '<label>';
-        echo '<input type="checkbox" name="selectedItems[]" value="' . $item['item_id'] . '"> ';
-        echo htmlspecialchars($item['name']);
-        echo '</label>';
-    }
-}
-?>
+                                    <?php
+                                    if (empty($user_items)) {
+                                        echo "<div style='padding:10px; color:#555;'>No items found in your inventory.</div>";
+                                    } else {
+                                        foreach ($user_items as $item) {
+                                            echo '<label>';
+                                            echo '<input type="checkbox" name="selectedItems[]" value="' . $item['item_id'] . '"> ';
+                                            echo htmlspecialchars($item['name']);
+                                            echo '</label>';
+                                        }
+                                    }
+                                    ?>
 
                                 </div>
                             </div>
@@ -244,14 +392,17 @@ if (empty($user_items)) {
 
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">Create Collection</button>
+
+                            <button type="button" id="bulk-import-btn" class="btn-secondary">Bulk Creation (CSV)</button>
+
                         </div>
                     </form>
 
-<?php if ($message): ?>
+                    <?php if ($message): ?>
                         <p id="formMessage" class="form-message <?php echo $messageType; ?>">
-                        <?php echo $message; ?>
+                            <?php echo $message; ?>
                         </p>
-                        <?php endif; ?>
+                    <?php endif; ?>
 
                 </section>
             </div>

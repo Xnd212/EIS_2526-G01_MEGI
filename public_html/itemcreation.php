@@ -32,90 +32,226 @@ $user_id = (int) $_SESSION['user_id'];
 $message = "";
 $messageType = "";
 
+
 // ==========================================
-// 3. HANDLE FORM SUBMISSION
+// CSV IMPORT HANDLER 
 // ==========================================
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
+    
+    $collection_id = isset($_POST['collection_id_csv']) ? (int)$_POST['collection_id_csv'] : 0;
+    
+    if ($collection_id == 0) {
+        $message = "Please select a valid collection.";
+        $messageType = "error";
+    } elseif (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
+        
+        $handle = fopen($_FILES['csvFile']['tmp_name'], "r");
+        
+        if ($handle !== FALSE) {
+            $imported = 0;
+            $failed = 0;
+            $errors = [];
+            $row_number = 0;
+            
+            // Skip header row
+            $first_row = fgetcsv($handle);
+            
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $row_number++;
+                
+                // Validate we have enough columns (at least name, price, type)
+                if (count($data) < 3) {
+                    $failed++;
+                    $errors[] = "Row $row_number: Not enough columns";
+                    continue;
+                }
+                
+                // Check for empty required fields
+                if (empty(trim($data[0])) || empty(trim($data[1])) || empty(trim($data[2]))) {
+                    $failed++;
+                    $errors[] = "Row $row_number: Missing required field (name, price, or type)";
+                    continue;
+                }
+                
+                // Parse CSV columns (matching your form order)
+                $name        = $conn->real_escape_string(trim($data[0]));
+                $price       = !empty($data[1]) ? (float)$data[1] : 0.00;
+                $typeNameInput = trim($data[2]);
+                $importance  = isset($data[3]) && !empty($data[3]) ? (int)$data[3] : 5;
+                $acc_date    = isset($data[4]) && !empty($data[4]) ? $data[4] : date('Y-m-d');
+                $acc_place   = isset($data[5]) ? $conn->real_escape_string(trim($data[5])) : '';
+                $description = isset($data[6]) ? $conn->real_escape_string(trim($data[6])) : '';
+                
+                // Validate importance range
+                if ($importance < 1 || $importance > 10) {
+                    $importance = 5;
+                }
+                
+                // Handle type (find or create) - same logic as your form
+                $typeNameSafe = $conn->real_escape_string($typeNameInput);
+                $type_id = 0;
+                
+                $sql_check_type = "SELECT type_id FROM type WHERE name = '$typeNameSafe' LIMIT 1";
+                $result_type = $conn->query($sql_check_type);
+                
+                if ($result_type && $result_type->num_rows > 0) {
+                    $row = $result_type->fetch_assoc();
+                    $type_id = $row['type_id'];
+                } else {
+                    $sql_create_type = "INSERT INTO type (name) VALUES ('$typeNameSafe')";
+                    if ($conn->query($sql_create_type) === TRUE) {
+                        $type_id = $conn->insert_id;
+                    } else {
+                        $failed++;
+                        $errors[] = "Row $row_number: Failed to create type '$typeNameInput'";
+                        continue;
+                    }
+                }
+                
+                // Insert item
+                if ($type_id > 0) {
+                    $sql_item = "INSERT INTO item (type_id, name, price, importance, acc_date, acc_place, description) 
+                                 VALUES ('$type_id', '$name', '$price', '$importance', '$acc_date', '$acc_place', '$description')";
+                    
+                    if ($conn->query($sql_item) === TRUE) {
+                        $new_item_id = $conn->insert_id;
+                        
+                        // Link to collection
+                        $sql_contains = "INSERT INTO contains (collection_id, item_id) VALUES ('$collection_id', '$new_item_id')";
+                        
+                        if ($conn->query($sql_contains) === TRUE) {
+                            $imported++;
+                        } else {
+                            $failed++;
+                            $errors[] = "Row $row_number: Failed to link item '$name' to collection";
+                            // Optionally delete the orphaned item
+                            $conn->query("DELETE FROM item WHERE item_id = '$new_item_id'");
+                        }
+                    } else {
+                        $failed++;
+                        $errors[] = "Row $row_number: Failed to insert item '$name' - " . $conn->error;
+                    }
+                } else {
+                    $failed++;
+                    $errors[] = "Row $row_number: Invalid type";
+                }
+            }
+            
+            fclose($handle);
+            
+            // Build success/error message
+            $message = "Import complete! Successfully imported $imported items.";
+            if ($failed > 0) {
+                $message .= " $failed items failed.";
+                $messageType = "error";
+                // Optionally show first few errors
+                if (!empty($errors) && count($errors) <= 5) {
+                    $message .= "<br><small>" . implode("<br>", $errors) . "</small>";
+                } elseif (!empty($errors)) {
+                    $message .= "<br><small>Showing first 5 errors:<br>" . implode("<br>", array_slice($errors, 0, 5)) . "</small>";
+                }
+            } else {
+                $messageType = "success";
+            }
+        } else {
+            $message = "Error opening CSV file.";
+            $messageType = "error";
+        }
+    } else {
+        $message = "Please upload a valid CSV file.";
+        $messageType = "error";
+    }
+}
+
+// ==========================================
+// 3. HANDLE FORM SUBMISSION (Single Item Creation)
+// ==========================================
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
 
     // --- A. GET STANDARD INPUTS ---
-    $name        = $conn->real_escape_string($_POST['itemName']);
+    $name        = isset($_POST['itemName']) ? $conn->real_escape_string($_POST['itemName']) : '';
     $price       = !empty($_POST['itemPrice']) ? (float)$_POST['itemPrice'] : 0.00;
-    $importance  = (int)$_POST['itemImportanceNumber']; 
-    $acc_date    = $_POST['acc_date']; 
-    $acc_place   = $conn->real_escape_string($_POST['acc_place']);
-    $description = $conn->real_escape_string($_POST['itemDescription']);
+    $importance  = isset($_POST['itemImportanceNumber']) ? (int)$_POST['itemImportanceNumber'] : 5; 
+    $acc_date    = isset($_POST['acc_date']) ? $_POST['acc_date'] : date('Y-m-d'); 
+    $acc_place   = isset($_POST['acc_place']) ? $conn->real_escape_string($_POST['acc_place']) : '';
+    $description = isset($_POST['itemDescription']) ? $conn->real_escape_string($_POST['itemDescription']) : '';
     
     $collection_id = isset($_POST['collection_id']) ? (int)$_POST['collection_id'] : 0;
 
     // --- B. HANDLE TYPE (Find or Create) ---
-    $typeNameInput = trim($_POST['itemType']);
+    $typeNameInput = isset($_POST['itemType']) ? trim($_POST['itemType']) : '';
     $typeNameSafe  = $conn->real_escape_string($typeNameInput);
     $type_id       = 0;
 
-    $sql_check_type = "SELECT type_id FROM type WHERE name = '$typeNameSafe' LIMIT 1";
-    $result_type    = $conn->query($sql_check_type);
-
-    if ($result_type && $result_type->num_rows > 0) {
-        $row    = $result_type->fetch_assoc();
-        $type_id = $row['type_id'];
+    if (empty($name) || empty($typeNameInput)) {
+        $message = "Please fill in all required fields (Name and Type).";
+        $messageType = "error";
     } else {
-        $sql_create_type = "INSERT INTO type (name) VALUES ('$typeNameSafe')";
-        if ($conn->query($sql_create_type) === TRUE) {
-            $type_id = $conn->insert_id;
+        $sql_check_type = "SELECT type_id FROM type WHERE name = '$typeNameSafe' LIMIT 1";
+        $result_type    = $conn->query($sql_check_type);
+
+        if ($result_type && $result_type->num_rows > 0) {
+            $row    = $result_type->fetch_assoc();
+            $type_id = $row['type_id'];
         } else {
-            $message     = "Error creating new Item Type: " . $conn->error;
-            $messageType = "error";
-        }
-    }
-
-    // --- C. HANDLE IMAGE ---
-    $image_id = "NULL";
-
-    if (isset($_FILES['itemImage']) && $_FILES['itemImage']['error'] == 0) {
-        $target_dir = "images/";
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-
-        $file_name   = basename($_FILES["itemImage"]["name"]);
-        $target_file = $target_dir . $file_name;
-        
-        if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
-            $url    = "images/" . $file_name;
-            $url_db = $conn->real_escape_string($url);
-            
-            $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
-            if ($conn->query($sql_img) === TRUE) {
-                $image_id = $conn->insert_id;
-            }
-        }
-    }
-
-    // --- D. INSERT ITEM & LINK TO COLLECTION ---
-    if ($type_id > 0 && $collection_id > 0) {
-        $img_val = ($image_id === "NULL") ? "NULL" : $image_id;
-
-        $sql_item = "INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description) 
-                     VALUES ('$type_id', $img_val, '$name', '$price', '$importance', '$acc_date', '$acc_place', '$description')";
-
-        if ($conn->query($sql_item) === TRUE) {
-            $new_item_id  = $conn->insert_id;
-            $sql_contains = "INSERT INTO contains (collection_id, item_id) VALUES ('$collection_id', '$new_item_id')";
-
-            if ($conn->query($sql_contains) === TRUE) {
-                $message     = "Item created successfully!";
-                $messageType = "success";
+            $sql_create_type = "INSERT INTO type (name) VALUES ('$typeNameSafe')";
+            if ($conn->query($sql_create_type) === TRUE) {
+                $type_id = $conn->insert_id;
             } else {
-                $message     = "Item created, but failed to add to collection. Error: " . $conn->error;
+                $message     = "Error creating new Item Type: " . $conn->error;
                 $messageType = "error";
             }
-        } else {
-            $message     = "Error inserting item: " . $conn->error;
+        }
+
+        // --- C. HANDLE IMAGE ---
+        $image_id = "NULL";
+
+        if (isset($_FILES['itemImage']) && $_FILES['itemImage']['error'] == 0) {
+            $target_dir = "images/";
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+
+            $file_name   = basename($_FILES["itemImage"]["name"]);
+            $target_file = $target_dir . $file_name;
+            
+            if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $target_file)) {
+                $url    = "images/" . $file_name;
+                $url_db = $conn->real_escape_string($url);
+                
+                $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
+                if ($conn->query($sql_img) === TRUE) {
+                    $image_id = $conn->insert_id;
+                }
+            }
+        }
+
+        // --- D. INSERT ITEM & LINK TO COLLECTION ---
+        if ($type_id > 0 && $collection_id > 0) {
+            $img_val = ($image_id === "NULL") ? "NULL" : $image_id;
+
+            $sql_item = "INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description) 
+                         VALUES ('$type_id', $img_val, '$name', '$price', '$importance', '$acc_date', '$acc_place', '$description')";
+
+            if ($conn->query($sql_item) === TRUE) {
+                $new_item_id  = $conn->insert_id;
+                $sql_contains = "INSERT INTO contains (collection_id, item_id) VALUES ('$collection_id', '$new_item_id')";
+
+                if ($conn->query($sql_contains) === TRUE) {
+                    $message     = "Item created successfully!";
+                    $messageType = "success";
+                } else {
+                    $message     = "Item created, but failed to add to collection. Error: " . $conn->error;
+                    $messageType = "error";
+                }
+            } else {
+                $message     = "Error inserting item: " . $conn->error;
+                $messageType = "error";
+            }
+        } elseif ($collection_id == 0) {
+            $message     = "Please select a valid collection.";
             $messageType = "error";
         }
-    } elseif ($collection_id == 0) {
-        $message     = "Please select a valid collection.";
-        $messageType = "error";
     }
 }
 
@@ -157,6 +293,79 @@ if ($result_cols && $result_cols->num_rows > 0) {
       }
   </style>
 </head>
+
+
+<!-- Popup Overlay -->
+<div class="popup-overlay" id="csv-overlay"></div>
+
+<!-- CSV Import Popup -->
+<div class="csv-import-popup" id="csv-import-popup">
+  <div class="popup-header">
+    <h3>Bulk Import Items</h3>
+    <button class="close-popup" id="close-csv-popup" type="button">✕</button>
+  </div>
+  
+  <div class="popup-content">
+    <h4>CSV Format Instructions</h4>
+    <p>Your CSV file must have columns in this <strong>exact order</strong>:</p>
+    
+    <div class="csv-format-box">
+      <code>name, price, type, importance, acc_date, acc_place, description</code>
+    </div>
+    
+    <h4>Example CSV:</h4>
+    <div class="csv-example">
+      <pre>name,price,type,importance,acc_date,acc_place,description
+Pikachu Card,25.50,Card,8,2024-01-15,Local Shop,First edition holographic
+Charizard Figure,45.00,Figure,10,2024-02-20,Online Store,Rare collectible item
+Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
+    </div>
+    
+    <h4>Field Details:</h4>
+    <ul>
+      <li><strong>name</strong> <span class="required">*</span> - Item name (required)</li>
+      <li><strong>price</strong> <span class="required">*</span> - Price in euros, use numbers only (e.g., 25.50)</li>
+      <li><strong>type</strong> <span class="required">*</span> - Item type (e.g., Card, Figure, Plush)</li>
+      <li><strong>importance</strong> - Number from 1 to 10 (defaults to 5 if empty)</li>
+      <li><strong>acc_date</strong> - Acquisition date in format YYYY-MM-DD (defaults to today if empty)</li>
+      <li><strong>acc_place</strong> - Where the item was acquired (optional)</li>
+      <li><strong>description</strong> - Item description (optional)</li>
+    </ul>
+    
+    <p><strong>Important Notes:</strong></p>
+    <ul>
+      <li>The first row should be the header (it will be skipped)</li>
+      <li>Required fields must not be empty</li>
+      <li>If a type doesn't exist, it will be created automatically</li>
+      <li>All items will be added to the selected collection</li>
+    </ul>
+    
+    <form method="POST" action="" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="collection_id_csv">Target Collection <span class="required">*</span></label>
+        <select id="collection_id_csv" name="collection_id_csv" required>
+          <option value="">-- Select a Collection --</option>
+          <?php 
+          if (!empty($user_collections)) {
+              foreach ($user_collections as $col) {
+                  echo '<option value="' . $col['collection_id'] . '">' . htmlspecialchars($col['name']) . '</option>';
+              }
+          }
+          ?>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="csvFile">Upload CSV File <span class="required">*</span></label>
+        <input type="file" id="csvFile" name="csvFile" accept=".csv" required />
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" name="import_csv" class="btn-primary">Import Items</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <body>
 
@@ -254,6 +463,7 @@ if ($result_cols && $result_cols->num_rows > 0) {
 
           <div class="form-actions">
             <button type="submit" class="btn-primary">Create Item</button>
+            <button type="button" id="bulk-import-btn" class="btn-secondary">Bulk Creation (CSV)</button>
           </div>
         </form>
 

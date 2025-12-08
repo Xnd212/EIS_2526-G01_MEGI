@@ -336,6 +336,27 @@
   color: #666;
 }
 
+
+.next-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.next-event-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.next-event-card img {
+  width: 100%;
+  border-radius: 15px;
+  margin-bottom: 0.75rem;
+}
+
+
 /* Section Colors */
 .collections-section {
   background-color: #f9d7d1;

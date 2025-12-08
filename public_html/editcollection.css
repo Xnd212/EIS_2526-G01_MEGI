@@ -219,3 +219,17 @@ textarea {
   margin-top: 0.7rem;
   font-size: 0.9rem;
 }
+
+.search-bar {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 1rem;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: none;
+  font-size: 1rem;
+}

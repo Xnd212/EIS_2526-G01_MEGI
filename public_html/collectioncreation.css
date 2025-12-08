@@ -18,8 +18,7 @@
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 800px;
-  height: auto;
-  min-height: 850px;
+  margin-bottom: 3rem;
 }
 
 .page-title {
@@ -34,299 +33,175 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
 }
 
-label {
+.collection-creation-section label {
   font-weight: bold;
   color: #444;
   margin-bottom: 0.4rem;
 }
 
-.required {
-  color: #b54242;
+.collection-creation-section input[type="text"],
+.collection-creation-section input[type="date"],
+.collection-creation-section input[type="file"],
+.collection-creation-section textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
-/* Custom Multi-select Dropdown */
+.collection-creation-section textarea {
+  resize: none;
+}
+
+/* MULTISELECT DROPDOWN (TAGS + ITENS) */
+
 .custom-multiselect {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-#dropdownBtn {
+.custom-multiselect button {
   width: 100%;
-  text-align: left;
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  background: #fff;
+  text-align: left;
+  background: white;
   cursor: pointer;
-  font-size: 1rem;
-}
-
-#dropdownBtn:hover {
-  border-color: #b54242;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #fff;
+  background: white;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 6px;
   width: 100%;
-  margin-top: 5px;
-  z-index: 20;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
+  margin-top: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 1000;
 }
 
 .dropdown-content label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   cursor: pointer;
-  font-weight: normal;
+  gap: 8px;
 }
 
 .dropdown-content label:hover {
-  background-color: #f8cbc1;
-  border-radius: 5px;
+  background: #f7d6ce;
 }
 
-/* Form inputs */
-input[type="text"],
-input[type="number"],
-input[type="file"],
-input[type="date"],
-textarea {
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-input:focus,
-textarea:focus {
-  border-color: #b54242;
-  outline: none;
-}
+/* BOTÕES */
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: 1.5rem;
+  gap: 0.75rem;
 }
 
 .btn-primary {
   background: #b54242;
-  color: #fff;
+  color: white;
   border: none;
   padding: 0.7rem 1.4rem;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  transition: background 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #9d3636;
-}
-
-.form-message {
-  margin-top: 1rem;
-  font-weight: bold;
-  text-align: center;
-}
-
-.form-message.error {
-  color: #b54242;
-}
-
-.form-message.success {
-  color: #3d8b3d;
-}
-
-input.error {
-  border-color: #b54242;
-  background-color: #ffecec;
-}
-
-/* Section Colors */
-.collections-section {
-  background-color: #f9d7d1;
-}
-
-.friends-section {
-  background-color: #f3b8aa ;
-}
-
-.events-section {
-  background-color: transparent;
-}
-
-textarea {
-  resize: none;
-}
-
-@media (max-width: 768px) {
-  .collection-creation-section {
-    max-width: 100%;
-    padding: 1.5rem;
-  }
-}
-
-.form-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
+  background: #9b3636;
 }
 
 .btn-secondary {
-    padding: 12px 30px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  background: #eee;
+  color: #444;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-.btn-secondary:hover {
-    background-color: #5a6268;
+.btn-small {
+  background: #c77462;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
 }
 
-/* CSV Import Popup */
-.csv-import-popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    z-index: 1000;
+/* MENSAGENS */
+
+.form-message {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 5px;
 }
 
-.csv-import-popup .popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+.form-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
-.csv-import-popup .popup-header h3 {
-    margin: 0;
-    font-size: 24px;
+.form-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
-.csv-import-popup .close-popup {
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #666;
-    line-height: 1;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-}
+/* CSV POPUP (mantém se já existia) */
 
-.csv-import-popup .close-popup:hover {
-    color: #000;
-}
-
-.popup-content h4 {
-    margin-top: 15px;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.csv-format-box {
-    background: #f5f5f5;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 10px 0;
-    font-family: monospace;
-    border: 1px solid #ddd;
-}
-
-.csv-format-box code {
-    font-size: 14px;
-    color: #d63384;
-}
-
-.csv-example {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 10px 0;
-}
-
-.csv-example pre {
-    margin: 0;
-    font-size: 12px;
-    overflow-x: auto;
-    font-family: monospace;
-    line-height: 1.5;
-}
-
-.popup-content ul {
-    padding-left: 25px;
-    margin: 10px 0;
-}
-
-.popup-content ul li {
-    margin: 8px 0;
-    line-height: 1.4;
-}
-
-.popup-content strong {
-    color: #333;
-}
-
-.popup-content .required {
-    color: #dc3545;
-}
-
-/* Overlay for popup */
 .popup-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  display: none;
+  z-index: 900;
 }
 
 .popup-overlay.active {
-    display: block;
+  display: block;
 }
 
-/* Form inside popup */
-.csv-import-popup .form-group {
-    margin-bottom: 20px;
+.csv-import-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  width: 500px;
+  max-width: 95vw;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 901;
 }
 
-.csv-import-popup .form-actions {
-    margin-top: 25px;
+.csv-import-popup .popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-
-
+.csv-import-popup .close-popup {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}

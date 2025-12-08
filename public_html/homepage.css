@@ -494,13 +494,12 @@ header {
 }
 
 .see-more-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    color: #555;
-    text-decoration: none;
-    white-space: nowrap;   
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #b54242;
+    cursor: pointer;
+    text-decoration: none;   
 }
 
 .see-more-icon {
@@ -508,7 +507,6 @@ header {
     line-height: 1;
     display: inline-block;
 }
-
 
 .see-more-link:hover {
   color: #b54242;
@@ -859,4 +857,31 @@ a {
   border-radius: 50%;        /* Makes the background circular */
   transform: scale(1.1);     /* Slightly larger */
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.6); /* Optional glow */
+}
+
+.notif-link {
+    color: #b54242;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.notif-link:hover {
+    text-decoration: underline;
+}
+
+/* Make the notifications popup "See more" centered everywhere */
+.notification-popup .see-more-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0.6rem 0;
+    font-size: 0.9rem;
+    color: #b54242;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.notification-popup .see-more-link:hover {
+    transform: scale(1.05);
+    color: #b54242;
 }

@@ -26,9 +26,11 @@ if (!isset($conn) || $conn->connect_error) {
 $sql = "
     SELECT 
         'collection_created' AS type,
+        u.user_id            AS actor_id,
         u.username           AS actor_name,
+        c.collection_id      AS target_id,
         c.name               AS target_name,
-        c.collection_id      AS sort_key
+        NULL                 AS item_id
     FROM collection c
     INNER JOIN user u    ON u.user_id = c.user_id
     INNER JOIN friends f ON f.friend_id = c.user_id
@@ -38,9 +40,11 @@ $sql = "
 
     SELECT 
         'event_created'      AS type,
+        u.user_id            AS actor_id,
         u.username           AS actor_name,
+        e.event_id           AS target_id,
         e.name               AS target_name,
-        e.event_id           AS sort_key
+        NULL                 AS item_id
     FROM event e
     INNER JOIN user u    ON u.user_id = e.user_id
     INNER JOIN friends f ON f.friend_id = e.user_id
@@ -50,17 +54,19 @@ $sql = "
 
     SELECT
         'item_added'         AS type,
+        u.user_id            AS actor_id,
         u.username           AS actor_name,
+        c.collection_id      AS target_id,
         c.name               AS target_name,
-        i.item_id            AS sort_key
+        i.item_id            AS item_id
     FROM contains ct
     INNER JOIN collection c ON ct.collection_id = c.collection_id
-    INNER JOIN user u       ON c.user_id = u.user_id 
+    INNER JOIN user u       ON c.user_id = u.user_id
     INNER JOIN friends f    ON f.friend_id = c.user_id
     INNER JOIN item i       ON ct.item_id = i.item_id
     WHERE f.user_id = ?
 
-    ORDER BY sort_key DESC
+    ORDER BY actor_id DESC
     LIMIT 10
 ";
 
@@ -74,17 +80,28 @@ if ($stmt) {
 
     while ($row = $result->fetch_assoc()) {
         $text = '';
+
+        $actorLink = "<a href='friendpage.php?user_id={$row['actor_id']}' class='notif-link'>{$row['actor_name']}</a>";
+
         switch ($row['type']) {
+
             case 'collection_created':
-                $text = "<strong>{$row['actor_name']}</strong> created a new collection: {$row['target_name']}.";
+                $collectionLink = "<a href='collectionpage.php?id={$row['target_id']}' class='notif-link'>{$row['target_name']}</a>";
+                $text = "$actorLink created a new collection: $collectionLink.";
                 break;
+
             case 'event_created':
-                $text = "<strong>{$row['actor_name']}</strong> created a new event: {$row['target_name']}.";
+                $eventLink = "<a href='eventpage.php?id={$row['target_id']}' class='notif-link'>{$row['target_name']}</a>";
+                $text = "$actorLink created a new event: $eventLink.";
                 break;
+
             case 'item_added':
-                $text = "<strong>{$row['actor_name']}</strong> added a new item to the {$row['target_name']} collection.";
+                $collectionLink = "<a href='collectionpage.php?id={$row['target_id']}' class='notif-link'>{$row['target_name']}</a>";
+                $itemLink = "<a href='itempage.php?id={$row['item_id']}' class='notif-link'>item</a>";
+                $text = "$actorLink added a new $itemLink to the $collectionLink collection.";
                 break;
         }
+
         if ($text !== '') {
             $notifications[] = $text;
         }

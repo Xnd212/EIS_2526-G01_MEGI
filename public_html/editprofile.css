@@ -1,15 +1,10 @@
-@import url('homepage.css'); /* Reuse global styles */
-
-/* Permitir scroll vertical */
-body {
-  overflow-y: auto;
-}
+@import url('homepage.css'); 
 
 /* Wrapper geral para a página de edição */
 .edit-profile-wrapper {
   display: flex;
   justify-content: center;
-  margin-right: 240px; /* espaço para a sidebar fixa da direita */
+  margin-right: 240px; 
   padding: 2rem 1rem 4rem;
   background: #eef0ff;
 }
@@ -301,44 +296,6 @@ select.error {
   display: flex;
   justify-content: flex-end;
   gap: 0.9rem;
-}
-
-/* Sidebar – herdada do homepage, reforçada aqui só para garantir posição */
-.sidebar {
-  position: fixed;
-  top: 100px;
-  right: 0;
-  width: 240px;
-  background: #f8cbc1;
-  padding: 1rem;
-  height: calc(100vh - 80px);
-  overflow-y: auto;
-  z-index: 10;
-  border-left: 2px solid #e1a79e;
-  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-section {
-  padding: 1rem;
-  height: 33.3%;
-}
-
-.sidebar-section h3 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-.sidebar-section p {
-  color: #333;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin: 0.3rem 0;
-  transition: color 0.2s ease;
-}
-
-.sidebar-section p:hover {
-  color: #b54242;
 }
 
 .collections-section {

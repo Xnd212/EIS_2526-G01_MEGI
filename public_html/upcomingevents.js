@@ -1,8 +1,10 @@
 // =============================
-// Notificações 
+// NOTIFICAÇÕES 
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // -------------- POPUP DE NOTIFICAÇÕES --------------
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
   const popup = document.getElementById('notification-popup');
   const seeMoreLink = document.querySelector('.see-more-link');
@@ -20,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Expandir / Encolher notificações
+  // -------------- EXPANDIR / ENCNCOLHER NOTIFICAÇÕES --------------
   if (seeMoreLink) {
     seeMoreLink.addEventListener('click', (e) => {
       e.preventDefault();
@@ -34,11 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-});
 
-
-
-document.addEventListener("DOMContentLoaded", () => {
+  // -------------- STATUS COLOR (GOING / INTERESTED) --------------
   document.querySelectorAll(".status-text").forEach((el) => {
     const status = el.textContent.trim().toLowerCase();
 
@@ -48,4 +47,27 @@ document.addEventListener("DOMContentLoaded", () => {
       el.classList.add("interested");
     }
   });
+
+  // =============================
+  // SORT DROPDOWN (Upcoming Events)
+  // =============================
+  const filterToggle = document.getElementById("filterToggle");
+  const filterMenu = document.getElementById("filterMenu");
+
+  if (filterToggle && filterMenu) {
+
+    // Abrir/Fechar menu
+    filterToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      filterMenu.classList.toggle("show");
+    });
+
+    // Clicar fora fecha o menu
+    document.addEventListener("click", (e) => {
+      if (!filterMenu.contains(e.target) && !filterToggle.contains(e.target)) {
+        filterMenu.classList.remove("show");
+      }
+    });
+  }
+
 });

@@ -29,7 +29,7 @@ $message = "";
 $messageType = "";
 
 // ==========================================
-// 4. CSV IMPORT HANDLER (mantém igual)
+// 4. CSV IMPORT HANDLER
 // ==========================================
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
 
@@ -38,9 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
         $handle = fopen($_FILES['csvFile']['tmp_name'], "r");
 
         if ($handle !== FALSE) {
-            $imported = 0;
-            $failed = 0;
-            $errors = [];
+            $imported   = 0;
+            $failed     = 0;
+            $errors     = [];
             $row_number = 0;
 
             // Skip header row
@@ -120,13 +120,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
 
     // A. Inputs
-    $name        = $conn->real_escape_string($_POST['collectionName']);
-    $theme       = $conn->real_escape_string($_POST['collectionTheme']);
-    $description = $conn->real_escape_string($_POST['collectionDescription']);
+    $name          = $conn->real_escape_string($_POST['collectionName']);
+    $theme         = $conn->real_escape_string($_POST['collectionTheme']);
+    $description   = $conn->real_escape_string($_POST['collectionDescription']);
     $starting_date = $_POST['creationDate']; // YYYY-MM-DD
 
     // Tags seleccionadas (IDs da tabela tags)
-    $selectedTags = isset($_POST['tags']) ? $_POST['tags'] : [];
+    $selectedTags = isset($_POST['tags'])
+        ? array_map('intval', (array)$_POST['tags'])
+        : [];
 
     // B. Image Upload
     $image_id = "NULL";
@@ -149,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
             if ($conn->query($sql_img) === TRUE) {
                 $image_id = $conn->insert_id;
             } else {
-                $message = "Image DB Error: " . $conn->error;
+                $message     = "Image DB Error: " . $conn->error;
                 $messageType = "error";
             }
         }
@@ -167,13 +169,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
         $new_collection_id = $conn->insert_id;
 
         if ($new_collection_id == 0) {
-            $message = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
+            $message     = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
             $messageType = "error";
         } else {
             // D. ligar items
             if (!empty($_POST['selectedItems'])) {
                 foreach ($_POST['selectedItems'] as $item_id) {
-                    $item_id = (int) $item_id;
+                    $item_id = (int)$item_id;
                     $sql_contains = "
                         INSERT INTO contains (collection_id, item_id) 
                         VALUES ('$new_collection_id', '$item_id')
@@ -182,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
                 }
             }
 
-            // E. ligar TAGS (como no editcollection)
+            // E. ligar TAGS (tabela collection_tags)
             if (!empty($selectedTags)) {
                 $stmtTag = $conn->prepare("
                     INSERT INTO collection_tags (collection_id, tag_id) 
@@ -196,17 +198,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
                 $stmtTag->close();
             }
 
-            $message = "Collection created successfully!";
+            $message     = "Collection created successfully!";
             $messageType = "success";
         }
     } else {
-        $message = "Database Error: " . $conn->error;
+        $message     = "Database Error: " . $conn->error;
         $messageType = "error";
     }
 }
 
 // ==========================================
-// 6. FETCH TAGS (para o dropdown, tal como no edit)
+// 6. FETCH TAGS (para o dropdown)
 // ==========================================
 $allTags = [];
 $sqlTags = "SELECT tag_id, name FROM tags ORDER BY name ASC";
@@ -247,6 +249,7 @@ if ($result_items && $result_items->num_rows > 0) {
 </head>
 
 <body>
+
 <!-- POPUP CSV (overlay + modal) -->
 <div class="popup-overlay" id="csv-overlay"></div>
 
@@ -395,7 +398,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                             } else {
                                 foreach ($user_items as $item) {
                                     echo '<label>';
-                                    echo '<input type="checkbox" name="selectedItems[]" value="' . $item['item_id'] . '"> ';
+                                    echo '<input type="checkbox" name="selectedItems[]" value="' . (int)$item['item_id'] . '"> ';
                                     echo htmlspecialchars($item['name']);
                                     echo '</label>';
                                 }
@@ -449,9 +452,27 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
     </aside>
 </div>
 
+
+<!-- MODAL DE TAGS -->
+<div id="tagModalOverlay" class="modal-overlay hidden"></div>
+
+<div id="tagModal" class="modal hidden">
+    <h3>Criar nova tag</h3>
+    <input type="text" id="newTagInput" placeholder="Nome da tag...">
+    <p id="tagFeedback" class="tag-feedback"></p>
+    <div class="modal-buttons">
+        <button id="createTagBtn" class="btn-primary">Criar tag</button>
+        <button id="closeTagModal" class="btn-secondary">Close</button>
+    </div>
+</div>
+
 <script src="collectioncreation.js"></script>
 <script src="homepage.js"></script>
 <script src="logout.js"></script>
 
 </body>
 </html>
+
+
+
+

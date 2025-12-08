@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 1.b MULTISELECT: TAGS (igual visual ao editcollection)
+  // 1.b MULTISELECT: TAGS (igual ao editcollection)
   // ============================================================
   const tagBtn = document.getElementById("dropdownBtn");
   const tagDropdown = document.getElementById("tagDropdown");
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 3. MODAL PARA CRIAR TAGS (visual, sem AJAX)
+  // 3. MODAL PARA CRIAR TAGS (COM AJAX, igual ao editcollection)
   // ============================================================
   const openTagModal = document.getElementById("openTagModal");
   const tagModalOverlay = document.getElementById("tagModalOverlay");
@@ -127,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const newTagInput = document.getElementById("newTagInput");
   const tagFeedback = document.getElementById("tagFeedback");
 
+  // Abrir modal
   if (openTagModal && tagModalOverlay && tagModal) {
     openTagModal.addEventListener("click", (e) => {
       e.preventDefault();
@@ -137,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Fechar modal (botão)
   if (closeTagModal && tagModalOverlay && tagModal) {
     closeTagModal.addEventListener("click", () => {
       tagModalOverlay.classList.add("hidden");
@@ -144,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Fechar modal (clique no overlay)
   if (tagModalOverlay && tagModal) {
     tagModalOverlay.addEventListener("click", () => {
       tagModalOverlay.classList.add("hidden");
@@ -151,38 +154,70 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (createTagBtn && newTagInput && tagDropdown && tagBtn) {
-    createTagBtn.addEventListener("click", () => {
-      const value = newTagInput.value.trim();
-      if (!value) {
-        tagFeedback.textContent = "Please write a tag name.";
+  // Criar tag via create_tag.php (igual ao editcollection.js)
+  if (createTagBtn && newTagInput && tagDropdown) {
+    createTagBtn.addEventListener("click", async () => {
+      const tagName = newTagInput.value.trim();
+      tagFeedback.textContent = "";
+
+      if (tagName === "") {
+        tagFeedback.textContent = "⚠ Escreva um nome.";
         tagFeedback.style.color = "#b54242";
         return;
       }
 
-      // Cria um checkbox localmente (não grava na BD – apenas visual)
-      const label = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.name = "tags[]";
-      // valor -1 para indicar que é novo; se quiseres BD fazemos depois
-      input.value = "-1|" + value;
+      let formData = new FormData();
+      formData.append("tagName", tagName);
 
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(" " + value));
-      tagDropdown.appendChild(label);
+      try {
+        const response = await fetch("create_tag.php", {
+          method: "POST",
+          body: formData,
+        });
 
-      input.checked = true;
+        const result = await response.json();
 
-      const checked = [
-        ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
-      ].map((c) => c.parentElement.textContent.trim());
-      tagBtn.textContent =
-        checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+        if (!result.success) {
+          tagFeedback.textContent = "⚠ " + (result.error || "Erro ao criar tag.");
+          tagFeedback.style.color = "#b54242";
+          return;
+        }
 
-      tagFeedback.textContent = "Tag added (local only).";
-      tagFeedback.style.color = "green";
-      newTagInput.value = "";
+        // Se já existia: apenas marcar a checkbox
+        if (result.existing) {
+          let existing = tagDropdown.querySelector(
+            `input[value='${result.tag_id}']`
+          );
+          if (existing) {
+            existing.checked = true;
+          }
+          tagFeedback.textContent = "Tag já existia — selecionada ✔";
+          tagFeedback.style.color = "#2e7d32";
+        } else {
+          // Criar nova checkbox no dropdown
+          let label = document.createElement("label");
+          label.innerHTML = `
+            <input type="checkbox" name="tags[]" value="${result.tag_id}" checked>
+            ${result.name}
+          `;
+          tagDropdown.appendChild(label);
+
+          tagFeedback.textContent = "Tag criada ✔";
+          tagFeedback.style.color = "#2e7d32";
+        }
+
+        // Atualizar texto do botão
+        const checked = [
+          ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
+        ].map((c) => c.parentElement.textContent.trim());
+        tagBtn.textContent =
+          checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+
+        newTagInput.value = "";
+      } catch (err) {
+        tagFeedback.textContent = "⚠ Erro de ligação ao servidor.";
+        tagFeedback.style.color = "#b54242";
+      }
     });
   }
 

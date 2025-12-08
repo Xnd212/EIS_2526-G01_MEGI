@@ -84,4 +84,33 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = `itempage.php?id=${window.itemId}`;
     }, 2000);
   }
+  
+    // =========================
+    // SLIDER <-> INPUT NUMBER
+    // =========================
+    const slider = document.getElementById("importanceSlider");
+    const number = document.getElementById("itemImportance");
+
+    if (slider && number) {
+
+        // Slider → Número
+        slider.addEventListener("input", () => {
+            number.value = slider.value;
+        });
+
+        // Número → Slider
+        number.addEventListener("input", () => {
+            let val = parseInt(number.value);
+
+            if (isNaN(val))
+                val = 1;
+            if (val < 1)
+                val = 1;
+            if (val > 10)
+                val = 10;
+
+            number.value = val;
+            slider.value = val;
+        });
+    }
 });

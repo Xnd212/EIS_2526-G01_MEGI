@@ -199,6 +199,48 @@ textarea {
   resize: none;
 }
 
+.importance-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    width: 100%;
+}
+
+#importanceSlider {
+  flex: 1;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #f8cbc1;
+  outline: none;
+}
+
+#importanceSlider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #b54242;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#importanceSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #b54242;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.importance-number {
+  width: 60px;
+  text-align: right;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .item-creation-section {
     max-width: 100%;

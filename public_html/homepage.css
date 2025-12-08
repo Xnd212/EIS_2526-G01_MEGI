@@ -252,7 +252,7 @@ header {
   background: #f8cbc1;
   padding: 1rem;
   height: calc(100vh - 80px);
-  overflow-y: auto;
+  overflow-y: hidden;
   z-index: 10;
   border-left: 2px solid #e1a79e;
   box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1);

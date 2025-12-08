@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/db.php"; // cria $conn (mysqli)
 
 // =============================================
 // 0. VALIDAR LOGIN
@@ -16,19 +16,23 @@ $userId = (int)$_SESSION['user_id'];
 if (!isset($_GET['id'])) {
     die("Erro: Nenhum item especificado.");
 }
-$itemId = intval($_GET['id']);
+$itemId = (int)$_GET['id'];
 
 // =============================================
-// 2. BUSCAR DADOS DO ITEM + TYPE
+// 2. BUSCAR ITEM + TYPE
 // =============================================
-$stmt = $pdo->prepare("
-    SELECT i.*, t.name AS type_name
+$sql = "
+    SELECT i.*, t.name AS type_name, img.url AS item_image
     FROM item i
     LEFT JOIN type t ON i.type_id = t.type_id
+    LEFT JOIN image img ON i.image_id = img.image_id
     WHERE i.item_id = ?
-");
-$stmt->execute([$itemId]);
-$item = $stmt->fetch(PDO::FETCH_ASSOC);
+";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $itemId);
+$stmt->execute();
+$item = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 if (!$item) {
     die("Erro: Item não encontrado.");
@@ -37,25 +41,23 @@ if (!$item) {
 // =============================================
 // 3. BUSCAR COLEÇÕES DO UTILIZADOR
 // =============================================
-$stmtCols = $pdo->prepare("
-    SELECT collection_id, name
-    FROM collection
-    WHERE user_id = ?
-    ORDER BY name
-");
-$stmtCols->execute([$userId]);
-$collections = $stmtCols->fetchAll(PDO::FETCH_ASSOC);
+$sql = "SELECT collection_id, name FROM collection WHERE user_id = ? ORDER BY name";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$collections = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // =============================================
 // 4. BUSCAR COLEÇÕES A QUE O ITEM PERTENCE
 // =============================================
-$stmtItemCols = $pdo->prepare("
-    SELECT collection_id
-    FROM contains
-    WHERE item_id = ?
-");
-$stmtItemCols->execute([$itemId]);
-$itemCollectionIds = array_column($stmtItemCols->fetchAll(PDO::FETCH_ASSOC), 'collection_id');
+$sql = "SELECT collection_id FROM contains WHERE item_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $itemId);
+$stmt->execute();
+$res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$itemCollectionIds = array_column($res, "collection_id");
+$stmt->close();
 
 $message = "";
 $redirectAfterSuccess = false;
@@ -63,128 +65,134 @@ $redirectAfterSuccess = false;
 // =============================================
 // 5. PROCESSAR UPDATE (POST)
 // =============================================
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Campos principais
-    $name        = trim($_POST['itemName'] ?? '');
-    $price       = isset($_POST['itemPrice']) ? (float)$_POST['itemPrice'] : 0.0;
-    $typeName    = trim($_POST['itemType'] ?? '');
-    $importance  = isset($_POST['itemImportance']) ? (int)$_POST['itemImportance'] : 0;
-    $accDate     = $_POST['acquisitionDate'] ?? '';
-    $accPlace    = trim($_POST['acquisitionPlace'] ?? '');
-    $description = trim($_POST['itemDescription'] ?? '');
-    $selectedCollections = isset($_POST['collections']) ? $_POST['collections'] : [];
+    $name   = trim($_POST["itemName"]);
+    $price  = (float)($_POST["itemPrice"] ?? 0);
+    $typeName = trim($_POST["itemType"]);
+    $importance = (int)($_POST["itemImportance"] ?? 0);
+    $accDate = $_POST["acquisitionDate"] ?: null;
+    $accPlace = trim($_POST["acquisitionPlace"]);
+    $description = trim($_POST["itemDescription"]);
+    $selectedCollections = $_POST["collections"] ?? [];
 
-    // Validações simples
-    if ($name === '' || $typeName === '' || empty($selectedCollections) || $importance < 1 || $importance > 10) {
+    if ($name === "" || $typeName === "" || empty($selectedCollections)) {
         $message = "⚠ Preencha todos os campos obrigatórios e selecione pelo menos uma coleção.";
     } else {
+        // =============================
+        // MYSQLI → TRANSAÇÃO
+        // =============================
+        $conn->begin_transaction();
 
         try {
-            $pdo->beginTransaction();
 
-            // ---------- A) TYPE (encontrar ou criar) ----------
-            $stmtType = $pdo->prepare("SELECT type_id FROM type WHERE name = ? LIMIT 1");
-            $stmtType->execute([$typeName]);
-            $typeRow = $stmtType->fetch(PDO::FETCH_ASSOC);
+            // A) OBTER OU CRIAR TYPE ID
+            $sql = "SELECT type_id FROM type WHERE name = ? LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $typeName);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
 
-            if ($typeRow) {
-                $typeId = (int)$typeRow['type_id'];
+            if ($result) {
+                $typeId = $result["type_id"];
             } else {
-                $stmtInsType = $pdo->prepare("INSERT INTO type (name) VALUES (?)");
-                $stmtInsType->execute([$typeName]);
-                $typeId = (int)$pdo->lastInsertId();
+                $sql = "INSERT INTO type (name) VALUES (?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("s", $typeName);
+                $stmt->execute();
+                $typeId = $stmt->insert_id;
+                $stmt->close();
             }
 
-            // ---------- B) IMAGEM (se nova imagem enviada) ----------
-            $imageIdToUse = $item['image_id']; // default: manter atual (pode ser null)
+            // B) SE HOUVER NOVA IMAGEM → GUARDAR
+            $imageIdToUse = $item["image_id"];
 
-            if (!empty($_FILES['itemImage']['name'])) {
-                $file = $_FILES['itemImage'];
+            if (!empty($_FILES["itemImage"]["name"])) {
+                $file = $_FILES["itemImage"];
                 $uploadDir = "images/";
-                $safeName  = time() . "_" . basename($file['name']);
+                $safeName = time() . "_" . basename($file["name"]);
                 $targetPath = $uploadDir . $safeName;
 
-                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                    $stmtImg = $pdo->prepare("INSERT INTO image (url) VALUES (?)");
-                    $stmtImg->execute([$targetPath]);
-                    $imageIdToUse = (int)$pdo->lastInsertId();
+                if (move_uploaded_file($file["tmp_name"], $targetPath)) {
+                    $sql = "INSERT INTO image (url) VALUES (?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("s", $targetPath);
+                    $stmt->execute();
+                    $imageIdToUse = $stmt->insert_id;
+                    $stmt->close();
                 } else {
-                    // não abortamos tudo, mas avisamos
-                    $message = "⚠ Erro ao carregar a imagem. Restantes alterações guardadas.";
+                    $message = "⚠ Erro ao carregar imagem. Restantes dados guardados.";
                 }
             }
 
-            // ---------- C) UPDATE DO ITEM ----------
-            $stmtUpdate = $pdo->prepare("
+            // C) UPDATE DO ITEM
+            $sql = "
                 UPDATE item
-                   SET type_id     = ?,
-                       image_id    = ?,
-                       name        = ?,
-                       price       = ?,
-                       importance  = ?,
-                       acc_date    = ?,
-                       acc_place   = ?,
-                       description = ?
-                 WHERE item_id    = ?
-            ");
-            // se $imageIdToUse for null, deixamos passar como null
-            $stmtUpdate->execute([
+                SET type_id = ?, image_id = ?, name = ?, price = ?, importance = ?, acc_date = ?, acc_place = ?, description = ?
+                WHERE item_id = ?
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param(
+                "iisdisssi",
                 $typeId,
-                $imageIdToUse ?: null,
+                $imageIdToUse,
                 $name,
                 $price,
                 $importance,
-                $accDate ?: null,
-                $accPlace ?: null,
-                $description ?: null,
+                $accDate,
+                $accPlace,
+                $description,
                 $itemId
-            ]);
+            );
+            $stmt->execute();
+            $stmt->close();
 
-            // ---------- D) UPDATE DA TABELA CONTAINS ----------
-            // Apagar associações antigas
-            $stmtDel = $pdo->prepare("DELETE FROM contains WHERE item_id = ?");
-            $stmtDel->execute([$itemId]);
+            // D) UPDATE DA TABELA contains
+            $sql = "DELETE FROM contains WHERE item_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $itemId);
+            $stmt->execute();
+            $stmt->close();
 
-            // Inserir novas associações
-            $stmtInsContains = $pdo->prepare("
-                INSERT INTO contains (collection_id, item_id)
-                VALUES (?, ?)
-            ");
+            $sql = "INSERT INTO contains (collection_id, item_id) VALUES (?, ?)";
+            $stmt = $conn->prepare($sql);
+
             foreach ($selectedCollections as $cid) {
                 $cid = (int)$cid;
-                if ($cid > 0) {
-                    $stmtInsContains->execute([$cid, $itemId]);
-                }
+                $stmt->bind_param("ii", $cid, $itemId);
+                $stmt->execute();
             }
+            $stmt->close();
 
-            $pdo->commit();
+            $conn->commit();
+            
+            $sql = "
+            SELECT i.*, t.name AS type_name, img.url AS item_image
+            FROM item i
+            LEFT JOIN type t ON i.type_id = t.type_id
+            LEFT JOIN image img ON i.image_id = img.image_id
+            WHERE i.item_id = ?
+            ";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $itemId);
+            $stmt->execute();
+            $item = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
 
-            // Mensagem de sucesso
-            if ($message === "") {
-                $message = "✓ Item atualizado com sucesso! A redirecionar...";
-            }
+            $message = "✓ Item atualizado com sucesso! A redirecionar...";
             $redirectAfterSuccess = true;
 
-            // Atualizar dados em memória
-            $stmt = $pdo->prepare("
-                SELECT i.*, t.name AS type_name
-                FROM item i
-                LEFT JOIN type t ON i.type_id = t.type_id
-                WHERE i.item_id = ?
-            ");
-            $stmt->execute([$itemId]);
-            $item = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            $itemCollectionIds = array_map('intval', $selectedCollections);
-
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $message = "Erro ao atualizar o item: " . $e->getMessage();
+            $conn->rollback();
+            $message = "Erro ao atualizar item: " . $e->getMessage();
         }
     }
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -305,16 +313,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <!-- IMPORTANCE (1–10) -->
           <div class="form-group">
-            <label for="itemImportance">Importance (1–10) <span class="required">*</span></label>
-            <input
-                type="number"
-                id="itemImportance"
-                name="itemImportance"
-                min="1"
-                max="10"
-                value="<?= (int)$item['importance'] ?>"
-                required
-            />
+              <label for="itemImportance">Importance (1–10) <span class="required">*</span></label>
+
+              <div class="importance-wrapper">
+
+                  <!-- SLIDER -->
+                  <input
+                      type="range"
+                      id="importanceSlider"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value="<?= (int) $item['importance'] ?>"
+                      >
+
+                  <!-- INPUT NUMÉRICO QUE SERÁ ENVIADO NO POST -->
+                  <input
+                      type="number"
+                      id="itemImportance"
+                      name="itemImportance"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value="<?= (int) $item['importance'] ?>"
+                      class="importance-number"
+                      >
+              </div>
           </div>
 
           <!-- ACQUISITION DATE -->

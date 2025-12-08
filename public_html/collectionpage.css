@@ -291,4 +291,36 @@
     background-color: #c0392b;
 }
 
+/* Styling for the Collector Name Link */
+.collector-info p .collector-link {
+    text-decoration: none;
+    color: #333; /* Dark gray to match text, or change to your theme color */
+    font-weight: 500;
+    transition: color 0.2s ease, border-bottom 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
 
+.collector-info p .collector-link:hover {
+    color: #e74c3c; /* Change to your preferred hover color */
+    border-bottom: 1px solid #e74c3c;
+    cursor: pointer;
+}
+
+
+/* Style for the Most Recent Item Link */
+.collection-info p .recent-item-link {
+    text-decoration: none;
+    color: #4a90e2; /* A nice blue to distinguish it as an item */
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.collection-info p .recent-item-link:hover {
+    color: #2c3e50; /* Darker on hover */
+    border-bottom: 1px solid #2c3e50;
+    background-color: #f0f4f8; /* Subtle background highlight */
+    border-radius: 4px;
+    padding: 0 4px; /* A little breathing room on hover */
+    margin: 0 -4px; /* Counteract padding to keep text aligned */
+}

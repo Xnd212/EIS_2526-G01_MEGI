@@ -335,3 +335,17 @@
     max-width: 100%;
   }}
 
+/* Styling for the Creator Name Link */
+.event-info p .creator-link {
+    text-decoration: none;
+    color: inherit; /* Inherits the dark gray/black from the paragraph */
+    font-weight: 500;
+    transition: color 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.event-info p .creator-link:hover {
+    color: #e74c3c; /* Theme red/orange color */
+    border-bottom: 1px solid #e74c3c;
+    cursor: pointer;
+}

@@ -149,7 +149,17 @@ function fmtDate($d) {
 
         <div class="item-info">
           <p><strong>Collector:</strong> 
-            <?php echo htmlspecialchars($item['collector_name']); ?>
+            <?php 
+                // Check if the current user owns this item
+                if ((int)$item['owner_id'] === $currentUserId) {
+                    $profileLink = "userpage.php";
+                } else {
+                    $profileLink = "friendpage.php?user_id=" . $item['owner_id'];
+                }
+            ?>
+            <a href="<?php echo $profileLink; ?>" class="collector-link">
+                <?php echo htmlspecialchars($item['collector_name']); ?>
+            </a>
           </p>
           <p><strong>Price:</strong> 
             <?php echo htmlspecialchars($item['price']); ?>€

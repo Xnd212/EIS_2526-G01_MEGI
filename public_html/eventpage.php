@@ -246,13 +246,29 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 
           <div class="event-details-content">
             <div class="event-info">
-              <p><strong>Created by:</strong> <?php echo htmlspecialchars($event['creator_name']); ?></p>
-              <p><strong>Date:</strong> <?php echo $event_date; ?></p>
-              <?php if(isset($event['place'])): ?>
-                <p><strong>Place:</strong> <?php echo htmlspecialchars($event['place']); ?></p>
-              <?php endif; ?>
-              <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
-            </div>
+                <p>
+                    <strong>Created by:</strong> 
+                    <?php 
+                        // Determine the link destination
+                        // If logged in AND current user is the creator -> My Profile
+                        if ($user_id !== null && $event['user_id'] == $user_id) {
+                            $creatorLink = "userpage.php";
+                        } else {
+                            // Guest or someone else -> Friend Profile
+                            $creatorLink = "friendpage.php?user_id=" . $event['user_id'];
+                        }
+                    ?>
+                    <a href="<?php echo $creatorLink; ?>" class="creator-link">
+                        <?php echo htmlspecialchars($event['creator_name']); ?>
+                    </a>
+                </p>
+                
+                <p><strong>Date:</strong> <?php echo $event_date; ?></p>
+                <?php if(isset($event['place'])): ?>
+                  <p><strong>Place:</strong> <?php echo htmlspecialchars($event['place']); ?></p>
+                <?php endif; ?>
+                <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+              </div>
           </div>
 
           <?php if ($video_id): ?>

@@ -190,3 +190,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// CSV Import Popup Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const bulkImportBtn = document.getElementById('bulk-import-btn');
+    const csvPopup = document.getElementById('csv-import-popup');
+    const closePopupBtn = document.getElementById('close-csv-popup');
+    const overlay = document.getElementById('csv-overlay');
+
+    if (bulkImportBtn) {
+        bulkImportBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            csvPopup.style.display = 'block';
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', function() {
+            csvPopup.style.display = 'none';
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            csvPopup.style.display = 'none';
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && csvPopup.style.display === 'block') {
+            csvPopup.style.display = 'none';
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+});

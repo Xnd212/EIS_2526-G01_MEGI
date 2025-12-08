@@ -246,6 +246,9 @@ $stmt->close();
 
     </div>
 
+    <div id="hover-popup"></div>
+
+    <script src="homepage.js"></script> 
     <script src="logout.js"></script>
 
 </body>

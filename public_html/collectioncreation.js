@@ -1,32 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
-  // 1. CUSTOM MULTI-SELECT DROPDOWN
+  // 1. MULTISELECT: ITENS EXISTENTES
   // ============================================================
-  const dropdownBtn = document.getElementById("dropdownBtn");
-  const dropdownContent = document.getElementById("dropdownContent");
+  const itemsBtn = document.getElementById("itemsDropdownBtn");
+  const itemsContent = document.getElementById("itemsDropdownContent");
 
-  if (dropdownBtn && dropdownContent) {
-    dropdownBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // Prevent button from submitting form
+  if (itemsBtn && itemsContent) {
+    itemsBtn.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      dropdownContent.style.display =
-        dropdownContent.style.display === "block" ? "none" : "block";
+      itemsContent.style.display =
+        itemsContent.style.display === "block" ? "none" : "block";
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
-      if (!dropdownContent.contains(e.target) && e.target !== dropdownBtn) {
-        dropdownContent.style.display = "none";
+      if (!itemsContent.contains(e.target) && e.target !== itemsBtn) {
+        itemsContent.style.display = "none";
       }
     });
 
-    // Update button text when checkboxes change
-    dropdownContent.addEventListener("change", () => {
+    itemsContent.addEventListener("change", () => {
       const checked = [
-        ...dropdownContent.querySelectorAll("input[type='checkbox']:checked"),
+        ...itemsContent.querySelectorAll("input[type='checkbox']:checked"),
       ].map((c) => c.parentElement.textContent.trim());
 
-      dropdownBtn.textContent =
+      itemsBtn.textContent =
         checked.length > 0
           ? checked.join(", ")
           : "Select from existing items ⮟";
@@ -34,82 +32,162 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 2. FORM VALIDATION
+  // 1.b MULTISELECT: TAGS (igual visual ao editcollection)
+  // ============================================================
+  const tagBtn = document.getElementById("dropdownBtn");
+  const tagDropdown = document.getElementById("tagDropdown");
+
+  if (tagBtn && tagDropdown) {
+    tagBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      tagDropdown.style.display =
+        tagDropdown.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!tagDropdown.contains(e.target) && e.target !== tagBtn) {
+        tagDropdown.style.display = "none";
+      }
+    });
+
+    tagDropdown.addEventListener("change", () => {
+      const checked = [
+        ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
+      ].map((c) => c.parentElement.textContent.trim());
+
+      tagBtn.textContent =
+        checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+    });
+  }
+
+  // ============================================================
+  // 2. FORM VALIDATION (simples)
   // ============================================================
   const form = document.getElementById("collectionForm");
   const formMessage = document.getElementById("formMessage");
 
-  if (form && formMessage) {
+  if (form) {
     form.addEventListener("submit", (e) => {
-      // Prevent default submission to allow validation
+      if (!formMessage) return;
+
       e.preventDefault();
 
       const name = document.getElementById("collectionName");
       const theme = document.getElementById("collectionTheme");
       const dateInput = document.getElementById("creationDate");
 
-      // Clear previous errors
-      [name, theme, dateInput].forEach((el) => {
-        if (el) el.classList.remove("error");
-      });
+      [name, theme, dateInput].forEach((el) => el && el.classList.remove("error"));
       formMessage.textContent = "";
       formMessage.className = "form-message";
 
       let valid = true;
 
-      // Name Validation
       if (!name || name.value.trim() === "") {
-        if (name) name.classList.add("error");
+        name.classList.add("error");
         valid = false;
       }
 
-      // Theme Validation
       if (!theme || theme.value.trim() === "") {
-        if (theme) theme.classList.add("error");
+        theme.classList.add("error");
         valid = false;
       }
 
-      // Date Validation
       if (dateInput) {
         const dateValue = dateInput.value.trim();
-        const datePattern = /^\d{4}-\d{2}-\d{2}$/; // matches "YYYY-MM-DD"
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
         if (!datePattern.test(dateValue)) {
           dateInput.classList.add("error");
           valid = false;
-        } else {
-          // Check if date is in the future
-          const selectedDate = new Date(dateValue);
-          const currentDate = new Date();
-          currentDate.setHours(0, 0, 0, 0); // Reset time
-          selectedDate.setHours(0, 0, 0, 0);
-
-          if (selectedDate > currentDate) {
-            dateInput.classList.add("error");
-            valid = false;
-          } else {
-            dateInput.classList.remove("error");
-          }
         }
       } else {
         valid = false;
       }
 
-      // --- FINAL DECISION ---
       if (!valid) {
-        formMessage.textContent = "⚠️ Please fill in all required (*) fields correctly.";
+        formMessage.textContent =
+          "⚠️ Please fill in all required (*) fields correctly.";
         formMessage.classList.add("error");
-        return; // Stop here, do not send to PHP
+        return;
       }
 
-      // IF VALID: SUBMIT THE FORM TO PHP
-      formMessage.textContent = "Processing...";
-      form.submit(); // This bypasses the listener and sends data to the server
+      form.submit();
     });
   }
 
   // ============================================================
-  // 3. NOTIFICATIONS
+  // 3. MODAL PARA CRIAR TAGS (visual, sem AJAX)
+  // ============================================================
+  const openTagModal = document.getElementById("openTagModal");
+  const tagModalOverlay = document.getElementById("tagModalOverlay");
+  const tagModal = document.getElementById("tagModal");
+  const closeTagModal = document.getElementById("closeTagModal");
+  const createTagBtn = document.getElementById("createTagBtn");
+  const newTagInput = document.getElementById("newTagInput");
+  const tagFeedback = document.getElementById("tagFeedback");
+
+  if (openTagModal && tagModalOverlay && tagModal) {
+    openTagModal.addEventListener("click", (e) => {
+      e.preventDefault();
+      tagModalOverlay.classList.remove("hidden");
+      tagModal.classList.remove("hidden");
+      newTagInput.value = "";
+      tagFeedback.textContent = "";
+    });
+  }
+
+  if (closeTagModal && tagModalOverlay && tagModal) {
+    closeTagModal.addEventListener("click", () => {
+      tagModalOverlay.classList.add("hidden");
+      tagModal.classList.add("hidden");
+    });
+  }
+
+  if (tagModalOverlay && tagModal) {
+    tagModalOverlay.addEventListener("click", () => {
+      tagModalOverlay.classList.add("hidden");
+      tagModal.classList.add("hidden");
+    });
+  }
+
+  if (createTagBtn && newTagInput && tagDropdown && tagBtn) {
+    createTagBtn.addEventListener("click", () => {
+      const value = newTagInput.value.trim();
+      if (!value) {
+        tagFeedback.textContent = "Please write a tag name.";
+        tagFeedback.style.color = "#b54242";
+        return;
+      }
+
+      // Cria um checkbox localmente (não grava na BD – apenas visual)
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "tags[]";
+      // valor -1 para indicar que é novo; se quiseres BD fazemos depois
+      input.value = "-1|" + value;
+
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(" " + value));
+      tagDropdown.appendChild(label);
+
+      input.checked = true;
+
+      const checked = [
+        ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
+      ].map((c) => c.parentElement.textContent.trim());
+      tagBtn.textContent =
+        checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+
+      tagFeedback.textContent = "Tag added (local only).";
+      tagFeedback.style.color = "green";
+      newTagInput.value = "";
+    });
+  }
+
+  // ============================================================
+  // 4. NOTIFICAÇÕES
   // ============================================================
   const bellBtn = document.getElementById("notification-btn");
   const notifPopup = document.getElementById("notification-popup");
@@ -119,12 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
     bellBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       e.preventDefault();
-      // Toggle display
       notifPopup.style.display =
         notifPopup.style.display === "block" ? "none" : "block";
     });
 
-    // Close when clicking outside
     document.addEventListener("click", (e) => {
       if (!notifPopup.contains(e.target) && !bellBtn.contains(e.target)) {
         notifPopup.style.display = "none";
@@ -132,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Expand/Collapse notifications
   if (seeMoreLink && notifPopup) {
     seeMoreLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -144,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 4. LOGOUT POPUP (Fixed ReferenceError)
+  // 5. LOGOUT POPUP
   // ============================================================
   const logoutBtn = document.getElementById("logout-btn");
   const logoutPopup = document.getElementById("logout-popup");
@@ -152,19 +227,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmLogout = document.getElementById("confirm-logout");
 
   if (logoutBtn && logoutPopup) {
-    // Open Popup
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      // Close notifications if open
       if (notifPopup) notifPopup.style.display = "none";
 
       logoutPopup.classList.add("active");
-      logoutPopup.style.display = "block"; // Force display
+      logoutPopup.style.display = "block";
     });
 
-    // Close when clicking outside
     document.addEventListener("click", (e) => {
       if (!logoutPopup.contains(e.target) && !logoutBtn.contains(e.target)) {
         logoutPopup.classList.remove("active");
@@ -173,7 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Cancel Button
   if (cancelLogout && logoutPopup) {
     cancelLogout.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -182,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Confirm Button (Redirect to logout PHP)
   if (confirmLogout) {
     confirmLogout.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -191,43 +261,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// CSV Import Popup Functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const bulkImportBtn = document.getElementById('bulk-import-btn');
-    const csvPopup = document.getElementById('csv-import-popup');
-    const closePopupBtn = document.getElementById('close-csv-popup');
-    const overlay = document.getElementById('csv-overlay');
+// ============================================================
+// 6. CSV IMPORT POPUP
+// ============================================================
+document.addEventListener("DOMContentLoaded", function () {
+  const bulkImportBtn = document.getElementById("bulk-import-btn");
+  const csvPopup = document.getElementById("csv-import-popup");
+  const closePopupBtn = document.getElementById("close-csv-popup");
+  const overlay = document.getElementById("csv-overlay");
 
-    if (bulkImportBtn) {
-        bulkImportBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            csvPopup.style.display = 'block';
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-    }
-
-    if (closePopupBtn) {
-        closePopupBtn.addEventListener('click', function() {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && csvPopup.style.display === 'block') {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
+  if (bulkImportBtn) {
+    bulkImportBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      csvPopup.style.display = "block";
+      overlay.classList.add("active");
+      document.body.style.overflow = "hidden";
     });
+  }
+
+  if (closePopupBtn) {
+    closePopupBtn.addEventListener("click", function () {
+      csvPopup.style.display = "none";
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+  }
+
+  if (overlay) {
+    overlay.addEventListener("click", function () {
+      csvPopup.style.display = "none";
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
+    });
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && csvPopup.style.display === "block") {
+      csvPopup.style.display = "none";
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  });
 });

@@ -96,7 +96,7 @@ $past_sql = "SELECT e.event_id, e.name, e.date, i.url
              JOIN attends a ON e.event_id = a.event_id
              LEFT JOIN image i ON e.image_id = i.image_id
              WHERE a.collection_id = ? AND e.date < CURDATE()
-             ORDER BY e.date DESC"; 
+             ORDER BY e.date DESC";
 
 $past_stmt = $conn->prepare($past_sql);
 $past_stmt->bind_param("i", $collection_id);
@@ -109,13 +109,12 @@ $future_sql = "SELECT e.event_id, e.name, e.date, i.url
                JOIN attends a ON e.event_id = a.event_id
                LEFT JOIN image i ON e.image_id = i.image_id
                WHERE a.collection_id = ? AND e.date >= CURDATE()
-               ORDER BY e.date ASC"; 
+               ORDER BY e.date ASC";
 
 $future_stmt = $conn->prepare($future_sql);
 $future_stmt->bind_param("i", $collection_id);
 $future_stmt->execute();
 $future_events = $future_stmt->get_result();
-
 
 // Formatar data (opcional)
 $starting_date_fmt = "";
@@ -126,228 +125,241 @@ if (!empty($col['starting_date'])) {
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | Collection Page</title>
-  <link rel="stylesheet" href="homepage.css" />
-  <link rel="stylesheet" href="collectionpage.css">
-  <link rel="stylesheet" href="userpage.css">
-</head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Trall-E | Collection Page</title>
+        <link rel="stylesheet" href="homepage.css" />
+        <link rel="stylesheet" href="collectionpage.css">
+        <link rel="stylesheet" href="userpage.css">
+    </head>
 
-<body>
-  <header>
-    <a href="homepage.php" class="logo">
-      <img src="images/TrallE_2.png" alt="logo" />
-    </a>
+    <body>
+        <header>
+            <a href="homepage.php" class="logo">
+                <img src="images/TrallE_2.png" alt="logo" />
+            </a>
 
-      <div class="search-bar">
-          <form action="search.php" method="GET">
-              <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
-          </form>
-      </div>
+            <div class="search-bar">
+                <form action="search.php" method="GET">
+                    <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+                </form>
+            </div>
 
-    <div class="icons">
+            <div class="icons">
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
 
-      <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
-      
-      <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+                <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
-      <div class="notification-popup logout-popup" id="logout-popup">
-        <div class="popup-header">
-          <h3>Logout</h3>
-        </div>
-        <p>Are you sure you want to log out?</p>
-        <div class="logout-btn-wrapper">
-          <button type="button" class="logout-btn cancel-btn" id="cancel-logout">Cancel</button>
-          <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
-        </div>
-      </div>
-    </div>
-  </header>
+                <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
-  <div class="main">
-    <div class="content">
-      <h2><?php echo htmlspecialchars($col['name']); ?></h2>
-
-      <div class="collection-details">
-        <div class="collection-logo-wrapper">
-          <?php
-          $image_src = !empty($col['url']) ? $col['url'] : 'images/default.png';
-          ?>
-          <img src="<?php echo htmlspecialchars($image_src); ?>" 
-               alt="Collection Logo" class="collection-logo">
-
-<?php if ((int)$col['user_id'] === $currentUserId): ?>
-    
-    <div class="owner-actions">
-        <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
-            ✎ Edit
-        </a>
-
-        <button id="deleteCollectionBtn" 
-                class="delete-link" 
-                data-col-id="<?php echo $col['collection_id']; ?>"
-                style="margin-top: 5px; background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%;">
-            🗑️ Delete
-        </button>
-        </div>
-
-<?php endif; ?>
-        </div>
-
-
-        <div class="collection-info">
-          <p>
-            <strong>Collector:</strong>
-            <?php echo htmlspecialchars($col['username'] ?? 'Unknown'); ?>
-          </p>
-
-          <?php if (!empty($col['Theme'])): ?>
-            <p><strong>Theme:</strong> <?php echo htmlspecialchars($col['Theme']); ?></p>
-          <?php endif; ?>
-
-          <?php if (!empty($starting_date_fmt)): ?>
-            <p><strong>Start Date:</strong> <?php echo $starting_date_fmt; ?></p>
-          <?php endif; ?>
-
-          <p><strong>Most recent Item:</strong> 
-            <?php if ($most_recent_item): ?>
-                <a href="itempage.php?id=<?php echo $most_recent_item['item_id']; ?>">
-                    <?php echo htmlspecialchars($most_recent_item['name']); ?>
-                </a>
-            <?php else: ?>
-                <span style="color:#777;">No items yet</span>
-            <?php endif; ?>
-          </p>
-
-          <?php if (!empty($col['description'])): ?>
-            <p><strong>Description:</strong>
-              <?php echo nl2br(htmlspecialchars($col['description'])); ?>
-            </p>
-          <?php endif; ?>
-
-            
-          <?php if (!empty($tags)): ?>
-            <p><strong>Tags:</strong>
-              <?php echo htmlspecialchars(implode(', ', $tags)); ?>
-            </p>
-          <?php else: ?>
-            <p><strong>Tags:</strong> <span style="color:#777;">No tags yet</span></p>
-          <?php endif; ?>
-
-        </div>
-      </div>
-
-        <div class="items-section">
-          <h3>Collection Items</h3>
-          <div class="items-grid">
-            <?php if ($item_result->num_rows > 0): ?>
-              <?php while ($item = $item_result->fetch_assoc()): ?>
-                <?php
-                  $item_img = !empty($item['item_url']) ? $item['item_url'] : 'images/default_item.png';
-                ?>
-                <div class="item-card">
-                  <a href="itempage.php?id=<?php echo $item['item_id']; ?>">
-                    <img src="<?php echo htmlspecialchars($item_img); ?>" 
-                         alt="<?php echo htmlspecialchars($item['name']); ?>">
-                    <p class="item-name"><?php echo htmlspecialchars($item['name']); ?></p>
-                    <p class="edit-btn">View Item</p>
-                  </a>
+                <div class="notification-popup logout-popup" id="logout-popup">
+                    <div class="popup-header">
+                        <h3>Logout</h3>
+                    </div>
+                    <p>Are you sure you want to log out?</p>
+                    <div class="logout-btn-wrapper">
+                        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">Cancel</button>
+                        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">Log out</button>
+                    </div>
                 </div>
-              <?php endwhile; ?>
-            <?php else: ?>
-              <p>No items in this collection yet.</p>
-            <?php endif; ?>
-          </div>
+            </div>
+        </header>
+
+        <div class="main">
+            <div class="content">
+                <h2><?php echo htmlspecialchars($col['name']); ?></h2>
+
+                <div class="collection-details">
+                    <div class="collection-logo-wrapper">
+                        <?php
+                        $image_src = !empty($col['url']) ? $col['url'] : 'images/default.png';
+                        ?>
+                        <img src="<?php echo htmlspecialchars($image_src); ?>" 
+                             alt="Collection Logo" class="collection-logo">
+
+                        <?php if ((int) $col['user_id'] === $currentUserId): ?>
+
+                            <div class="owner-actions">
+                                <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
+                                    ✎ Edit
+                                </a>
+
+                                <button id="deleteCollectionBtn" 
+                                        class="delete-link" 
+                                        data-col-id="<?php echo $col['collection_id']; ?>"
+                                        style="margin-top: 5px; background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+
+                        <?php endif; ?>
+                    </div>
+
+
+                    <div class="collection-info">
+                     <p>
+            <strong>Collector:</strong>
+            <?php 
+                // Determine the link destination
+                if ((int)$col['user_id'] === $currentUserId) {
+                    // It's me -> Go to my personal userpage
+                    $profileLink = "userpage.php";
+                } else {
+                    // It's someone else -> Go to the friend viewer page
+                    $profileLink = "friendpage.php?user_id=" . $col['user_id'];
+                }
+            ?>
+            
+            <a href="<?php echo $profileLink; ?>" class="collector-link">
+                <?php echo htmlspecialchars($col['username'] ?? 'Unknown'); ?>
+            </a>
+          </p>
+
+                        <?php if (!empty($col['Theme'])): ?>
+                            <p><strong>Theme:</strong> <?php echo htmlspecialchars($col['Theme']); ?></p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($starting_date_fmt)): ?>
+                            <p><strong>Start Date:</strong> <?php echo $starting_date_fmt; ?></p>
+                        <?php endif; ?>
+
+                        <p><strong>Most recent Item:</strong> 
+                            <?php if ($most_recent_item): ?>
+                                <a href="itempage.php?id=<?php echo $most_recent_item['item_id']; ?>" class="recent-item-link">
+                                    <?php echo htmlspecialchars($most_recent_item['name']); ?>
+                                </a>
+                            <?php else: ?>
+                                <span style="color:#777;">No items yet</span>
+                            <?php endif; ?>
+                        </p>
+
+                        <?php if (!empty($col['description'])): ?>
+                            <p><strong>Description:</strong>
+                                <?php echo nl2br(htmlspecialchars($col['description'])); ?>
+                            </p>
+                        <?php endif; ?>
+
+
+                        <?php if (!empty($tags)): ?>
+                            <p><strong>Tags:</strong>
+                                <?php echo htmlspecialchars(implode(', ', $tags)); ?>
+                            </p>
+                        <?php else: ?>
+                            <p><strong>Tags:</strong> <span style="color:#777;">No tags yet</span></p>
+                        <?php endif; ?>
+
+                    </div>
+                </div>
+
+                <div class="items-section">
+                    <h3>Collection Items</h3>
+                    <div class="items-grid">
+                        <?php if ($item_result->num_rows > 0): ?>
+                            <?php while ($item = $item_result->fetch_assoc()): ?>
+                                <?php
+                                $item_img = !empty($item['item_url']) ? $item['item_url'] : 'images/default_item.png';
+                                ?>
+                                <div class="item-card">
+                                    <a href="itempage.php?id=<?php echo $item['item_id']; ?>">
+                                        <img src="<?php echo htmlspecialchars($item_img); ?>" 
+                                             alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                        <p class="item-name"><?php echo htmlspecialchars($item['name']); ?></p>
+                                        <p class="edit-btn">View Item</p>
+                                    </a>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p>No items in this collection yet.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+
+                <div class="events-section">
+                    <h3>Previous Events</h3>
+                    <div class="event-cards">
+                        <?php if ($past_events->num_rows > 0): ?>
+                            <?php while ($p_event = $past_events->fetch_assoc()): ?>
+                                <?php
+                                $p_img = !empty($p_event['url']) ? $p_event['url'] : 'images/default_event.png';
+                                ?>
+                                <div class="event-card">
+                                    <a href="eventpage.php?id=<?php echo $p_event['event_id']; ?>">
+                                        <img src="<?php echo htmlspecialchars($p_img); ?>" alt="<?php echo htmlspecialchars($p_event['name']); ?>">
+                                        <p><?php echo htmlspecialchars($p_event['name']); ?></p>
+                                    </a>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p style="color: #777;">No previous events.</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <h3>Next Events</h3>
+                    <div class="next-event">
+                        <?php if ($future_events->num_rows > 0): ?>
+                            <?php while ($f_event = $future_events->fetch_assoc()): ?>
+                                <?php
+                                $f_img = !empty($f_event['url']) ? $f_event['url'] : 'images/default_event.png';
+                                ?>
+                                <a href="eventpage.php?id=<?php echo $f_event['event_id']; ?>">
+                                    <img src="<?php echo htmlspecialchars($f_img); ?>" alt="<?php echo htmlspecialchars($f_event['name']); ?>">
+                                    <p><strong><?php echo htmlspecialchars($f_event['name']); ?></strong></p>
+                                </a>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p style="color: #777;">No upcoming events.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="sidebar-section collections-section">
+                    <h3>My collections</h3>
+                    <p><a href="collectioncreation.php">Create collection</a></p>
+                    <p><a href="itemcreation.php">Create item</a></p>
+                    <p><a href="mycollectionspage.php">View collections</a></p>
+                    <p><a href="myitems.php">View items</a></p>
+                </div>
+
+                <div class="sidebar-section friends-section">
+                    <h3>My friends</h3>
+                    <p><a href="userfriendspage.php">View Friends</a></p>
+                    <p><a href="allfriendscollectionspage.php">View collections</a></p>
+                    <p><a href="teampage.php">Team Page</a></p>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Events</h3>
+                    <p><a href="createevent.php">Create event</a></p>
+                    <p><a href="upcomingevents.php">View upcoming events</a></p>
+                    <p><a href="eventhistory.php">Event history</a></p>
+                </div>
+            </aside>
         </div>
 
+        <div id="hover-popup"></div>
 
-      <div class="events-section">
-        <h3>Previous Events</h3>
-        <div class="event-cards">
-          <?php if ($past_events->num_rows > 0): ?>
-            <?php while($p_event = $past_events->fetch_assoc()): ?>
-              <?php 
-                 $p_img = !empty($p_event['url']) ? $p_event['url'] : 'images/default_event.png';
-              ?>
-              <div class="event-card">
-                <a href="eventpage.php?id=<?php echo $p_event['event_id']; ?>">
-                  <img src="<?php echo htmlspecialchars($p_img); ?>" alt="<?php echo htmlspecialchars($p_event['name']); ?>">
-                  <p><?php echo htmlspecialchars($p_event['name']); ?></p>
-                </a>
-              </div>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <p style="color: #777;">No previous events.</p>
-          <?php endif; ?>
+
+        <div class="delete-popup" id="delete-collection-popup" style="display: none;">
+            <div class="delete-popup-content">
+                <div class="popup-header">
+                    <h3>Delete Collection</h3>
+                </div>
+
+                <p id="delete-message">Are you sure you want to delete this collection?</p>
+
+                <div class="logout-btn-wrapper">
+                    <button type="button" class="logout-btn cancel-btn" id="cancel-col-delete">Cancel</button>
+                    <button type="button" class="logout-btn confirm-btn" id="confirm-col-delete">Yes, Delete</button>
+                </div>
+            </div>
         </div>
 
-        <h3>Next Events</h3>
-        <div class="next-event">
-          <?php if ($future_events->num_rows > 0): ?>
-            <?php while($f_event = $future_events->fetch_assoc()): ?>
-              <?php 
-                 $f_img = !empty($f_event['url']) ? $f_event['url'] : 'images/default_event.png';
-              ?>
-              <a href="eventpage.php?id=<?php echo $f_event['event_id']; ?>">
-                <img src="<?php echo htmlspecialchars($f_img); ?>" alt="<?php echo htmlspecialchars($f_event['name']); ?>">
-                <p><strong><?php echo htmlspecialchars($f_event['name']); ?></strong></p>
-              </a>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <p style="color: #777;">No upcoming events.</p>
-          <?php endif; ?>
-        </div>
-      </div>
-    </div>
+        <script src="collectionpage.js"></script>
+        <script src="logout.js"></script>
 
-    <aside class="sidebar">
-      <div class="sidebar-section collections-section">
-        <h3>My collections</h3>
-        <p><a href="collectioncreation.php">Create collection</a></p>
-        <p><a href="itemcreation.php">Create item</a></p>
-        <p><a href="mycollectionspage.php">View collections</a></p>
-        <p><a href="myitems.php">View items</a></p>
-      </div>
-
-      <div class="sidebar-section friends-section">
-        <h3>My friends</h3>
-        <p><a href="userfriendspage.php">View Friends</a></p>
-        <p><a href="allfriendscollectionspage.php">View collections</a></p>
-        <p><a href="teampage.php">Team Page</a></p>
-      </div>
-
-      <div class="sidebar-section">
-        <h3>Events</h3>
-        <p><a href="createevent.php">Create event</a></p>
-        <p><a href="upcomingevents.php">View upcoming events</a></p>
-        <p><a href="eventhistory.php">Event history</a></p>
-      </div>
-    </aside>
-  </div>
-
-  <div id="hover-popup"></div>
-
-  
-  <div class="delete-popup" id="delete-collection-popup" style="display: none;">
-    <div class="delete-popup-content">
-        <div class="popup-header">
-          <h3>Delete Collection</h3>
-        </div>
-        
-        <p id="delete-message">Are you sure you want to delete this collection?</p>
-        
-        <div class="logout-btn-wrapper">
-          <button type="button" class="logout-btn cancel-btn" id="cancel-col-delete">Cancel</button>
-          <button type="button" class="logout-btn confirm-btn" id="confirm-col-delete">Yes, Delete</button>
-        </div>
-    </div>
-  </div>
-  
-  <script src="collectionpage.js"></script>
-  <script src="logout.js"></script>
-
-</body>
+    </body>
 </html>

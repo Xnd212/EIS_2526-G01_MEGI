@@ -345,3 +345,17 @@
   z-index: 9999 !important;
 }
 
+/* Styling for the Collector Name Link */
+.item-info p .collector-link {
+    text-decoration: none;
+    color: inherit; /* Keeps the text dark gray */
+    font-weight: 500;
+    transition: color 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.item-info p .collector-link:hover {
+    color: #e74c3c; /* Changes to your theme red on hover */
+    border-bottom: 1px solid #e74c3c;
+    cursor: pointer;
+}

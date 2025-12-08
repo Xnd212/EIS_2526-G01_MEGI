@@ -1,4 +1,3 @@
-// Aguarda até que todo o conteúdo da página esteja carregado
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("hover-popup"); 
 

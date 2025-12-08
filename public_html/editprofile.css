@@ -421,3 +421,9 @@ body[data-theme="dark"] .redirect-msg {
     color: #ddd;
 }
 
+/* Reset search bar styles to match homepage */
+header .search-bar input[type="text"] {
+    border-radius: 20px;
+    border: none;
+    padding: 0.5rem 1rem;
+}

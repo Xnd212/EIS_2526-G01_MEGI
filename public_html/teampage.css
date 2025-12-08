@@ -1,4 +1,4 @@
-@import url('homepage.css'); /* Reuse global styles */
+@import url('homepage.css');
 
 .content {
   margin-right: 240px;
@@ -13,7 +13,7 @@
   right: 60px;
   background: #fff;
   border-radius: 10px;
-  border: 1px solid #b54242; /* cor escura da header */
+  border: 1px solid #b54242;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   width: 315px;
   padding: 0;
@@ -186,49 +186,6 @@
   .team-grid {
     justify-content: center;
   }
-}
-
-
-
-/* =======================
-   Sidebar (Fixed on the Right)
-======================= */
-.sidebar {
-  position: fixed;          
-  top: 100px;                
-  right: 0;                 
-  width: 240px;
-  background: #f8cbc1;
-  padding: 1rem;
-  height: calc(100vh - 80px); 
-  overflow-y: auto;
-  z-index: 10;
-  border-left: 2px solid #e1a79e;
-  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
-}
-
-/* Sidebar Sections */
-.sidebar-section {
-  padding: 1rem;
-  height: 33.3%;
-}
-
-.sidebar-section h3 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-.sidebar-section p {
-  color: #333;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin: 0.3rem 0;
-  transition: color 0.2s ease;
-}
-
-.sidebar-section p:hover {
-  color: #b54242;
 }
 
 /* Section Colors */

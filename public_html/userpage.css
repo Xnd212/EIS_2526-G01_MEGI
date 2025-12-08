@@ -1,9 +1,4 @@
-
-@import url('homepage.css'); /* Reuse global styles */
-
-body {
-  overflow-y: scroll;
-}
+@import url('homepage.css');
 
 .content {
   margin-right: 240px;
@@ -18,7 +13,7 @@ body {
   right: 60px;
   background: #fff;
   border-radius: 10px;
-  border: 1px solid #b54242; /* cor escura da header */
+  border: 1px solid #b54242;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   width: 315px;
   padding: 0;
@@ -72,7 +67,7 @@ body {
 }
 
 .notification-list li:first-child {
-  border-top: none; /* Remove a linha de cima apenas da 1ª notificação */
+  border-top: none;
 }
 
 
@@ -82,7 +77,7 @@ body {
 .profile-container {
   padding: 1rem;
   max-width: 1200px;
-  margin: 110px 240px 1rem 1rem; /* top, right (sidebar), bottom, left */
+  margin: 110px 240px 1rem 1rem;
   background: #eef0ff;
 }
 
@@ -205,7 +200,7 @@ body {
 .collections {
   flex: 2;
   margin-bottom: 2rem;
-   min-width: 0; /* Prevents flex item from overflowing */
+   min-width: 0;
 }
 
 
@@ -262,7 +257,7 @@ body {
 
 .friends-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* duas colunas */
+  grid-template-columns: repeat(2, 1fr); 
   gap: 1.5rem;
   justify-items: center;
 }
@@ -341,48 +336,6 @@ body {
   color: #666;
 }
 
-
-/* =======================
-   Sidebar (Fixed on the Right)
-======================= */
-.sidebar {
-  position: fixed;          
-  top: 100px;                
-  right: 0;                 
-  width: 240px;
-  background: #f8cbc1;
-  padding: 1rem;
-  height: calc(100vh - 80px); 
-  overflow-y: auto;
-  z-index: 10;
-  border-left: 2px solid #e1a79e;
-  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1); 
-}
-
-/* Sidebar Sections */
-.sidebar-section {
-  padding: 1rem;
-  height: 33.3%;
-}
-
-.sidebar-section h3 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-}
-
-.sidebar-section p {
-  color: #333;
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin: 0.3rem 0;
-  transition: color 0.2s ease;
-}
-
-.sidebar-section p:hover {
-  color: #b54242;
-}
-
 /* Section Colors */
 .collections-section {
   background-color: #f9d7d1;
@@ -409,7 +362,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 0;
-  background: none; /* removes pink background */
-  box-shadow: none; /* removes shadow */
-  border-radius: 0; /* removes rounded corners */
+  background: none; 
+  box-shadow: none; 
+  border-radius: 0; 
 }

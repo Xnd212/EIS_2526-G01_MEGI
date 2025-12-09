@@ -43,8 +43,8 @@
 =========================== */
 .event-card {
   display: flex;
-  flex-direction: row;         /* Garante orientação horizontal */
-  align-items: center;         /* Alinha verticalmente imagem + texto */
+  flex-direction: row;         
+  align-items: center;         
   gap: 1.5rem;
   background-color: #f9f9ff;
   border: 1px solid #ccc;

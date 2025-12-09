@@ -167,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$conn->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -299,6 +299,7 @@ $conn->close();
                                     name="description"
                                     rows="4"
                                     required
+                                    style="resize: none;"
                                     ><?php echo htmlspecialchars($eventData['description']); ?></textarea>
                             </div>
 
@@ -312,22 +313,17 @@ $conn->close();
                                     />
                             </div>
 
-                            <div class="form-group">
-                                <label for="coverImage">Cover Image (Optional)</label>
-                                <?php if (!empty($eventData['image_url'])): ?>
-                                    <div style="margin-bottom:10px;">
-                                        <small>Current Image:</small><br>
-                                        <img src="<?php echo htmlspecialchars($eventData['image_url']); ?>" alt="Current Event Image" style="max-height: 100px; border-radius: 5px;">
-                                    </div>
-                                <?php endif; ?>
-                                <input
-                                    type="file"
-                                    id="coverImage"
-                                    name="coverImage"
-                                    accept="image/*"
-                                    />
-                                <small style="color:#666;">Leave empty to keep the current image.</small>
-                            </div>
+<div class="form-group">
+    <label for="coverImage">Cover Image (Optional)</label>
+    <input
+        type="file"
+        id="coverImage"
+        name="coverImage"
+        accept="image/*"
+    />
+    <small style="color:#666;">Leave empty to keep the current image.</small>
+</div>
+
 
                             <div class="form-actions" style="display: flex; gap: 15px; align-items: center; justify-content: space-between;">
 
@@ -384,3 +380,6 @@ $conn->close();
 
     </body>
 </html>
+
+<?php
+ $conn->close();

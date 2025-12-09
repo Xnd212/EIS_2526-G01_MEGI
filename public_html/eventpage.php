@@ -81,7 +81,7 @@ if ($result->num_rows === 0) {
     exit();
 }
 
-$event = $result->fetch_assoc();
+$eventData = $result->fetch_assoc();   // <<< renomeei aqui
 $stmt->close();
 
 // ==========================================
@@ -154,19 +154,19 @@ if ($user_id !== null) {
 // ==========================================
 // 5. HELPER LOGIC
 // ==========================================
-$eventDateObj = new DateTime($event['date']);
+$eventDateObj = new DateTime($eventData['date']);
 $today        = new DateTime('today');
 
 $isPast     = $eventDateObj < $today;
 $event_date = $eventDateObj->format("d/m/Y");
 
 // Check if current user is the creator
-$isCreator  = ($user_id !== null && $event['user_id'] == $user_id);
+$isCreator  = ($user_id !== null && $eventData['user_id'] == $user_id);
 
 // Video Logic
 $video_id = null;
-if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
-    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $event['teaser_url'], $matches)) {
+if (isset($eventData['teaser_url']) && !empty($eventData['teaser_url'])) {
+    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $eventData['teaser_url'], $matches)) {
         $video_id = $matches[1];
     }
 }
@@ -177,7 +177,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | <?php echo htmlspecialchars($event['name']); ?></title>
+  <title>Trall-E | <?php echo htmlspecialchars($eventData['name']); ?></title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="eventpage.css" />
   <link rel="stylesheet" href="calendar_popup.css" />
@@ -210,8 +210,8 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </form>
     </div>
     <div class="icons">
-                <?php include __DIR__ . '/calendar_popup.php'; ?>
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
+        <?php include __DIR__ . '/notifications_popup.php'; ?>
         <a href="userpage.php" class="icon-btn">👤</a>
         <button class="icon-btn" id="logout-btn">🚪</button>
         
@@ -238,11 +238,11 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
   <div class="main">
     <div class="content">
       <div class="event-details-box">
-        <h2><?php echo htmlspecialchars($event['name']); ?></h2>
+        <h2><?php echo htmlspecialchars($eventData['name']); ?></h2>
 
         <div class="event-teaser-wrapper">
           <div class="event-image-wrapper">
-            <?php $imgSrc = !empty($event['image_url']) ? $event['image_url'] : 'images/default_event.png'; ?>
+            <?php $imgSrc = !empty($eventData['image_url']) ? $eventData['image_url'] : 'images/default_event.png'; ?>
             <img src="<?php echo htmlspecialchars($imgSrc); ?>" alt="Event Image" />
           </div>
 
@@ -253,29 +253,29 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
                     <?php 
                         // Determine the link destination
                         // If logged in AND current user is the creator -> My Profile
-                        if ($user_id !== null && $event['user_id'] == $user_id) {
+                        if ($user_id !== null && $eventData['user_id'] == $user_id) {
                             $creatorLink = "userpage.php";
                         } else {
                             // Guest or someone else -> Friend Profile
-                            $creatorLink = "friendpage.php?user_id=" . $event['user_id'];
+                            $creatorLink = "friendpage.php?user_id=" . $eventData['user_id'];
                         }
                     ?>
                     <a href="<?php echo $creatorLink; ?>" class="creator-link">
-                        <?php echo htmlspecialchars($event['creator_name']); ?>
+                        <?php echo htmlspecialchars($eventData['creator_name']); ?>
                     </a>
                 </p>
                 
                 <p><strong>Date:</strong> <?php echo $event_date; ?></p>
-                <?php if(isset($event['place'])): ?>
-                  <p><strong>Place:</strong> <?php echo htmlspecialchars($event['place']); ?></p>
+                <?php if(isset($eventData['place'])): ?>
+                  <p><strong>Place:</strong> <?php echo htmlspecialchars($eventData['place']); ?></p>
                 <?php endif; ?>
-                <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+                <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($eventData['description'])); ?></p>
               </div>
           </div>
 
           <?php if ($video_id): ?>
           <div class="video-thumbnail">
-            <a href="<?php echo htmlspecialchars($event['teaser_url']); ?>" target="_blank">
+            <a href="<?php echo htmlspecialchars($eventData['teaser_url']); ?>" target="_blank">
               <img src="https://img.youtube.com/vi/<?php echo $video_id; ?>/hqdefault.jpg" alt="Video Teaser">
               <div class="play-button">▶</div>
             </a>
@@ -320,10 +320,10 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </div>
         <?php endif; ?>
 
-        <?php if(isset($event['place']) && !empty($event['place'])): ?>
+        <?php if(isset($eventData['place']) && !empty($eventData['place'])): ?>
             <h3 class="map-title">Where to find us:</h3>
             <div class="map-container">
-              <iframe src="https://maps.google.com/maps?q=<?php echo urlencode($event['place']); ?>&t=&z=13&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
+              <iframe src="https://maps.google.com/maps?q=<?php echo urlencode($eventData['place']); ?>&t=&z=13&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
             </div>
         <?php endif; ?>
 

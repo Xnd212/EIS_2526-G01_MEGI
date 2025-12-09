@@ -335,6 +335,7 @@ if ($user_id !== null) {
                 }
             });
         </script>
+        <script src="homepage.js"></script>
         <script src="logout.js"></script>
     </body>
 </html>

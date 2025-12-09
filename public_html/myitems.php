@@ -48,7 +48,6 @@ switch ($sort) {
 $items = [];
 
 if ($user_id !== null) {
-    // Base SQL
     $sql = "SELECT 
                 i.item_id,
                 i.name AS item_name,
@@ -62,8 +61,8 @@ if ($user_id !== null) {
             LEFT JOIN image img ON i.image_id = img.image_id
             WHERE c.user_id = ?";
 
-    $types = "i";       
-    $params = [$user_id]; 
+    $types = "i";
+    $params = [$user_id];
 
     // Add Price Filters
     if ($min_price !== null) {
@@ -73,7 +72,7 @@ if ($user_id !== null) {
     }
     if ($max_price !== null) {
         $sql .= " AND i.price <= ?";
-        $types .= "d"; 
+        $types .= "d";
         $params[] = $max_price;
     }
 
@@ -158,7 +157,7 @@ if ($user_id !== null) {
 
             /* Reset Button (Circle Arrow) */
             .reset-btn {
-                background: #6c757d; /* Grey */
+                background: #6c757d;
                 color: white;
                 border: none;
                 border-radius: 50%;
@@ -211,7 +210,7 @@ if ($user_id !== null) {
                             <h2>My Items</h2>
 
                             <div class="controls-wrapper">
-                                
+                                <!-- PRICE FILTERS -->
                                 <form method="GET" class="price-form">
                                     <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort); ?>">
                                     
@@ -229,6 +228,7 @@ if ($user_id !== null) {
                                     <?php endif; ?>
                                 </form>
 
+                                <!-- SORT DROPDOWN -->
                                 <div style="position:relative;">
                                     <button class="filter-toggle" id="filterToggle" aria-haspopup="true" aria-expanded="false">
                                         &#128269; Sort ▾
@@ -253,18 +253,34 @@ if ($user_id !== null) {
 
                         <div class="item-grid" id="itemGrid">
                             <?php if ($user_id === null): ?>
-                                <p style="margin-top:20px; font-size:18px;">
-                                    You are browsing as a guest. <a href="login.php" style="color:#7a1b24; font-weight:600;">Log in</a> to view items.
+                                <!-- GUEST: igual ao estilo das outras páginas -->
+                                <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
+                                    You are browsing as a guest.
+                                    <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                        Log in
+                                    </a>
+                                    to view items.
                                 </p>
+
                             <?php elseif (empty($items)): ?>
-                                <div style="margin-top:20px; font-size:18px;">
-                                    <?php if($min_price !== null || $max_price !== null): ?>
-                                        <p>No items found in this price range.</p>
-                                        <a href="<?php echo $resetUrl; ?>" style="color:#7a1b24; font-weight:600;">Clear Filters</a>
-                                    <?php else: ?>
-                                        <p>You don’t have any items yet. <a href="itemcreation.php" style="color:#7a1b24; font-weight:600;">Create your first item</a>.</p>
-                                    <?php endif; ?>
-                                </div>
+                                <?php if($min_price !== null || $max_price !== null): ?>
+                                    <!-- LOGADO, COM FILTROS MAS SEM RESULTADOS -->
+                                    <p style="text-align:left; margin-top:20px; margin-left:0; font-size:18px;">
+                                        No items found in this price range.
+                                        <a href="<?php echo $resetUrl; ?>" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                            Clear filters
+                                        </a>.
+                                    </p>
+                                <?php else: ?>
+                                    <!-- LOGADO, SEM ITEMS (igual collections/friends) -->
+                                    <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
+                                        You don’t have any items yet.
+                                        <a href="itemcreation.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                                            Create your first item
+                                        </a>.
+                                    </p>
+                                <?php endif; ?>
+
                             <?php else: ?>
                                 <?php foreach ($items as $row): ?>
                                     <?php
@@ -281,7 +297,7 @@ if ($user_id !== null) {
                                                 €<?php echo $price; ?>
                                             </p>
                                             <?php if (!empty($row['collection_name'])): ?>
-                                                <span class="item-collection" style="font-size:0.8em; color:#666;">
+                                                <span class="item-collection">
                                                     Collection: <?php echo htmlspecialchars($row['collection_name']); ?>
                                                 </span>
                                             <?php endif; ?>

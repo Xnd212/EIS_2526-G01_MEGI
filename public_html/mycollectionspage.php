@@ -179,19 +179,20 @@ if ($currentUserId !== null) {
 
                     <div class="collection-grid" id="collectionGrid">
                         <?php if ($currentUserId === null): ?>
-                            <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
-                                You are browsing as a guest. 
-                                <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
-                                    Log in
-                                </a>
-                                to create and view your own collections.
+                            <p style="margin-top:20px; font-size:18px;">
+                                You are browsing as a guest.
+                                <a href="login.php" style="color:#7a1b24; font-weight:600;">Log in</a>
+                                to view collections.
                             </p>
 
                         <?php elseif (empty($collections)): ?>
-                            <div class="empty-message">
-                                <h3>No collections yet</h3>
-                                <p>You haven’t created any collections so far.</p>
-                                <a href="collectioncreation.php" class="btn-primary">Create your first collection</a>
+                            <div style="margin-top:20px; font-size:18px;">
+                                <p>
+                                    You don’t have any collections yet.
+                                    <a href="collectioncreation.php" style="color:#7a1b24; font-weight:600;">
+                                        Create your first collection
+                                    </a>.
+                                </p>
                             </div>
 
                         <?php else: ?>

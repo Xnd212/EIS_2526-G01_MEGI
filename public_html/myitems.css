@@ -169,6 +169,7 @@ body {
   margin: 0.25rem 0;
 }
 
+/* Sidebar colors */
 .collections-section {
   background-color: #f9d7d1;
 }
@@ -185,21 +186,27 @@ body {
    ESTILOS ESPECÍFICOS PARA MY ITEMS
 ======================= */
 
-/* Grid de items */
+/* Grid de items – alinhado com collection-grid */
 .item-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
 }
 
-/* Card de item */
+/* Card de item – parecido ao collection-card */
 .item-card {
+  width: 100%;
+  height: 260px;
   background-color: #f3cccc;
   padding: 1rem;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   text-align: center;
-  width: 220px;        /* ajusta aqui a largura */
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.4rem;
 }
 
 /* Link ocupa o card todo */
@@ -207,26 +214,30 @@ body {
   text-decoration: none;
   color: inherit;
   display: block;
+  height: 100%;
 }
 
 /* Imagem do item */
 .item-card img {
-  height: 135px;       /* ajusta aqui o tamanho da imagem */
-  width: auto;
+  height: 150px;
+  width: 100%;
   object-fit: contain;
-  margin-bottom: 0.6rem;
 }
 
 /* Título do item */
 .item-title {
   font-weight: bold;
-  font-size: 1rem;     /* ajusta aqui o tamanho do texto */
-  margin-bottom: 0.2rem;
+  margin: 0.25rem 0;
 }
 
-/* Texto "From collection" */
+/* Preço */
+.item-price {
+  margin: 0;
+}
+
+/* Texto "Collection:" */
 .item-collection {
-  font-size: 0.85rem;  /* texto mais pequeno */
+  font-size: 0.85rem;
   color: #666;
   display: block;
   margin-top: 0.25rem;

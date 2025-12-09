@@ -12,31 +12,8 @@ if ($isGuest || !isset($_SESSION['user_id'])) {
     $currentUserId = (int) $_SESSION['user_id'];
 }
 
-/* Which profile are we viewing? */
-$profileUserId = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
-
-if (!$profileUserId) {
-    // If no ?user_id given, show user's own friends (if logged)
-    $profileUserId = $currentUserId;
-}
-
 /* DB CONNECTION */
 require_once __DIR__ . "/db.php";
-
-/* FETCH PROFILE USERNAME */
-$profileUsername = "User";
-
-if ($profileUserId !== null) {
-    $sqlUserName = "SELECT username FROM user WHERE user_id = ?";
-    $stmtName = $conn->prepare($sqlUserName);
-    $stmtName->bind_param("i", $profileUserId);
-    $stmtName->execute();
-    $resName = $stmtName->get_result();
-    if ($rowName = $resName->fetch_assoc()) {
-        $profileUsername = $rowName['username'];
-    }
-    $stmtName->close();
-}
 
 /* ==========================================
    SORTING LOGIC
@@ -76,7 +53,7 @@ if ($currentUserId !== null) {
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $profileUserId);
+    $stmt->bind_param("i", $currentUserId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -86,47 +63,15 @@ if ($currentUserId !== null) {
 
     $stmt->close();
 }
-
-// Helper to preserve user_id in sort links
-$baseUrl = "?";
-if (isset($_GET['user_id'])) {
-    $baseUrl .= "user_id=" . htmlspecialchars($_GET['user_id']) . "&";
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | User Friends Page</title>
+  <title>Trall-E | My Friends</title>
   <link rel="stylesheet" href="userfriendspage.css">
   <link rel="stylesheet" href="calendar_popup.css" />
-  
-  <style>
-      .friends-header {
-          display: flex; align-items: center; justify-content: space-between;
-          position: relative; margin-bottom: 20px;
-      }
-      .filter-toggle {
-          display: inline-flex; align-items: center; gap: 0.25rem;
-          padding: 0.35rem 0.8rem; border-radius: 999px;
-          border: 1px solid #b54242; background-color: #fbecec;
-          font-size: 0.9rem; cursor: pointer; color: #b54242;
-      }
-      .filter-menu {
-          position: absolute; top: 100%; right: 0; margin-top: 5px;
-          background: white; border-radius: 10px; border: 1px solid #ddd;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 200px;
-          display: none; z-index: 1000;
-      }
-      .filter-menu.show { display: block; }
-      .filter-menu a {
-          display: block; padding: 10px 15px; text-decoration: none;
-          color: #333; font-size: 0.9rem;
-      }
-      .filter-menu a:hover { background: #fbecec; color: #b54242; }
-      .filter-menu hr { margin: 0; border: 0; border-top: 1px solid #eee; }
-  </style>
 </head>
 
 <body>    
@@ -166,52 +111,42 @@ if (isset($_GET['user_id'])) {
 
         <section class="friends">
             <div class="friends-header">
-                <h2>
-                    <?php
-                        if ($profileUserId === $currentUserId) {
-                            echo "My Friends";
-                        } else {
-                            echo htmlspecialchars($profileUsername) . "'s Friends";
-                        }
-                    ?>
-                </h2>
+                <h2>My Friends</h2>
 
                 <button class="filter-toggle" id="filterToggle">
                     &#128269; Sort ▾
                 </button>
 
                 <div class="filter-menu" id="filterMenu">
-                    <a href="<?php echo $baseUrl; ?>sort=alpha-asc">Name: A–Z</a>
-                    <a href="<?php echo $baseUrl; ?>sort=alpha-desc">Name: Z–A</a>
+                    <a href="?sort=alpha-asc">Name: A–Z</a>
+                    <a href="?sort=alpha-desc">Name: Z–A</a>
                     <hr>
-                    <a href="<?php echo $baseUrl; ?>sort=date-desc">Newest Friends</a>
-                    <a href="<?php echo $baseUrl; ?>sort=date-asc">Oldest Friends</a>
+                    <a href="?sort=date-desc">Newest Friends</a>
+                    <a href="?sort=date-asc">Oldest Friends</a>
                 </div>
             </div>
 
             <div class="friends-grid">
-
                 <?php if ($currentUserId === null): ?>
 
-                    <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
+                    <!-- ESTADO: GUEST (mesmo estilo da collections) -->
+                    <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
                         You are browsing as a guest.
                         <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
                             Log in
                         </a>
-                        to view and manage your friends list.
+                        to view friends.
                     </p>
 
                 <?php elseif (empty($friends)): ?>
 
-                    <?php if ($profileUserId === $currentUserId): ?>
-                        <p style="margin-top:20px; font-size:18px;">
-                            You don't have any friends yet.
-                        </p>
-                    <?php else: ?>
-                        <p style="margin-top:20px; font-size:18px;">
-                            <?php echo htmlspecialchars($profileUsername); ?> does not have any friends to display.
-                        </p>
-                    <?php endif; ?>
+                    <!-- ESTADO: LOGADO MAS SEM AMIGOS (igual à collections) -->
+                    <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
+                        You don’t have any friends yet.
+                        <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
+                            Find new friends
+                        </a>.
+                    </p>
 
                 <?php else: ?>
 
@@ -221,7 +156,6 @@ if (isset($_GET['user_id'])) {
                                 ? $friend['friend_image']
                                 : 'images/default_avatar.png';
                             
-                            // Optional: Format date to show "Friend since: ..."
                             $since = !empty($friend['start_date']) 
                                 ? date("M Y", strtotime($friend['start_date'])) 
                                 : '';
@@ -247,8 +181,8 @@ if (isset($_GET['user_id'])) {
                     <?php endforeach; ?>
 
                 <?php endif; ?>
-
             </div>
+
         </section>
 
     </div>

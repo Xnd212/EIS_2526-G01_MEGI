@@ -1,36 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("hover-popup"); 
 
-// Define os dados associados a cada item
-  const itemData = {
-    "charizard": {
-      item: "Champion's Path Charizard V (PSA 10)",
-      price: '950€',
-      importance: "High",
-      item_type: "Card",
-      date: '29/10/2025',
-      place: 'Comic Con 2025',
-      image: 'images/CharizardV.png'
-    },
-    "machamp": {
-      item: "1st Edition Machamp",
-      price: '2000€',
-      importance: "High",
-      item_type: "Card",
-      date: '03/10/2025',
-      place: 'Comic Con 2025',
-      image: 'images/1st Edition Machamp.png'
-    },
-    "charizard_1st": {
-      item: "1st Edition Charizard",
-      price: '651,17€',
-      importance: "High",
-      item_type: "Card",
-      date: '03/10/2025',
-      place: 'Comic Con 2025',
-      image: 'images/3.png'
-    }
-  };
   
 // Para cada card dos Items mostra o conteúdo do popup ao mover o rato sobre o card
   document.querySelectorAll(".item-card").forEach(block => {

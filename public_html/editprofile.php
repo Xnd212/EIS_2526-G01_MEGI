@@ -538,7 +538,7 @@ $bodyThemeAttr = $currentTheme;
 </script>
 <?php endif; ?>
 
-
+<script src="homepage.js"></script>
 <script src="editprofile.js"></script>
 <script src="logout.js"></script>
 </body>

@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Mensagem final
     if ($message === "") {
-        $message = "✓ Alterações guardadas com sucesso! <span class='redirect-msg'>A redirecionar...</span>";
+        $message = "✓ Changes saved with success! <span class='redirect-msg'>Redirecting...</span>";
         $redirectAfterSuccess = true;
     }
 

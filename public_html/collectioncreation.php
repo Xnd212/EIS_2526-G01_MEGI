@@ -25,8 +25,9 @@ require_once __DIR__ . "/db.php";
 // ==========================================
 $user_id = (int) $_SESSION['user_id'];
 
-$message = "";
-$messageType = "";
+$message            = "";
+$messageType        = "";   // "success" | "error"
+$createdCollectionId = null;
 
 // ==========================================
 // 4. CSV IMPORT HANDLER
@@ -119,91 +120,153 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['import_csv'])) {
 // ==========================================
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
 
-    // A. Inputs
-    $name          = $conn->real_escape_string($_POST['collectionName']);
-    $theme         = $conn->real_escape_string($_POST['collectionTheme']);
-    $description   = $conn->real_escape_string($_POST['collectionDescription']);
-    $starting_date = $_POST['creationDate']; // YYYY-MM-DD
+    // A. Inputs (raw)
+    $name        = isset($_POST['collectionName']) ? trim($_POST['collectionName']) : '';
+    $theme       = isset($_POST['collectionTheme']) ? trim($_POST['collectionTheme']) : '';
+    $description = isset($_POST['collectionDescription']) ? trim($_POST['collectionDescription']) : '';
+    $starting_date = isset($_POST['creationDate']) ? $_POST['creationDate'] : '';
 
     // Tags seleccionadas (IDs da tabela tags)
     $selectedTags = isset($_POST['tags'])
         ? array_map('intval', (array)$_POST['tags'])
         : [];
 
-    // B. Image Upload
-    $image_id = "NULL";
+    // Items seleccionados
+    $selectedItems = isset($_POST['selectedItems'])
+        ? array_map('intval', (array)$_POST['selectedItems'])
+        : [];
 
-    if (isset($_FILES['collectionImage']) && $_FILES['collectionImage']['error'] == 0) {
-        $target_dir = "images/";
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
+    $errors = [];
+
+    // ====== VALIDAÇÕES BÁSICAS (server-side) ======
+    if ($name === '' || $theme === '' || $starting_date === '') {
+        $errors[] = "⚠ Please fill in all required (*) fields.";
+    }
+
+    // validar formato de data (simples: YYYY-MM-DD)
+    if ($starting_date !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $starting_date)) {
+        $errors[] = "⚠ Invalid date format.";
+    }
+
+    // Data no futuro
+    $today = date("Y-m-d");
+    if ($starting_date !== '' && $starting_date > $today) {
+        $errors[] = "⚠ The starting date cannot be in the future.";
+    }
+
+    // Nome duplicado para o mesmo user
+    if ($name !== '') {
+        $stmtCheck = $conn->prepare("
+            SELECT 1 FROM collection 
+            WHERE user_id = ? AND name = ?
+            LIMIT 1
+        ");
+        $stmtCheck->bind_param("is", $user_id, $name);
+        $stmtCheck->execute();
+        $stmtCheck->store_result();
+
+        if ($stmtCheck->num_rows > 0) {
+            $errors[] = "⚠ You already have a collection with this name.";
         }
 
-        $file_name   = basename($_FILES["collectionImage"]["name"]);
-        $target_file = $target_dir . $file_name;
+        $stmtCheck->close();
+    }
 
-        if (move_uploaded_file($_FILES["collectionImage"]["tmp_name"], $target_file)) {
+    // Se houve erros de validação, não criamos a coleção
+    if (!empty($errors)) {
+        $message     = implode("<br>", $errors);
+        $messageType = "error";
+    } else {
+        // ====== Se passou as validações, tratamos da imagem e da inserção ======
 
-            $url    = "images/" . $file_name;
-            $url_db = $conn->real_escape_string($url);
+        $image_id = "NULL";
 
-            $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
-            if ($conn->query($sql_img) === TRUE) {
-                $image_id = $conn->insert_id;
+        // B. Image Upload (opcional)
+        if (isset($_FILES['collectionImage']) && $_FILES['collectionImage']['error'] == 0) {
+            $target_dir = "images/";
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+
+            $file_name   = basename($_FILES["collectionImage"]["name"]);
+            $target_file = $target_dir . $file_name;
+
+            if (move_uploaded_file($_FILES["collectionImage"]["tmp_name"], $target_file)) {
+
+                $url    = "images/" . $file_name;
+                $url_db = $conn->real_escape_string($url);
+
+                $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
+                if ($conn->query($sql_img) === TRUE) {
+                    $image_id = $conn->insert_id;
+                } else {
+                    $errors[] = "Image DB Error: " . $conn->error;
+                }
             } else {
-                $message     = "Image DB Error: " . $conn->error;
+                $errors[] = "Error uploading image file.";
+            }
+        }
+
+        // Se a imagem falhou, não inserimos a coleção
+        if (!empty($errors)) {
+            $message     = implode("<br>", $errors);
+            $messageType = "error";
+        } else {
+            // C. Insert Collection
+            $img_val = ($image_id === "NULL") ? "NULL" : (int)$image_id;
+
+            $name_db        = $conn->real_escape_string($name);
+            $theme_db       = $conn->real_escape_string($theme);
+            $desc_db        = $conn->real_escape_string($description);
+            $start_db       = $conn->real_escape_string($starting_date);
+
+            $sql_coll = "
+                INSERT INTO collection (user_id, Theme, image_id, name, starting_date, description) 
+                VALUES ('$user_id', '$theme_db', $img_val, '$name_db', '$start_db', '$desc_db')
+            ";
+
+            if ($conn->query($sql_coll) === TRUE) {
+                $new_collection_id = $conn->insert_id;
+
+                if ($new_collection_id == 0) {
+                    $message     = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
+                    $messageType = "error";
+                } else {
+                    // D. ligar items
+                    if (!empty($selectedItems)) {
+                        foreach ($selectedItems as $item_id) {
+                            $item_id = (int)$item_id;
+                            $sql_contains = "
+                                INSERT INTO contains (collection_id, item_id) 
+                                VALUES ('$new_collection_id', '$item_id')
+                            ";
+                            $conn->query($sql_contains);
+                        }
+                    }
+
+                    // E. ligar TAGS (tabela collection_tags)
+                    if (!empty($selectedTags)) {
+                        $stmtTag = $conn->prepare("
+                            INSERT INTO collection_tags (collection_id, tag_id) 
+                            VALUES (?, ?)
+                        ");
+                        foreach ($selectedTags as $tid) {
+                            $tid = (int)$tid;
+                            $stmtTag->bind_param("ii", $new_collection_id, $tid);
+                            $stmtTag->execute();
+                        }
+                        $stmtTag->close();
+                    }
+
+                    $message     = "✔ Collection created successfully! <span class='redirect-msg'>Redirecting...</span>";
+                    $messageType = "success";
+                    $createdCollectionId = $new_collection_id;
+                }
+            } else {
+                $message     = "Database Error: " . $conn->error;
                 $messageType = "error";
             }
         }
-    }
-
-    // C. Insert Collection
-    $img_val = ($image_id === "NULL") ? "NULL" : $image_id;
-
-    $sql_coll = "
-        INSERT INTO collection (user_id, Theme, image_id, name, starting_date, description) 
-        VALUES ('$user_id', '$theme', $img_val, '$name', '$starting_date', '$description')
-    ";
-
-    if ($conn->query($sql_coll) === TRUE) {
-        $new_collection_id = $conn->insert_id;
-
-        if ($new_collection_id == 0) {
-            $message     = "Error: Collection created but ID is 0. Check DB Auto_Increment.";
-            $messageType = "error";
-        } else {
-            // D. ligar items
-            if (!empty($_POST['selectedItems'])) {
-                foreach ($_POST['selectedItems'] as $item_id) {
-                    $item_id = (int)$item_id;
-                    $sql_contains = "
-                        INSERT INTO contains (collection_id, item_id) 
-                        VALUES ('$new_collection_id', '$item_id')
-                    ";
-                    $conn->query($sql_contains);
-                }
-            }
-
-            // E. ligar TAGS (tabela collection_tags)
-            if (!empty($selectedTags)) {
-                $stmtTag = $conn->prepare("
-                    INSERT INTO collection_tags (collection_id, tag_id) 
-                    VALUES (?, ?)
-                ");
-                foreach ($selectedTags as $tid) {
-                    $tid = (int)$tid;
-                    $stmtTag->bind_param("ii", $new_collection_id, $tid);
-                    $stmtTag->execute();
-                }
-                $stmtTag->close();
-            }
-
-            $message     = "Collection created successfully!";
-            $messageType = "success";
-        }
-    } else {
-        $message     = "Database Error: " . $conn->error;
-        $messageType = "error";
     }
 }
 
@@ -237,6 +300,17 @@ if ($result_items && $result_items->num_rows > 0) {
         $user_items[] = $row;
     }
 }
+
+// ==========================================
+// 8. VALORES POSTADOS (para manter campos preenchidos)
+// ==========================================
+$postedName        = isset($_POST['collectionName']) ? htmlspecialchars($_POST['collectionName']) : '';
+$postedTheme       = isset($_POST['collectionTheme']) ? htmlspecialchars($_POST['collectionTheme']) : '';
+$postedDate        = isset($_POST['creationDate']) ? $_POST['creationDate'] : '';
+$postedDescription = isset($_POST['collectionDescription']) ? htmlspecialchars($_POST['collectionDescription']) : '';
+
+$postedTags = isset($_POST['tags']) ? array_map('intval', (array)$_POST['tags']) : [];
+$postedItems = isset($_POST['selectedItems']) ? array_map('intval', (array)$_POST['selectedItems']) : [];
 ?>
 
 <!DOCTYPE html>
@@ -344,22 +418,47 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
 
                 <div class="form-group">
                     <label for="collectionName">Name <span class="required">*</span></label>
-                    <input type="text" id="collectionName" name="collectionName" placeholder="Enter collection name" required />
+                    <input 
+                        type="text" 
+                        id="collectionName" 
+                        name="collectionName" 
+                        placeholder="Enter collection name" 
+                        value="<?php echo $postedName; ?>"
+                        required 
+                    />
                 </div>
 
                 <div class="form-group">
                     <label for="collectionTheme">Theme <span class="required">*</span></label>
-                    <input type="text" id="collectionTheme" name="collectionTheme" placeholder="Enter collection theme" required />
+                    <input 
+                        type="text" 
+                        id="collectionTheme" 
+                        name="collectionTheme" 
+                        placeholder="Enter collection theme" 
+                        value="<?php echo $postedTheme; ?>"
+                        required 
+                    />
                 </div>
 
                 <div class="form-group">
                     <label for="creationDate">Starting Date (DD/MM/YYYY) <span class="required">*</span></label>
-                    <input type="date" id="creationDate" name="creationDate" required />
+                    <input 
+                        type="date" 
+                        id="creationDate" 
+                        name="creationDate" 
+                        value="<?php echo $postedDate; ?>"
+                        required 
+                    />
                 </div>
 
                 <div class="form-group">
                     <label for="collectionDescription">Description</label>
-                    <textarea id="collectionDescription" name="collectionDescription" rows="4" placeholder="Add details"></textarea>
+                    <textarea 
+                        id="collectionDescription" 
+                        name="collectionDescription" 
+                        rows="4" 
+                        placeholder="Add details"
+                    ><?php echo $postedDescription; ?></textarea>
                 </div>
 
                 <!-- TAGS – MESMO ESTILO DO EDIT -->
@@ -377,8 +476,17 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                 <div style="padding:0.4rem 0.6rem; color:#777;">No tags created yet.</div>
                             <?php else: ?>
                                 <?php foreach ($allTags as $tag): ?>
+                                    <?php 
+                                        $tid = (int)$tag['tag_id']; 
+                                        $checked = in_array($tid, $postedTags) ? 'checked' : '';
+                                    ?>
                                     <label>
-                                        <input type="checkbox" name="tags[]" value="<?php echo (int)$tag['tag_id']; ?>">
+                                        <input 
+                                            type="checkbox" 
+                                            name="tags[]" 
+                                            value="<?php echo $tid; ?>" 
+                                            <?php echo $checked; ?>
+                                        >
                                         <?php echo htmlspecialchars($tag['name']); ?>
                                     </label>
                                 <?php endforeach; ?>
@@ -399,8 +507,10 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                 echo "<div style='padding:10px; color:#555;'>No items found in your inventory.</div>";
                             } else {
                                 foreach ($user_items as $item) {
+                                    $iid = (int)$item['item_id'];
+                                    $checked = in_array($iid, $postedItems) ? 'checked' : '';
                                     echo '<label>';
-                                    echo '<input type="checkbox" name="selectedItems[]" value="' . (int)$item['item_id'] . '"> ';
+                                    echo '<input type="checkbox" name="selectedItems[]" value="' . $iid . '" ' . $checked . '> ';
                                     echo htmlspecialchars($item['name']);
                                     echo '</label>';
                                 }
@@ -468,13 +578,15 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
     </div>
 </div>
 
+<?php if (!empty($createdCollectionId)): ?>
+<script>
+    window.NEW_COLLECTION_ID = <?php echo (int)$createdCollectionId; ?>;
+</script>
+<?php endif; ?>
+
 <script src="collectioncreation.js"></script>
 <script src="homepage.js"></script>
 <script src="logout.js"></script>
 
 </body>
 </html>
-
-
-
-

@@ -284,7 +284,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </div>
 
         <?php if (count($collections) > 0): ?>
-        <h3 class="collections-others">Collections others brought:</h3>
+        <h3 class="collections-others"> <?php echo $isPast ? 'Collections others brought:' : 'Collections others are bringing:'; ?></h3>
         <div class="collections-brought">
           <?php foreach ($collections as $collection): ?>
             <?php

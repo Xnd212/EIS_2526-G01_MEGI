@@ -158,7 +158,7 @@ if ($profileUserId !== null) {
 
     // ---------- EVENTOS PASSADOS ----------
     $sqlPast = "
-        SELECT 
+        SELECT DISTINCT
             e.event_id,
             e.name,
             e.date,
@@ -167,13 +167,14 @@ if ($profileUserId !== null) {
             img.url AS event_image
         FROM event e
         LEFT JOIN image img ON e.image_id = img.image_id
-        WHERE e.user_id = ? 
+        LEFT JOIN attends a ON a.event_id = e.event_id
+        WHERE (e.user_id = ? OR a.user_id = ?)   -- criou OU participou
           AND e.date < ?
         ORDER BY e.date DESC
     ";
 
     $stmtPast = $conn->prepare($sqlPast);
-    $stmtPast->bind_param("is", $profileUserId, $today);
+    $stmtPast->bind_param("iis", $profileUserId, $profileUserId, $today);
     $stmtPast->execute();
     $resPast = $stmtPast->get_result();
 
@@ -185,7 +186,7 @@ if ($profileUserId !== null) {
 
     // ---------- PRÓXIMOS EVENTOS ----------
     $sqlNext = "
-        SELECT 
+        SELECT DISTINCT
             e.event_id,
             e.name,
             e.date,
@@ -194,13 +195,14 @@ if ($profileUserId !== null) {
             img.url AS event_image
         FROM event e
         LEFT JOIN image img ON e.image_id = img.image_id
-        WHERE e.user_id = ? 
+        LEFT JOIN attends a ON a.event_id = e.event_id
+        WHERE (e.user_id = ? OR a.user_id = ?)   -- criou OU participou
           AND e.date >= ?
         ORDER BY e.date ASC
     ";
 
     $stmtNext = $conn->prepare($sqlNext);
-    $stmtNext->bind_param("is", $profileUserId, $today);
+    $stmtNext->bind_param("iis", $profileUserId, $profileUserId, $today);
     $stmtNext->execute();
     $resNext = $stmtNext->get_result();
 
@@ -209,7 +211,6 @@ if ($profileUserId !== null) {
     }
     $stmtNext->close();
 }
-
 
 
 ?>

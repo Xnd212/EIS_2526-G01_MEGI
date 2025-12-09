@@ -162,10 +162,10 @@ $stmtC->close();
 
 
 /* ==========================================
-   6) EVENTOS DO PERFIL
+   6) EVENTOS DO PERFIL 
    ========================================== */
 $sqlEvents = "
-    SELECT 
+    SELECT DISTINCT
         e.event_id,
         e.name,
         e.date,
@@ -175,19 +175,44 @@ $sqlEvents = "
         img.url AS event_image
     FROM event e
     LEFT JOIN image img ON e.image_id = img.image_id
-    WHERE e.user_id = ?
+    LEFT JOIN attends a ON a.event_id = e.event_id
+    WHERE e.user_id = ?       -- eventos criados por este user
+       OR a.user_id = ?       -- eventos em que este user participa
     ORDER BY e.date DESC
 ";
+
 $stmtE = $conn->prepare($sqlEvents);
-$stmtE->bind_param("i", $profileUserId);
+$stmtE->bind_param("ii", $profileUserId, $profileUserId);
 $stmtE->execute();
 $resultE = $stmtE->get_result();
 
+// $events  → passados
+// $nextEvents → hoje ou futuros
 $events = [];
+$nextEvents = [];
+
+$today = strtotime(date('Y-m-d')); // hoje à meia-noite
+
 while ($row = $resultE->fetch_assoc()) {
-    $events[] = $row;
+    if (!empty($row['date'])) {
+        $eventTs = strtotime($row['date']); // tenta converter data da BD
+
+        if ($eventTs !== false && $eventTs >= $today) {
+            // hoje ou futuro
+            $nextEvents[] = $row;
+        } else {
+            // passado ou data inválida
+            $events[] = $row;
+        }
+    } else {
+        // sem data → considero passado
+        $events[] = $row;
+    }
 }
+
 $stmtE->close();
+
+
 
 ?>
 <!DOCTYPE html>
@@ -446,7 +471,43 @@ $stmtE->close();
         </div>
       </section>
         
-        
+              <!-- ====================== NEXT EVENTS ====================== -->
+      <section class="past-events">
+        <h3>Next events</h3>
+        <div class="past-events-grid">
+          <?php if (empty($nextEvents)): ?>
+            <p>This user has no upcoming events.</p>
+          <?php else: ?>
+            <?php foreach ($nextEvents as $ev): ?>
+              <?php
+                if (!empty($ev['event_image'])) {
+                    $eventImg = $ev['event_image'];
+                } elseif (!empty($ev['teaser_url'])) {
+                    $eventImg = $ev['teaser_url'];
+                } else {
+                    $eventImg = 'images/default_event.png';
+                }
+
+                $eventDate = !empty($ev['date'])
+                    ? date('d/m/Y', strtotime($ev['date']))
+                    : '-';
+              ?>
+              <div class="past-event-card">
+                <img src="<?php echo htmlspecialchars($eventImg); ?>" 
+                     alt="<?php echo htmlspecialchars($ev['name']); ?>">
+                <p class="event-name"><?php echo htmlspecialchars($ev['name']); ?></p>
+                <span class="event-date">
+                  <?php echo $eventDate; ?>
+                </span>
+                <a href="pasteventpage.php?id=<?php echo $ev['event_id']; ?>" class="view-all">
+                  + See more
+                </a>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </section>
+
     </div>
   </div>
 

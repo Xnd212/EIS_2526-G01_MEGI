@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+/*
 // ============================================
   // 2. FORM VALIDATION (SAFER VERSION)
   // ============================================
@@ -117,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+*/
   // ============================================
   // 3. NOTIFICATIONS & LOGOUT (Bell/Door)
   // ============================================

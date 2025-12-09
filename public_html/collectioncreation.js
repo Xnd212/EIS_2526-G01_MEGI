@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 1.b MULTISELECT: TAGS (igual ao editcollection)
+  // 1.b MULTISELECT: TAGS
   // ============================================================
   const tagBtn = document.getElementById("dropdownBtn");
   const tagDropdown = document.getElementById("tagDropdown");
@@ -62,62 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 2. FORM VALIDATION (simples)
-  // ============================================================
-  const form = document.getElementById("collectionForm");
-  const formMessage = document.getElementById("formMessage");
-
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      if (!formMessage) return;
-
-      e.preventDefault();
-
-      const name = document.getElementById("collectionName");
-      const theme = document.getElementById("collectionTheme");
-      const dateInput = document.getElementById("creationDate");
-
-      [name, theme, dateInput].forEach((el) => el && el.classList.remove("error"));
-      formMessage.textContent = "";
-      formMessage.className = "form-message";
-
-      let valid = true;
-
-      if (!name || name.value.trim() === "") {
-        name.classList.add("error");
-        valid = false;
-      }
-
-      if (!theme || theme.value.trim() === "") {
-        theme.classList.add("error");
-        valid = false;
-      }
-
-      if (dateInput) {
-        const dateValue = dateInput.value.trim();
-        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-
-        if (!datePattern.test(dateValue)) {
-          dateInput.classList.add("error");
-          valid = false;
-        }
-      } else {
-        valid = false;
-      }
-
-      if (!valid) {
-        formMessage.textContent =
-          "⚠️ Please fill in all required (*) fields correctly.";
-        formMessage.classList.add("error");
-        return;
-      }
-
-      form.submit();
-    });
-  }
-
-  // ============================================================
-  // 3. MODAL PARA CRIAR TAGS (COM AJAX, igual ao editcollection)
+  // 2. MODAL PARA CRIAR TAGS (AJAX)
   // ============================================================
   const openTagModal = document.getElementById("openTagModal");
   const tagModalOverlay = document.getElementById("tagModalOverlay");
@@ -135,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tagModal.classList.remove("hidden");
       newTagInput.value = "";
       tagFeedback.textContent = "";
+      tagFeedback.style.color = "";
     });
   }
 
@@ -154,8 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Criar tag via create_tag.php (igual ao editcollection.js)
-  if (createTagBtn && newTagInput && tagDropdown) {
+  // Criar tag via create_tag.php
+  if (createTagBtn && newTagInput && tagDropdown && tagBtn) {
     createTagBtn.addEventListener("click", async () => {
       const tagName = newTagInput.value.trim();
       tagFeedback.textContent = "";
@@ -178,7 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await response.json();
 
         if (!result.success) {
-          tagFeedback.textContent = "⚠ " + (result.error || "Erro ao criar tag.");
+          tagFeedback.textContent =
+            "⚠ " + (result.error || "Erro ao criar tag.");
           tagFeedback.style.color = "#b54242";
           return;
         }
@@ -222,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 4. NOTIFICAÇÕES
+  // 3. NOTIFICAÇÕES
   // ============================================================
   const bellBtn = document.getElementById("notification-btn");
   const notifPopup = document.getElementById("notification-popup");
@@ -254,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // 5. LOGOUT POPUP
+  // 4. LOGOUT POPUP
   // ============================================================
   const logoutBtn = document.getElementById("logout-btn");
   const logoutPopup = document.getElementById("logout-popup");
@@ -294,47 +241,62 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "logout.php";
     });
   }
-});
 
-// ============================================================
-// 6. CSV IMPORT POPUP
-// ============================================================
-document.addEventListener("DOMContentLoaded", function () {
+  // ============================================================
+  // 5. CSV IMPORT POPUP
+  // ============================================================
   const bulkImportBtn = document.getElementById("bulk-import-btn");
   const csvPopup = document.getElementById("csv-import-popup");
   const closePopupBtn = document.getElementById("close-csv-popup");
   const overlay = document.getElementById("csv-overlay");
 
-  if (bulkImportBtn) {
+  if (bulkImportBtn && csvPopup && overlay) {
     bulkImportBtn.addEventListener("click", function (e) {
       e.preventDefault();
       csvPopup.style.display = "block";
       overlay.classList.add("active");
       document.body.style.overflow = "hidden";
     });
-  }
 
-  if (closePopupBtn) {
     closePopupBtn.addEventListener("click", function () {
       csvPopup.style.display = "none";
       overlay.classList.remove("active");
       document.body.style.overflow = "";
     });
-  }
 
-  if (overlay) {
     overlay.addEventListener("click", function () {
       csvPopup.style.display = "none";
       overlay.classList.remove("active");
       document.body.style.overflow = "";
     });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && csvPopup.style.display === "block") {
+        csvPopup.style.display = "none";
+        overlay.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+    });
   }
 
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && csvPopup.style.display === "block") {
-      csvPopup.style.display = "none";
-      overlay.classList.remove("active");
-      document.body.style.overflow = "";
+  // ============================================================
+  // 6. SCROLL PARA MENSAGEM + REDIRECT (SUCESSO)
+  // ============================================================
+  const successMessage = document.querySelector(".form-message.success");
+  const errorMessage   = document.querySelector(".form-message.error");
+
+  if (successMessage) {
+    // focar na mensagem de sucesso
+    successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // redirecionar se o PHP tiver definido o ID
+    if (window.NEW_COLLECTION_ID) {
+      setTimeout(() => {
+        window.location.href = `collectionpage.php?id=${window.NEW_COLLECTION_ID}`;
+      }, 2000);
     }
-  });
+  } else if (errorMessage) {
+    // focar na mensagem de erro
+    errorMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 });

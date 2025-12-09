@@ -106,6 +106,7 @@ if ($user_id !== null) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Trall-E | My Items</title>
         <link rel="stylesheet" href="myitems.css">
+        <link rel="stylesheet" href="calendar_popup.css" />
         <style>
             /* Filter Menu Styles */
             .filter-menu a {
@@ -186,6 +187,7 @@ if ($user_id !== null) {
             </div>
 
             <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
                 <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>

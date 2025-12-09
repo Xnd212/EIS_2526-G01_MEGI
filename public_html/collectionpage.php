@@ -132,6 +132,7 @@ if (!empty($col['starting_date'])) {
         <link rel="stylesheet" href="homepage.css" />
         <link rel="stylesheet" href="collectionpage.css">
         <link rel="stylesheet" href="userpage.css">
+        <link rel="stylesheet" href="calendar_popup.css" />
     </head>
 
     <body>
@@ -147,6 +148,7 @@ if (!empty($col['starting_date'])) {
             </div>
 
             <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

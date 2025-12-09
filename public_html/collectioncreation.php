@@ -246,6 +246,7 @@ if ($result_items && $result_items->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trall-E | Create Collection</title>
     <link rel="stylesheet" href="collectioncreation.css" />
+    <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>
@@ -314,6 +315,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
         </form>
     </div>
     <div class="icons">
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
         <?php include __DIR__ . '/notifications_popup.php'; ?>
 
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

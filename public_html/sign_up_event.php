@@ -118,6 +118,7 @@ $user_collections = $c_res->fetch_all(MYSQLI_ASSOC);
   <title>Trall-E | Sign up for event</title>
   <link rel="stylesheet" href="sign_up_event.css" />
   <link rel="stylesheet" href="homepage.css" /> 
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>
@@ -132,6 +133,7 @@ $user_collections = $c_res->fetch_all(MYSQLI_ASSOC);
           </form>
       </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       

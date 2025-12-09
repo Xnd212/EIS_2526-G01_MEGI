@@ -97,6 +97,7 @@ if ($currentUserId !== null) {
     <meta charset="UTF-8">
     <title>Trall-E | Event History</title>
     <link rel="stylesheet" href="eventhistory.css">
+    <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>
@@ -113,6 +114,7 @@ if ($currentUserId !== null) {
     </div>
 
     <div class="icons">
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
         <?php include __DIR__ . '/notifications_popup.php'; ?>
 
         <a href="userpage.php" class="icon-btn">👤</a>

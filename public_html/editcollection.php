@@ -142,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Edit Collection</title>
     <link rel="stylesheet" href="editcollection.css">
+    <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 <body>
 
@@ -155,6 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="icons">
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
         <?php include __DIR__ . '/notifications_popup.php'; ?>
         <a href="userpage.php" class="icon-btn">👤</a>
         <button class="icon-btn" id="logout-btn">🚪</button>

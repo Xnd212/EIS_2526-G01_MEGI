@@ -102,6 +102,7 @@ $stmtC->close();
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Trall-E | <?php echo htmlspecialchars($profile['username']); ?>'s Collections</title>
         <link rel="stylesheet" href="mycollectionspage.css">
+        <link rel="stylesheet" href="calendar_popup.css" />
         <style>
             /* Ensure links look correct in the menu */
             .filter-menu a {
@@ -140,6 +141,7 @@ $stmtC->close();
             </div>
 
             <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

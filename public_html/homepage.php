@@ -285,7 +285,9 @@ if ($topByItems) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Trall-E | Homepage</title>
+        <link rel="stylesheet" href="calendar_popup.css" />
         <link rel="stylesheet" href="homepage.css" />
+        
 
     </head>
     <!-- comment -->
@@ -306,7 +308,9 @@ if ($topByItems) {
             </div>
             <div class="icons">
                 <!-- Botão de notificações -->
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
+                
 
 
                 <!-- Perfil -->

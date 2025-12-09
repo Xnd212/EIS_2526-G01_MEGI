@@ -111,6 +111,7 @@ if (isset($_GET['user_id'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Friends' Collections</title>
   <link rel="stylesheet" href="allfriendscollectionspage.css">
+  <link rel="stylesheet" href="calendar_popup.css" />
   
   <style>
       .collections-header {
@@ -151,6 +152,7 @@ if (isset($_GET['user_id'])) {
         </form>
     </div>
     <div class="icons">
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
         <?php include __DIR__ . '/notifications_popup.php'; ?>
 
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

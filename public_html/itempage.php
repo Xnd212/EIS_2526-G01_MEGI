@@ -86,6 +86,7 @@ function fmtDate($d) {
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="itempage.css" />
   <link rel="stylesheet" href="mycollectionspage.css" />
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>
@@ -100,6 +101,7 @@ function fmtDate($d) {
           </form>
       </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       

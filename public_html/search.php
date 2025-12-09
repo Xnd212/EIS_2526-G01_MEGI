@@ -88,6 +88,7 @@ $stmt->close();
     <title>Search Results - Trall-E</title>
     <link rel="stylesheet" href="homepage.css"> 
     <link rel="stylesheet" href="search.css">
+    <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 <body>
 
@@ -103,6 +104,7 @@ $stmt->close();
         </div>
 
         <div class="icons">
+            <?php include __DIR__ . '/calendar_popup.php'; ?>
             <?php include __DIR__ . '/notifications_popup.php'; ?>
             <a href="userpage.php" class="icon-btn">👤</a>
             <button class="icon-btn" id="logout-btn">🚪</button>

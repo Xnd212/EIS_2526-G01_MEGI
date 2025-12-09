@@ -200,6 +200,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Edit Item</title>
   <link rel="stylesheet" href="edititem.css" />
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 <body>
 
@@ -215,6 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
     <div class="icons">
       <!-- Notificações -->
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
 
       <!-- Perfil -->

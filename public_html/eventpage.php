@@ -180,6 +180,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
   <title>Trall-E | <?php echo htmlspecialchars($event['name']); ?></title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="eventpage.css" />
+  <link rel="stylesheet" href="calendar_popup.css" />
   <style>
       .map-container iframe { width: 100%; height: 300px; border: 0; border-radius: 8px; }
       .register-button.registered { background-color: #dc3545; color: white; cursor: pointer; }
@@ -209,6 +210,7 @@ if (isset($event['teaser_url']) && !empty($event['teaser_url'])) {
         </form>
     </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
         <a href="userpage.php" class="icon-btn">👤</a>
         <button class="icon-btn" id="logout-btn">🚪</button>

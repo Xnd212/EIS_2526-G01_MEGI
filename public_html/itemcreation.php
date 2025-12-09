@@ -276,6 +276,7 @@ if ($result_cols && $result_cols->num_rows > 0) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | Create Item</title>
   <link rel="stylesheet" href="itemcreation.css" />
+  <link rel="stylesheet" href="calendar_popup.css" />
   <style>
       /* Simple feedback styles */
       .form-message { text-align: center; font-weight: bold; padding: 10px; margin-top: 15px; border-radius: 5px; }
@@ -379,6 +380,7 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
           </form>
       </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       

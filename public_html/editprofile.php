@@ -292,6 +292,7 @@ $bodyThemeAttr = $currentTheme;
     <title>Trall-E | Edit Profile</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="editprofile.css">
+    <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 <body data-theme="<?php echo htmlspecialchars($bodyThemeAttr); ?>">
 
@@ -305,6 +306,7 @@ $bodyThemeAttr = $currentTheme;
         </form>
     </div>
     <div class="icons">
+        <?php include __DIR__ . '/calendar_popup.php'; ?>
         <?php include __DIR__ . '/notifications_popup.php'; ?>
 
         <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

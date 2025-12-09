@@ -6,6 +6,7 @@
   <title>Trall-E | Comic Con Portugal</title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="eventpage.css" />
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>
@@ -21,6 +22,7 @@
           </form>
       </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       

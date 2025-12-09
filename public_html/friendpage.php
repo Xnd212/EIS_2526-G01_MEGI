@@ -199,6 +199,7 @@ $stmtE->close();
   <title>Trall-E | <?php echo htmlspecialchars($profile['username']); ?>'s Page</title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="userpage.css">
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 <body>    
@@ -216,6 +217,7 @@ $stmtE->close();
       </div>
     <div class="icons">
       <!-- Botão de notificações -->
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
            
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>

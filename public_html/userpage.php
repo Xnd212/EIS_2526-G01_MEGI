@@ -224,6 +224,7 @@ if ($profileUserId !== null) {
   <title>Trall-E | <?php echo htmlspecialchars($profile['username']); ?>'s Page</title>
   <link rel="stylesheet" href="homepage.css" />
   <link rel="stylesheet" href="userpage.css">
+  <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 
 
@@ -241,6 +242,7 @@ if ($profileUserId !== null) {
           </form>
       </div>
     <div class="icons">
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
       <!-- Botão de notificações -->
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
            

@@ -30,8 +30,6 @@
   border: 1px solid #ccc;
 }
 
-
-
 .item-details .item-info p {
   display: flex;
   align-items: flex-start;
@@ -52,22 +50,7 @@
   color: #333;
 }
 
-
-
-
-.item-collections-card {
-  margin: 2rem 1.5rem;
-  padding: 1.5rem 2rem;
-  background-color: #ffd9cc;  
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-}
-
-.item-collections-grid {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
+/* Cards das coleções */
 
 .collections h3 {
     margin-bottom: 0.5rem;   
@@ -96,48 +79,16 @@
   font-weight: 500;
 }
 
-
-/* Collections Section */
-.belongs-section {
-  margin-top: 2rem;
-}
-
-.belongs-logos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin-top: 1rem;
-}
-
-.collection-logo-box {
-  text-align: center;
-}
-
-.collection-logo-box img {
-  width: 180px;
-  height: 200px;
-  object-fit: contain;
-}
-
-.collection-logo-box p {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-/* Section Colors */
+/* Section Colors para sidebar */
 .collections-section {
   background-color: #f9d7d1;
 }
 
 .friends-section {
-  background-color: #f3b8aa ;
+  background-color: #f3b8aa;
 }
 
-
-/* Add to your itempage.css */
-
-/* Item actions container */
+/* Ações (edit / delete) */
 .item-actions {
   display: flex;
   gap: 10px;
@@ -146,7 +97,6 @@
   align-items: center;
 }
 
-/* Common styling for edit and delete links/buttons */
 .item-actions .edit-link,
 .item-actions .delete-link {
   display: inline-flex;
@@ -166,7 +116,7 @@
   font-family: inherit;
 }
 
-/* Edit button styling */
+/* Edit button */
 .item-actions .edit-link {
   background-color: #4a90e2;
   color: white;
@@ -178,148 +128,115 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* =======================
-   Delete Popup Styling (Prettified)
-======================= */
+/* Collector link */
+.item-info p .collector-link {
+    text-decoration: none;
+    color: inherit;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
 
-/* The Background Overlay (Blurred) */
-.delete-popup {
+.item-info p .collector-link:hover {
+    color: #e74c3c;
+    border-bottom: 1px solid #e74c3c;
+    cursor: pointer;
+}
+
+/* === Popup de delete de item === */
+.delete-item-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  /* Slightly darker, tinted overlay */
-  background: rgba(44, 62, 80, 0.7);
-  backdrop-filter: blur(5px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;           /* JS muda para flex */
   justify-content: center;
-  padding: 20px;
+  align-items: center;
+  z-index: 9999;
 }
 
-/* The Main Popup Box */
-.delete-popup .delete-popup-content {
+.delete-item-modal {
   background: #ffffff;
-  padding: 35px 30px;
-  /* Very round corners for a modern feel */
-  border-radius: 24px;
-  /* Deep, soft shadow to make it "float" */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.05);
-  max-width: 400px;
-  width: 100%;
-  text-align: center; /* Center alignment looks cleaner for modals */
-  position: relative;
-  overflow: hidden;
-  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy entrance */
-}
-
-/* Accent bar at the top */
-.delete-popup .delete-popup-content::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 8px;
-    /* Warning/Danger Gradient */
-    background: linear-gradient(90deg, #ff416c, #ff4b2b);
-}
-
-/* Animation */
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.8) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Header Area */
-.delete-popup .popup-header {
-  margin-bottom: 15px;
-  border: none; /* Removed the underline */
-}
-
-/* Stylish Icon Container */
-.delete-popup .popup-header h3::before {
-    /* Using a trash emoji, but styling it up */
-    content: '🗑️'; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    /* Create a circular background for the icon */
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px auto; /* Center horizontally */
-    background: #fee2e2; /* Soft red background */
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
-}
-
-/* Header Text */
-.delete-popup .popup-header h3 {
-  margin: 0;
-  color: #991b1b; /* Deep red text */
-  font-size: 1.6rem;
-  font-weight: 800;
-  display: block; 
-}
-
-/* Body Text */
-.delete-popup p {
-    color: #4b5563; /* Soft gray */
-    font-size: 1.05rem;
-    line-height: 1.6;
-    margin-bottom: 35px;
-    padding: 0 10px;
-}
-
-/* Button Container */
-.logout-btn-wrapper {
-  display: flex;
-  justify-content: center; /* Center buttons */
-  gap: 15px; /* Spacing between buttons */
-}
-
-/* Base Button Styles */
-.logout-btn {
-  padding: 12px 28px;
-  /* Pill-shaped buttons */
-  border-radius: 50px; 
-  cursor: pointer;
-  border: none;
-  font-weight: 700;
+  border-radius: 14px;
+  padding: 1.8rem 2.2rem;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
 }
 
-/* Cancel Button styling */
-.cancel-btn {
-    background: #f3f4f6;
-    color: #6b7280;
-}
-.cancel-btn:hover {
-    background: #e5e7eb;
-    color: #374151;
-    transform: translateY(-2px);
+/* Header igual ao da collection */
+.delete-item-modal .popup-header {
+  margin: -1.8rem -2.2rem 1.2rem;
+  padding: 1rem 2.2rem;
+  border-bottom: 1px solid #f1b9b4;
+  background-color: #fbecec;
+  border-radius: 14px 14px 0 0;
 }
 
-/* Delete (Confirm) Button Styling */
-.confirm-btn {
-    /* Red gradient background */
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    color: white;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+.delete-item-modal .popup-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #b54242;
 }
 
-.confirm-btn:hover {
-    /* Make it lift up and glow on hover */
-    box-shadow: 0 8px 16px rgba(220, 38, 38, 0.4);
-    transform: translateY(-3px) scale(1.02);
+/* Texto da mensagem */
+#delete-item-message {
+  margin-bottom: 1.4rem;
+  line-height: 1.5;
+  color: #444;
 }
 
-.confirm-btn:active {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+/* Botões alinhados à direita */
+.delete-item-modal .logout-btn-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
-/* Responsive adjustments */
+
+/* estilo base de ambos os botões */
+.delete-item-modal .logout-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+}
+
+/* botão Cancel */
+.delete-item-modal .cancel-btn {
+  background-color: #ffffff;
+  color: #b54242;
+  border: 1px solid #b54242;
+}
+
+.delete-item-modal .cancel-btn:hover {
+  background-color: #fbecec;
+}
+
+/* botão Delete */
+.delete-item-modal .confirm-btn {
+  background-color: #b54242;
+  color: #ffffff;
+}
+
+.delete-item-modal .confirm-btn:hover {
+  background-color: #963433;
+}
+
+/* pequeno efeito de “click” */
+.delete-item-modal .logout-btn:active {
+  transform: translateY(1px);
+}
+
+.delete-item-modal strong {
+  font-weight: 700;
+}
+
+
+/* Responsivo */
 @media (max-width: 768px) {
   .item-actions {
     flex-direction: column;
@@ -331,31 +248,4 @@
     width: 100%;
     text-align: center;
   }
-}
-
-/* Center all popups on screen */
-.notification-popup,
-.logout-popup,
-.delete-popup {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  z-index: 9999 !important;
-}
-
-/* Styling for the Collector Name Link */
-.item-info p .collector-link {
-    text-decoration: none;
-    color: inherit; /* Keeps the text dark gray */
-    font-weight: 500;
-    transition: color 0.2s ease;
-    border-bottom: 1px solid transparent;
-}
-
-.item-info p .collector-link:hover {
-    color: #e74c3c; /* Changes to your theme red on hover */
-    border-bottom: 1px solid #e74c3c;
-    cursor: pointer;
 }

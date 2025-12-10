@@ -236,22 +236,27 @@ function fmtDate($d) {
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div class="delete-popup" id="delete-popup" style="display: none;">
-    <div class="popup-header">
-      <h3>Delete Item</h3>
-    </div>
+  <div class="delete-item-overlay" id="delete-item-popup" style="display: none;">
+    <div class="delete-item-modal">
+      <div class="popup-header">
+        <h3>Delete Item</h3>
+      </div>
 
-    <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+      <p id="delete-item-message">
+        Are you sure you want to delete this item? This action cannot be undone.
+      </p>
 
-    <div class="logout-btn-wrapper">
-      <button type="button" class="logout-btn cancel-btn" id="cancel-delete">
-        Cancel
-      </button>
-      <button type="button" class="logout-btn confirm-btn" id="confirm-delete">
-        Delete
-      </button>
+      <div class="logout-btn-wrapper">
+        <button type="button" class="logout-btn cancel-btn" id="cancel-delete">
+          Cancel
+        </button>
+        <button type="button" class="logout-btn confirm-btn" id="confirm-delete">
+          Delete
+        </button>
+      </div>
     </div>
   </div>
+
 
   <script src="itempage.js"></script>
   <script src="logout.js"></script>

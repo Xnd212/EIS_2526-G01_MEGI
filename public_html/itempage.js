@@ -1,60 +1,95 @@
-// =============================
-// Notificações 
-// =============================
-
 document.addEventListener("DOMContentLoaded", () => {
+  // =============================
+  // Notificações 
+  // =============================
   const bellBtn = document.querySelector('.icon-btn[aria-label="Notificações"]');
-  const popup = document.getElementById('notification-popup');
-  const seeMoreLink = document.querySelector('.see-more-link');
+  const notifPopup = document.getElementById("notification-popup");
+  const seeMoreLink = document.querySelector(".see-more-link");
 
-  if (bellBtn && popup) {
-    bellBtn.addEventListener('click', (e) => {
+  if (bellBtn && notifPopup) {
+    bellBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+      notifPopup.style.display =
+        notifPopup.style.display === "block" ? "none" : "block";
     });
 
-    document.addEventListener('click', (e) => {
-      if (!popup.contains(e.target) && !bellBtn.contains(e.target)) {
-        popup.style.display = 'none';
+    document.addEventListener("click", (e) => {
+      if (!notifPopup.contains(e.target) && !bellBtn.contains(e.target)) {
+        notifPopup.style.display = "none";
       }
     });
   }
 
-  // Expandir / Encolher notificações
-  if (seeMoreLink) {
-    seeMoreLink.addEventListener('click', (e) => {
+  if (seeMoreLink && notifPopup) {
+    seeMoreLink.addEventListener("click", (e) => {
       e.preventDefault();
 
-      popup.classList.toggle('expanded');
+      notifPopup.classList.toggle("expanded");
 
-      if (popup.classList.contains('expanded')) {
+      if (notifPopup.classList.contains("expanded")) {
         seeMoreLink.textContent = "Show less";
       } else {
         seeMoreLink.textContent = "+ See more";
       }
     });
   }
-});
 
+  // =============================
+  // Popup de DELETE do Item
+  // =============================
+  const deleteBtn = document.getElementById("deleteItemBtn");
+  const deletePopup = document.getElementById("delete-item-popup");
+  const cancelDeleteBtn = document.getElementById("cancel-delete");
+  const confirmDeleteBtn = document.getElementById("confirm-delete");
 
+  // id do item vem do data-attribute no botão
+  let itemIdToDelete = deleteBtn
+    ? deleteBtn.getAttribute("data-item-id")
+    : null;
 
-document.addEventListener("DOMContentLoaded", () => {
-  const editBtn = document.getElementById("editBtn");
+  if (deleteBtn && deletePopup && cancelDeleteBtn && confirmDeleteBtn) {
+    // abrir popup
+    deleteBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      deletePopup.style.display = "flex";
+    });
 
-  if (editBtn) {
-    editBtn.addEventListener("click", () => {
-      const itemData = {
-        price: document.getElementById("itemPrice").textContent,
-        itemType: document.getElementById("itemType").textContent,
-        importance: document.getElementById("itemImportance").textContent,
-        acquisitionDate: document.getElementById("itemAcquisitionDate").textContent,
-        acquisitionPlace: document.getElementById("itemAcquisitionPlace").textContent,
-        description: document.getElementById("itemDescription").textContent
-      };
+    // cancelar / fechar
+    cancelDeleteBtn.addEventListener("click", () => {
+      deletePopup.style.display = "none";
+    });
 
-      localStorage.setItem("editItemData", JSON.stringify(itemData));
-      window.location.href = "edititem.php";
+    // fechar ao clicar fora da caixa
+    deletePopup.addEventListener("click", (e) => {
+      if (e.target === deletePopup) {
+        deletePopup.style.display = "none";
+      }
+    });
+
+    // confirmar delete
+    confirmDeleteBtn.addEventListener("click", () => {
+      if (!itemIdToDelete) return;
+
+      const formData = new FormData();
+      formData.append("item_id", itemIdToDelete);
+
+      fetch("deleteitem.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // depois de apagar, manda para a lista de items
+            window.location.href = "myitems.php";
+          } else {
+            alert("Error deleting item: " + (data.message || ""));
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Error deleting item.");
+        });
     });
   }
 });
-

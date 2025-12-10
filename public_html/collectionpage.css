@@ -324,3 +324,99 @@
     padding: 0 4px; /* A little breathing room on hover */
     margin: 0 -4px; /* Counteract padding to keep text aligned */
 }
+
+/* ===== Delete Collection Popup (modal overlay) ===== */
+
+.delete-popup {
+  position: fixed;
+  inset: 0;                 /* top/right/bottom/left: 0 */
+  background: rgba(0, 0, 0, 0.45);
+  display: none;            /* JS muda para flex */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Caixa do popup */
+.delete-popup-content {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.8rem 2.2rem;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  font-size: 0.95rem;
+}
+
+/* Header cor-de-rosa tipo cards das coleções */
+.delete-popup .popup-header {
+  margin: -1.8rem -2.2rem 1.2rem;   /* estica header até às bordas */
+  padding: 1rem 2.2rem;
+  border-bottom: 1px solid #f1b9b4;
+  background-color: #fbecec;
+  border-radius: 14px 14px 0 0;
+}
+
+.delete-popup .popup-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #b54242;
+}
+
+/* Texto da mensagem */
+#delete-message {
+  margin-bottom: 1.4rem;
+  line-height: 1.5;
+  color: #444;
+}
+
+/* ===== Botões do popup ===== */
+
+.delete-popup .logout-btn-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* estilo base de ambos os botões */
+.delete-popup .logout-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+}
+
+/* botão Cancel */
+.delete-popup .cancel-btn {
+  background-color: #ffffff;
+  color: #b54242;
+  border: 1px solid #b54242;
+}
+
+.delete-popup .cancel-btn:hover {
+  background-color: #fbecec;
+}
+
+/* botão Confirmar */
+.delete-popup .confirm-btn {
+  background-color: #b54242;
+  color: #ffffff;
+}
+
+.delete-popup .confirm-btn:hover {
+  background-color: #963433;
+}
+
+/* pequeno efeito de “click” */
+.delete-popup .logout-btn:active {
+  transform: translateY(1px);
+}
+
+/* texto em bold dentro da mensagem */
+.delete-popup-content strong {
+  font-weight: 700;
+}

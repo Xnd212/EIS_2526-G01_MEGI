@@ -135,7 +135,7 @@
     </aside>
   </div>
 
-  <script src="eventpage.js"></script>
+  <script src="upcomingevents.js"></script>
   <script src="logout.js"></script>
 </body>
 </html>

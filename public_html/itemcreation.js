@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    
+
   // ============================================
   // 1. IMPORTANCE SLIDER SYNCHRONIZATION
   // ============================================
@@ -10,117 +10,164 @@ document.addEventListener("DOMContentLoaded", () => {
     slider.addEventListener("input", () => {
       numberInput.value = slider.value;
     });
+
     numberInput.addEventListener("input", () => {
-      // Bounds check
       let val = parseInt(numberInput.value, 10);
       if (isNaN(val)) val = 5;
       if (val < 1) val = 1;
       if (val > 10) val = 10;
       slider.value = val;
+      numberInput.value = val;
     });
   }
 
-/*
-// ============================================
-  // 2. FORM VALIDATION (SAFER VERSION)
   // ============================================
-  const form = document.getElementById("itemForm");
-  const formMessage = document.getElementById("formMessage");
+  // 2. TYPE DROPDOWN
+  // ============================================
+  const typeBtn      = document.getElementById("typeDropdownBtn");
+  const typeDropdown = document.getElementById("typeDropdown");
+  const hiddenType   = document.getElementById("itemType");
 
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      // NOTE: We do NOT preventDefault here. We assume it's valid until proven otherwise.
+  if (typeBtn && typeDropdown && hiddenType) {
+    typeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      typeDropdown.style.display =
+        typeDropdown.style.display === "block" ? "none" : "block";
+    });
 
-      // Elements
-      const collection = document.getElementById("collection_id"); 
-      const name = document.getElementById("itemName");
-      const price = document.getElementById("itemPrice");
-      const type = document.getElementById("itemType");
-      const date = document.getElementById("acc_date");
-      
-      // Reset Errors (remove red borders)
-      [collection, name, price, type, date].forEach(el => {
-          if(el) el.classList.remove("error");
-      });
-      
-      if(formMessage) {
-        formMessage.textContent = "";
-        formMessage.className = "form-message";
+    document.addEventListener("click", (e) => {
+      if (!typeDropdown.contains(e.target) && e.target !== typeBtn) {
+        typeDropdown.style.display = "none";
+      }
+    });
+
+    typeDropdown.addEventListener("change", () => {
+      const checked = typeDropdown.querySelector("input[type='radio']:checked");
+      if (checked) {
+        const labelText = checked.parentElement.textContent.trim();
+        hiddenType.value = checked.value;
+        typeBtn.textContent = labelText;
+      }
+    });
+  }
+
+  // ============================================
+  // 3. MODAL PARA CRIAR TYPE (AJAX)
+  // ============================================
+  const openTypeModal   = document.getElementById("openTypeModal");
+  const typeModalOverlay= document.getElementById("typeModalOverlay");
+  const typeModal       = document.getElementById("typeModal");
+  const closeTypeModal  = document.getElementById("closeTypeModal");
+  const createTypeBtn   = document.getElementById("createTypeBtn");
+  const newTypeInput    = document.getElementById("newTypeInput");
+  const typeFeedback    = document.getElementById("typeFeedback");
+
+  if (openTypeModal && typeModalOverlay && typeModal) {
+    openTypeModal.addEventListener("click", (e) => {
+      e.preventDefault();
+      typeModalOverlay.classList.remove("hidden");
+      typeModal.classList.remove("hidden");
+      if (newTypeInput) newTypeInput.value = "";
+      if (typeFeedback) {
+        typeFeedback.textContent = "";
+        typeFeedback.style.color = "";
+      }
+    });
+  }
+
+  if (closeTypeModal && typeModalOverlay && typeModal) {
+    closeTypeModal.addEventListener("click", () => {
+      typeModalOverlay.classList.add("hidden");
+      typeModal.classList.add("hidden");
+    });
+  }
+
+  if (typeModalOverlay && typeModal) {
+    typeModalOverlay.addEventListener("click", () => {
+      typeModalOverlay.classList.add("hidden");
+      typeModal.classList.add("hidden");
+    });
+  }
+
+  if (createTypeBtn && newTypeInput && typeDropdown && typeBtn && hiddenType) {
+    createTypeBtn.addEventListener("click", async () => {
+      const typeName = newTypeInput.value.trim();
+      typeFeedback.textContent = "";
+
+      if (typeName === "") {
+        typeFeedback.textContent = "⚠ Please write a name.";
+        typeFeedback.style.color = "#b54242";
+        return;
       }
 
-      let valid = true;
+      let formData = new FormData();
+      formData.append("typeName", typeName);
 
-      // --- CHECK FIELDS ---
+      try {
+        const response = await fetch("create_type.php", {
+          method: "POST",
+          body: formData,
+        });
 
-      // Check Collection
-      if (!collection || collection.value === "") { 
-          if(collection) collection.classList.add("error"); 
-          valid = false; 
-      }
+        const result = await response.json();
 
-      // Check Name
-      if (!name || !name.value.trim()) { 
-          if(name) name.classList.add("error"); 
-          valid = false; 
-      }
-
-      // Check Price
-      if (!price || !price.value.trim() || parseFloat(price.value) < 0) { 
-          if(price) price.classList.add("error"); 
-          valid = false; 
-      }
-
-      // Check Type
-      if (!type || !type.value.trim()) { 
-          if(type) type.classList.add("error"); 
-          valid = false; 
-      }
-
-      // Check Date (Empty)
-      if (!date || !date.value.trim()) { 
-          if(date) date.classList.add("error"); 
-          valid = false; 
-      }
-
-      // Check Date (Future) - SAFER LOGIC
-      if (date && date.value) {
-          const selectedDate = new Date(date.value);
-          // Check if date is valid before running setHours
-          if (!isNaN(selectedDate.getTime())) { 
-             const currentDate = new Date();
-             currentDate.setHours(0,0,0,0);
-             selectedDate.setHours(0,0,0,0);
-             
-             if (selectedDate > currentDate) {
-                 date.classList.add("error");
-                 valid = false;
-                 if(formMessage) formMessage.textContent = "Date cannot be in the future.";
-             }
-          }
-      }
-
-      // --- FINAL DECISION ---
-      if (!valid) {
-        // ONLY NOW do we stop the form from sending
-        e.preventDefault(); 
-        
-        if(formMessage && formMessage.textContent === "") {
-            formMessage.textContent = "⚠️ Please fill in all required (*) fields.";
+        if (!result.success) {
+          typeFeedback.textContent = "⚠ " + (result.error || "Error creating type.");
+          typeFeedback.style.color = "#b54242";
+          return;
         }
-        if(formMessage) formMessage.classList.add("error");
-        
-        // Console log for debugging
-        console.log("Form submission blocked due to validation errors.");
-      } 
-      
-      // If valid is true, we do nothing. 
-      // The browser continues to PHP naturally.
+
+        // Se já existia: apenas selecionar
+        if (result.existing) {
+          let existing = typeDropdown.querySelector(
+            `input[value='${result.name.replace(/'/g, "\\'")}']`
+          );
+
+          if (!existing) {
+            // Pode não existir ainda no dropdown → criar
+            let label = document.createElement("label");
+            label.innerHTML = `
+              <input type="radio" name="typeRadio" value="${result.name}">
+              ${result.name}
+            `;
+            typeDropdown.appendChild(label);
+            existing = label.querySelector("input");
+          }
+
+          existing.checked = true;
+          hiddenType.value = result.name;
+          typeBtn.textContent = result.name;
+
+          typeFeedback.textContent = "Type already existed — selected ✔";
+          typeFeedback.style.color = "#2e7d32";
+        } else {
+          // Criar nova radio no dropdown
+          let label = document.createElement("label");
+          label.innerHTML = `
+            <input type="radio" name="typeRadio" value="${result.name}" checked>
+            ${result.name}
+          `;
+          typeDropdown.appendChild(label);
+
+          hiddenType.value = result.name;
+          typeBtn.textContent = result.name;
+
+          typeFeedback.textContent = "Type created ✔";
+          typeFeedback.style.color = "#2e7d32";
+        }
+
+        newTypeInput.value = "";
+      } catch (err) {
+        console.error(err);
+        typeFeedback.textContent = "⚠ Connection error.";
+        typeFeedback.style.color = "#b54242";
+      }
     });
   }
 
-*/
   // ============================================
-  // 3. NOTIFICATIONS & LOGOUT (Bell/Door)
+  // 4. NOTIFICATIONS & LOGOUT
   // ============================================
   const bellBtn = document.getElementById("notification-btn");
   const notifPopup = document.getElementById("notification-popup");
@@ -129,96 +176,101 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelLogout = document.getElementById("cancel-logout");
   const confirmLogout = document.getElementById("confirm-logout");
 
-  // Bell Logic
   if (bellBtn && notifPopup) {
     bellBtn.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
-      if(logoutPopup) logoutPopup.style.display = "none"; // Close door if open
-      
-      notifPopup.style.display = (notifPopup.style.display === "block") ? "none" : "block";
+      if (logoutPopup) logoutPopup.style.display = "none";
+      notifPopup.style.display =
+        notifPopup.style.display === "block" ? "none" : "block";
     });
   }
 
-  // Door Logic
   if (logoutBtn && logoutPopup) {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
-      if(notifPopup) notifPopup.style.display = "none"; // Close bell if open
-      
+      if (notifPopup) notifPopup.style.display = "none";
       logoutPopup.classList.add("active");
       logoutPopup.style.display = "block";
     });
   }
 
-  // Close Popups on Outside Click
   document.addEventListener("click", (e) => {
-    // Close Notification
     if (notifPopup && !notifPopup.contains(e.target) && bellBtn && !bellBtn.contains(e.target)) {
-        notifPopup.style.display = "none";
+      notifPopup.style.display = "none";
     }
-    // Close Logout
     if (logoutPopup && !logoutPopup.contains(e.target) && logoutBtn && !logoutBtn.contains(e.target)) {
-        logoutPopup.style.display = "none";
-        logoutPopup.classList.remove("active");
+      logoutPopup.style.display = "none";
+      logoutPopup.classList.remove("active");
     }
   });
 
-  // Logout Cancel
-  if (cancelLogout) {
-      cancelLogout.addEventListener("click", () => {
-          logoutPopup.style.display = "none";
-          logoutPopup.classList.remove("active");
-      });
+  if (cancelLogout && logoutPopup) {
+    cancelLogout.addEventListener("click", () => {
+      logoutPopup.style.display = "none";
+      logoutPopup.classList.remove("active");
+    });
   }
-  
-  // Logout Confirm
+
   if (confirmLogout) {
-      confirmLogout.addEventListener("click", () => {
-          window.location.href = "logout.php";
-      });
+    confirmLogout.addEventListener("click", () => {
+      window.location.href = "logout.php";
+    });
   }
-});
 
-// CSV Import Popup Functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const bulkImportBtn = document.getElementById('bulk-import-btn');
-    const csvPopup = document.getElementById('csv-import-popup');
-    const closePopupBtn = document.getElementById('close-csv-popup');
-    const overlay = document.getElementById('csv-overlay');
+  // ============================================
+  // 5. CSV IMPORT POPUP
+  // ============================================
+  const bulkImportBtn = document.getElementById("bulk-import-btn");
+  const csvPopup = document.getElementById("csv-import-popup");
+  const closePopupBtn = document.getElementById("close-csv-popup");
+  const overlay = document.getElementById("csv-overlay");
 
-    if (bulkImportBtn) {
-        bulkImportBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            csvPopup.style.display = 'block';
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        });
-    }
+  if (bulkImportBtn && csvPopup && overlay) {
+    bulkImportBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      csvPopup.style.display = "block";
+      overlay.classList.add("active");
+      document.body.style.overflow = "hidden";
+    });
 
     if (closePopupBtn) {
-        closePopupBtn.addEventListener('click', function() {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scrolling
-        });
+      closePopupBtn.addEventListener("click", function () {
+        csvPopup.style.display = "none";
+        overlay.classList.remove("active");
+        document.body.style.overflow = "";
+      });
     }
 
-    // Close on overlay click
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    }
-
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && csvPopup.style.display === 'block') {
-            csvPopup.style.display = 'none';
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
+    overlay.addEventListener("click", function () {
+      csvPopup.style.display = "none";
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
     });
-});
 
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && csvPopup.style.display === "block") {
+        csvPopup.style.display = "none";
+        overlay.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+    });
+  }
+
+  // ============================================
+  // 6. SCROLL PARA MENSAGEM + REDIRECT (SUCESSO)
+  // ============================================
+  const successMessage = document.querySelector(".form-message.success");
+  const errorMessage   = document.querySelector(".form-message.error");
+
+  if (successMessage) {
+    successMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    if (window.NEW_ITEM_ID) {
+      setTimeout(() => {
+        window.location.href = `itempage.php?id=${window.NEW_ITEM_ID}`;
+      }, 2000);
+    }
+  } else if (errorMessage) {
+    errorMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+});

@@ -1,3 +1,5 @@
+itemcreation
+
 <?php
 // ==========================================
 // 1. DEBUG & SETUP
@@ -24,205 +26,311 @@ $user_id = (int) $_SESSION['user_id'];
 
 $message = "";
 $messageType = ""; // success | error
+$createdItemId = 0;
+
+// Helpers para repovoar o form
+$post_collection_id = isset($_POST['collection_id']) ? (int)$_POST['collection_id'] : 0;
+$post_itemName      = $_POST['itemName']          ?? "";
+$post_itemPrice     = $_POST['itemPrice']         ?? "";
+$post_itemType      = $_POST['itemType']          ?? "";
+$post_importance    = $_POST['itemImportanceNumber'] ?? 5;
+$post_acc_date      = $_POST['acc_date']          ?? "";
+$post_acc_place     = $_POST['acc_place']         ?? "";
+$post_description   = $_POST['itemDescription']   ?? "";
 
 /* ==========================================================
-   2. CSV IMPORT HANDLING
-========================================================== */
+  2. CSV IMPORT HANDLING
+  ========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
 
-    $collection_id = isset($_POST['collection_id_csv']) ? (int)$_POST['collection_id_csv'] : 0;
+    $collection_id = isset($_POST['collection_id_csv']) ? (int) $_POST['collection_id_csv'] : 0;
 
     if ($collection_id === 0) {
         $message = "Please select a valid collection.";
         $messageType = "error";
+        goto end_of_form;
     }
-    elseif (!isset($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== 0) {
+
+    if (!isset($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== 0) {
         $message = "Please upload a valid CSV file.";
         $messageType = "error";
+        goto end_of_form;
     }
-    else {
-        $handle = fopen($_FILES['csvFile']['tmp_name'], "r");
 
-        if ($handle === FALSE) {
-            $message = "Error opening CSV file.";
-            $messageType = "error";
+    $handle = fopen($_FILES['csvFile']['tmp_name'], "r");
+    if ($handle === FALSE) {
+        $message = "Error opening CSV file.";
+        $messageType = "error";
+        goto end_of_form;
+    }
+
+    $imported = 0;
+    $failed = 0;
+    $errors = [];
+    $row_number = 0;
+
+    // Skip header
+    fgetcsv($handle);
+
+    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+        $row_number++;
+
+        if (count($data) < 3) {
+            $failed++;
+            $errors[] = "Row $row_number: Not enough columns.";
+            continue;
+        }
+
+        $name  = trim($data[0]);
+        $price = trim($data[1]);
+        $type  = trim($data[2]);
+
+        if ($name === "" || $price === "" || $type === "") {
+            $failed++;
+            $errors[] = "Row $row_number: Missing required fields.";
+            continue;
+        }
+
+        $price      = (float)$price;
+        $importance = isset($data[3]) ? (int)$data[3] : 5;
+        $acc_date   = isset($data[4]) && $data[4] !== "" ? $data[4] : date('Y-m-d');
+        $acc_place   = isset($data[5]) ? trim($data[5]) : "";
+        $description = isset($data[6]) ? trim($data[6]) : "";
+
+        if ($acc_date > date("Y-m-d")) {
+            $failed++;
+            $errors[] = "Row $row_number: Acquisition date cannot be in the future.";
+            continue;
+        }
+
+        // DUPLICADOS NA MESMA COLEÇÃO  ✔
+        $dup_stmt = $conn->prepare("
+            SELECT COUNT(*) AS c
+            FROM contains c
+            JOIN item i ON c.item_id = i.item_id
+            WHERE c.collection_id = ?
+              AND LOWER(TRIM(i.name)) = LOWER(TRIM(?))
+        ");
+        $dup_stmt->bind_param("is", $collection_id, $name);
+        $dup_stmt->execute();
+        $dup_res = $dup_stmt->get_result()->fetch_assoc();
+        $dup_stmt->close();
+
+        if ((int)$dup_res['c'] > 0) {
+            $failed++;
+            $errors[] = "Row $row_number: Item '$name' already exists in this collection.";
+            continue;  // <- NÃO INSERE ESTE REGISTO
+        }
+
+        // TYPE
+        $stmtT = $conn->prepare("SELECT type_id FROM type WHERE name = ? LIMIT 1");
+        $stmtT->bind_param("s", $type);
+        $stmtT->execute();
+        $resT = $stmtT->get_result();
+
+        if ($resT->num_rows > 0) {
+            $type_id = (int)$resT->fetch_assoc()['type_id'];
         } else {
-            $imported = 0;
-            $failed = 0;
-            $errors = [];
-            $row_number = 0;
+            $stmtInsT = $conn->prepare("INSERT INTO type (name) VALUES (?)");
+            $stmtInsT->bind_param("s", $type);
+            $stmtInsT->execute();
+            $type_id = $stmtInsT->insert_id;
+            $stmtInsT->close();
+        }
 
-            // Skip header
-            fgetcsv($handle);
+        // DEFAULT IMAGE
+        $image_id = 42;
 
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                $row_number++;
+        // INSERT ITEM
+        $stmt = $conn->prepare("
+            INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param("iisdisss",
+            $type_id,
+            $image_id,
+            $name,
+            $price,
+            $importance,
+            $acc_date,
+            $acc_place,
+            $description
+        );
 
-                if (count($data) < 3) {
-                    $failed++;
-                    $errors[] = "Row $row_number: Not enough columns.";
-                    continue;
-                }
+        if ($stmt->execute()) {
+            $item_id = $stmt->insert_id;
 
-                $name  = trim($data[0]);
-                $price = trim($data[1]);
-                $type  = trim($data[2]);
+            $stmtC = $conn->prepare("
+                INSERT INTO contains (collection_id, item_id)
+                VALUES (?, ?)
+            ");
+            $stmtC->bind_param("ii", $collection_id, $item_id);
+            $stmtC->execute();
 
-                if ($name === "" || $price === "" || $type === "") {
-                    $failed++;
-                    $errors[] = "Row $row_number: Missing required fields.";
-                    continue;
-                }
-
-                $price = (float)$price;
-                $importance = isset($data[3]) && $data[3] !== "" ? (int)$data[3] : 5;
-                $acc_date = isset($data[4]) && $data[4] !== "" ? $data[4] : date('Y-m-d');
-                $acc_place = isset($data[5]) ? $conn->real_escape_string($data[5]) : "";
-                $description = isset($data[6]) ? $conn->real_escape_string($data[6]) : "";
-
-                // Validate date
-                if ($acc_date > date("Y-m-d")) {
-                    $failed++;
-                    $errors[] = "Row $row_number: Acquisition date cannot be in the future.";
-                    continue;
-                }
-
-                // Handle Type
-                $typeSafe = $conn->real_escape_string($type);
-                $sql = "SELECT type_id FROM type WHERE name = '$typeSafe' LIMIT 1";
-                $res = $conn->query($sql);
-
-                if ($res && $res->num_rows > 0) {
-                    $type_id = (int)$res->fetch_assoc()['type_id'];
-                } else {
-                    $conn->query("INSERT INTO type (name) VALUES ('$typeSafe')");
-                    $type_id = $conn->insert_id;
-                }
-
-                // Insert item
-                $sql_item = "INSERT INTO item (type_id,name,price,importance,acc_date,acc_place,description)
-                             VALUES ($type_id,'$name',$price,$importance,'$acc_date','$acc_place','$description')";
-
-                if ($conn->query($sql_item)) {
-                    $item_id = $conn->insert_id;
-
-                    $sql_link = "INSERT INTO contains (collection_id,item_id)
-                                 VALUES ($collection_id,$item_id)";
-
-                    if ($conn->query($sql_link)) {
-                        $imported++;
-                    } else {
-                        $failed++;
-                        $errors[] = "Row $row_number: Failed to link item to collection.";
-                    }
-                } else {
-                    $failed++;
-                    $errors[] = "Row $row_number: Failed to insert item.";
-                }
-            }
-
-            fclose($handle);
-
-            $message = "Import finished! $imported items imported.";
-            if ($failed > 0) {
-                $message .= " $failed errors occurred.<br>";
-                $message .= implode("<br>", array_slice($errors, 0, 5));
-                $messageType = "error";
-            } else {
-                $messageType = "success";
-            }
+            $imported++;
+        } else {
+            $failed++;
+            $errors[] = "Row $row_number: Failed inserting item.";
         }
     }
+
+    fclose($handle);
+
+    $message = "Import finished! $imported items imported.";
+    if ($failed > 0) {
+        $message .= " $failed errors occurred.<br>" .
+                    implode("<br>", array_slice($errors, 0, 5));
+        $messageType = "error";
+    } else {
+        $messageType = "success";
+    }
+
+    goto end_of_form;
 }
 
 /* ==========================================================
-   3. MANUAL ITEM CREATION (NORMAL FORM)
-========================================================== */
+  3. MANUAL ITEM CREATION (FORM NORMAL)
+  ========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
 
-    $name        = trim($_POST['itemName'] ?? "");
-    $price       = isset($_POST['itemPrice']) ? (float)$_POST['itemPrice'] : -1;
-    $typeInput   = trim($_POST['itemType'] ?? "");
-    $importance  = (int)($_POST['itemImportanceNumber'] ?? 5);
-    $acc_date    = $_POST['acc_date'] ?? "";
-    $acc_place   = $conn->real_escape_string($_POST['acc_place'] ?? "");
-    $description = $conn->real_escape_string($_POST['itemDescription'] ?? "");
+    $name       = trim($_POST['itemName'] ?? "");
+    $price      = isset($_POST['itemPrice']) ? (float) $_POST['itemPrice'] : -1;
+    $typeInput  = trim($_POST['itemType'] ?? "");
+    $importance = (int) ($_POST['itemImportanceNumber'] ?? 5);
+    $acc_date   = trim($_POST['acc_date'] ?? "");
+    $acc_place   = trim($_POST['acc_place'] ?? "");
+    $description = trim($_POST['itemDescription'] ?? "");
     $collection_id = (int)($_POST['collection_id'] ?? 0);
 
-    // =============================
-    // PHP VALIDATION
-    // =============================
+    // Repovoar
+    $post_collection_id = $collection_id;
+    $post_itemName      = $name;
+    $post_itemPrice     = $_POST['itemPrice'] ?? "";
+    $post_itemType      = $typeInput;
+    $post_importance    = $importance;
+    $post_acc_date      = $acc_date;
+    $post_acc_place     = $acc_place;
+    $post_description   = $description;
+
+    // VALIDAÇÕES
     if ($collection_id === 0 || $name === "" || $typeInput === "" || $acc_date === "") {
         $message = "⚠️ Please fill in all required (*) fields.";
         $messageType = "error";
+        goto end_of_form;
     }
-    elseif ($price < 0) {
+
+    if ($price < 0) {
         $message = "⚠️ Price cannot be negative.";
         $messageType = "error";
+        goto end_of_form;
     }
-    elseif ($acc_date > date("Y-m-d")) {
+
+    if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $acc_date)) {
+        $message = "⚠️ Invalid acquisition date format.";
+        $messageType = "error";
+        goto end_of_form;
+    }
+
+    if ($acc_date > date("Y-m-d")) {
         $message = "⚠️ Acquisition date cannot be in the future.";
         $messageType = "error";
+        goto end_of_form;
     }
-    else {
-        // VALID — proceed
 
-        // 1. Handle Type (create if needed)
-        $typeSafe = $conn->real_escape_string($typeInput);
-        $sql = "SELECT type_id FROM type WHERE name = '$typeSafe' LIMIT 1";
-        $res = $conn->query($sql);
+    // DUPLICADOS NA MESMA COLEÇÃO ✔
+    $dup_stmt = $conn->prepare("
+        SELECT COUNT(*) AS c
+        FROM contains c
+        JOIN item i ON c.item_id = i.item_id
+        WHERE c.collection_id = ?
+          AND LOWER(TRIM(i.name)) = LOWER(TRIM(?))
+    ");
+    $dup_stmt->bind_param("is", $collection_id, $name);
+    $dup_stmt->execute();
+    $dup_res = $dup_stmt->get_result()->fetch_assoc();
+    $dup_stmt->close();
 
-        if ($res && $res->num_rows > 0) {
-            $type_id = (int)$res->fetch_assoc()['type_id'];
-        } else {
-            $conn->query("INSERT INTO type (name) VALUES ('$typeSafe')");
-            $type_id = $conn->insert_id;
+    if ((int)$dup_res['c'] > 0) {
+        $message = "⚠️ This collection already has an item with that name.";
+        $messageType = "error";
+        goto end_of_form;   // <- NÃO CHEGA A INSERIR
+    }
+
+    // TYPE
+    $stmtT = $conn->prepare("SELECT type_id FROM type WHERE name = ? LIMIT 1");
+    $stmtT->bind_param("s", $typeInput);
+    $stmtT->execute();
+    $resT = $stmtT->get_result();
+
+    if ($resT->num_rows > 0) {
+        $type_id = (int)$resT->fetch_assoc()['type_id'];
+    } else {
+        $stmtInsT = $conn->prepare("INSERT INTO type (name) VALUES (?)");
+        $stmtInsT->bind_param("s", $typeInput);
+        $stmtInsT->execute();
+        $type_id = $stmtInsT->insert_id;
+        $stmtInsT->close();
+    }
+
+    // IMAGE
+    $image_id = 42;
+
+    if (isset($_FILES["itemImage"]) && $_FILES["itemImage"]["error"] === 0) {
+        $dir = "images/";
+        if (!is_dir($dir)) mkdir($dir, 0777, true);
+
+        $file = $dir . basename($_FILES["itemImage"]["name"]);
+        if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $file)) {
+            $url = $file;
+            $stmtImg = $conn->prepare("INSERT INTO image (url) VALUES (?)");
+            $stmtImg->bind_param("s", $url);
+            $stmtImg->execute();
+            $image_id = $stmtImg->insert_id;
         }
+    }
 
-        // 2. Handle Image (optional)
-        $image_id = 42; // default placeholder
+    // INSERT ITEM
+    $stmt = $conn->prepare("
+        INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
 
-        if (isset($_FILES["itemImage"]) && $_FILES["itemImage"]["error"] === 0) {
-            $dir = "images/";
-            if (!is_dir($dir)) mkdir($dir, 0777, true);
+    $stmt->bind_param(
+        "iisdisss",
+        $type_id,
+        $image_id,
+        $name,
+        $price,
+        $importance,
+        $acc_date,
+        $acc_place,
+        $description
+    );
 
-            $file = $dir . basename($_FILES["itemImage"]["name"]);
-            if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $file)) {
-                $url = $conn->real_escape_string($file);
-                $conn->query("INSERT INTO image (url) VALUES ('$url')");
-                $image_id = $conn->insert_id;
-            }
-        }
+    if ($stmt->execute()) {
+        $item_id = $stmt->insert_id;
 
-        // 3. Insert item
-        $sql_item = "
-            INSERT INTO item (type_id,image_id,name,price,importance,acc_date,acc_place,description)
-            VALUES ($type_id,$image_id,'$name',$price,$importance,'$acc_date','$acc_place','$description')
-        ";
+        $stmtC = $conn->prepare("
+            INSERT INTO contains (collection_id, item_id)
+            VALUES (?, ?)
+        ");
+        $stmtC->bind_param("ii", $collection_id, $item_id);
+        $stmtC->execute();
 
-        if ($conn->query($sql_item)) {
-            $item_id = $conn->insert_id;
+        $message = "✔ Item created successfully! <span class='redirect-msg'>Redirecting...</span>";
+        $messageType = "success";
+        $createdItemId = $item_id;
+        goto end_of_form;
 
-            // Link item to collection
-            $sql_link = "INSERT INTO contains (collection_id,item_id)
-                         VALUES ($collection_id,$item_id)";
-
-            if ($conn->query($sql_link)) {
-                $message = "✅ Item created successfully!";
-                $messageType = "success";
-            } else {
-                $message = "Item created but failed to link to collection.";
-                $messageType = "error";
-            }
-        } else {
-            $message = "Error inserting item: " . $conn->error;
-            $messageType = "error";
-        }
+    } else {
+        $message = "Database error while creating item.";
+        $messageType = "error";
+        goto end_of_form;
     }
 }
 
 /* ==========================================================
-   4. FETCH COLLECTIONS
+  4. FETCH COLLECTIONS
 ========================================================== */
 $user_collections = [];
 $sql = "SELECT collection_id, name FROM collection WHERE user_id = $user_id";
@@ -233,6 +341,20 @@ if ($res && $res->num_rows > 0) {
         $user_collections[] = $row;
     }
 }
+
+/* ==========================================================
+  5. FETCH TYPES (para o dropdown)
+========================================================== */
+$allTypes = [];
+$sqlTypes = "SELECT type_id, name FROM type ORDER BY name ASC";
+$resTypes = $conn->query($sqlTypes);
+if ($resTypes && $resTypes->num_rows > 0) {
+    while ($row = $resTypes->fetch_assoc()) {
+        $allTypes[] = $row;
+    }
+}
+
+end_of_form:
 ?>
 
 <!DOCTYPE html>
@@ -243,24 +365,9 @@ if ($res && $res->num_rows > 0) {
   <title>Trall-E | Create Item</title>
   <link rel="stylesheet" href="itemcreation.css" />
   <link rel="stylesheet" href="calendar_popup.css" />
-  <style>
-      /* Simple feedback styles */
-      .form-message { text-align: center; font-weight: bold; padding: 10px; margin-top: 15px; border-radius: 5px; }
-      .form-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-      .form-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-      
-      /* Style the standard select box to look decent */
-      select#collection_id {
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          background-color: white;
-          font-size: 14px;
-      }
-  </style>
 </head>
 
+<body>
 
 <!-- Popup Overlay -->
 <div class="popup-overlay" id="csv-overlay"></div>
@@ -315,7 +422,7 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
           <?php 
           if (!empty($user_collections)) {
               foreach ($user_collections as $col) {
-                  echo '<option value="' . $col['collection_id'] . '">' . htmlspecialchars($col['name']) . '</option>';
+                  echo '<option value="' . (int)$col['collection_id'] . '">' . htmlspecialchars($col['name']) . '</option>';
               }
           }
           ?>
@@ -334,8 +441,6 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
   </div>
 </div>
 
-<body>
-
   <header>
     <a href="homepage.php" class="logo">
       <img src="images/TrallE_2.png" alt="logo" />
@@ -346,8 +451,8 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
           </form>
       </div>
     <div class="icons">
-                <?php include __DIR__ . '/calendar_popup.php'; ?>
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+      <?php include __DIR__ . '/calendar_popup.php'; ?>
+      <?php include __DIR__ . '/notifications_popup.php'; ?>
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
       
       <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
@@ -370,7 +475,7 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
       <section class="item-creation-section">
         <h2 class="page-title">Create New Item</h2>
 
-        <form id="itemForm" method="POST" action="" enctype="multipart/form-data" novalidate>
+        <form id="itemForm" method="POST" action="" enctype="multipart/form-data">
 
           <div class="form-group">
             <label for="collection_id">Collection <span class="required">*</span></label>
@@ -379,7 +484,8 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
                 <?php 
                 if (!empty($user_collections)) {
                     foreach ($user_collections as $col) {
-                        echo '<option value="' . $col['collection_id'] . '">' . htmlspecialchars($col['name']) . '</option>';
+                        $selected = ($post_collection_id === (int)$col['collection_id']) ? "selected" : "";
+                        echo '<option value="' . (int)$col['collection_id'] . '" ' . $selected . '>' . htmlspecialchars($col['name']) . '</option>';
                     }
                 }
                 ?>
@@ -388,40 +494,80 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
 
           <div class="form-group">
             <label for="itemName">Name <span class="required">*</span></label>
-            <input type="text" id="itemName" name="itemName" placeholder="Enter item name" required />
+            <input type="text" id="itemName" name="itemName" placeholder="Enter item name"
+                   value="<?php echo htmlspecialchars($post_itemName); ?>" required />
           </div>
 
           <div class="form-group">
             <label for="itemPrice">Price (€) <span class="required">*</span></label>
-            <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price" step="0.01" min="0" required />
+            <input type="number" id="itemPrice" name="itemPrice" placeholder="Enter price"
+                   step="0.01" min="0"
+                   value="<?php echo htmlspecialchars($post_itemPrice); ?>" required />
           </div>
 
+          <!-- TYPE DROPDOWN + BOTÃO CRIAR TYPE -->
           <div class="form-group">
-            <label for="itemType">Item Type <span class="required">*</span></label>
-            <input type="text" id="itemType" name="itemType" placeholder="Enter item type (e.g., Card, Figure)" required />
+            <label>Item Type <span class="required">*</span></label>
+
+            <div class="type-header">
+              <button type="button" id="openTypeModal" class="btn-small">Create type</button>
+            </div>
+
+            <div class="custom-multiselect">
+              <button type="button" id="typeDropdownBtn">
+                <?php echo $post_itemType !== "" ? htmlspecialchars($post_itemType) : "Select Type ⮟"; ?>
+              </button>
+              <div class="dropdown-content" id="typeDropdown">
+                <?php if (empty($allTypes)): ?>
+                  <div style="padding:0.4rem 0.6rem; color:#777;">No types created yet.</div>
+                <?php else: ?>
+                  <?php foreach ($allTypes as $t): 
+                        $checked = ($post_itemType !== "" && $post_itemType === $t['name']) ? "checked" : "";
+                  ?>
+                    <label>
+                      <input type="radio" name="typeRadio"
+                             value="<?php echo htmlspecialchars($t['name']); ?>"
+                             <?php echo $checked; ?>>
+                      <?php echo htmlspecialchars($t['name']); ?>
+                    </label>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </div>
+            </div>
+
+            <!-- hidden que vai com o form para o PHP -->
+            <input type="hidden" id="itemType" name="itemType"
+                   value="<?php echo htmlspecialchars($post_itemType); ?>">
           </div>
 
           <div class="form-group">
               <label for="itemImportanceSlider">Importance (1–10) <span class="required">*</span></label>
               <div class="slider-wrapper">
-                  <input type="range" id="itemImportanceSlider" min="1" max="10" step="1" value="5" />
-                  <input type="number" id="itemImportanceNumber" name="itemImportanceNumber" min="1" max="10" value="5" />
+                  <input type="range" id="itemImportanceSlider" min="1" max="10" step="1"
+                         value="<?php echo (int)$post_importance; ?>" />
+                  <input type="number" id="itemImportanceNumber" name="itemImportanceNumber" min="1" max="10"
+                         value="<?php echo (int)$post_importance; ?>" />
               </div>
           </div>
 
           <div class="form-group">
             <label for="acc_date">Acquisition Date (DD-MM-YYYY) <span class="required">*</span></label>
-            <input type="date" id="acc_date" name="acc_date" required />
+            <input type="date" id="acc_date" name="acc_date"
+                   value="<?php echo htmlspecialchars($post_acc_date); ?>" required />
           </div>
 
           <div class="form-group">
             <label for="acc_place">Acquisition Place</label>
-            <input type="text" id="acc_place" name="acc_place" placeholder="Enter where item was acquired" />
+            <input type="text" id="acc_place" name="acc_place"
+                   value="<?php echo htmlspecialchars($post_acc_place); ?>"
+                   placeholder="Enter where item was acquired" />
           </div>
 
           <div class="form-group">
             <label for="itemDescription">Description</label>
-            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your item"></textarea>
+            <textarea id="itemDescription" name="itemDescription" rows="4" placeholder="Add details about your item"><?php
+                echo htmlspecialchars($post_description);
+            ?></textarea>
           </div>
 
           <div class="form-group">
@@ -432,16 +578,15 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
           <div class="form-actions">
             <button type="submit" class="btn-primary">Create Item</button>
             <button type="button" id="bulk-import-btn" class="btn-secondary">Bulk Creation (CSV)</button>
-          </div>
+          </div>          
+          
         </form>
-
+        
         <?php if ($message): ?>
             <p id="formMessage" class="form-message <?php echo $messageType; ?>">
                 <?php echo $message; ?>
             </p>
         <?php endif; ?>
-        
-        <p id="jsFormMessage" class="form-message"></p> 
 
       </section>
     </div>
@@ -469,6 +614,29 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
       </div>
     </aside>
   </div>
+
+<!-- MODAL PARA TYPE -->
+<div id="typeModalOverlay" class="modal-overlay hidden"></div>
+
+<div id="typeModal" class="modal hidden">
+    <h3>Create new type</h3>
+
+    <input type="text" id="newTypeInput" placeholder="Type name...">
+
+    <p id="typeFeedback" class="type-feedback"></p>
+
+    <div class="modal-buttons">
+        <button id="createTypeBtn" class="btn-primary">Create type</button>
+        <button id="closeTypeModal" class="btn-secondary">Close</button>
+    </div>
+</div>
+
+
+<?php if (!empty($createdItemId)): ?>
+<script>
+    window.NEW_ITEM_ID = <?php echo (int)$createdItemId; ?>;
+</script>
+<?php endif; ?>
 
   <script src="itemcreation.js"></script>
   <script src="logout.js"></script>

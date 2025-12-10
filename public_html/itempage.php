@@ -72,7 +72,16 @@ if (!empty($item['collection_image_id'])) {
 }
 
 function fmtDate($d) {
-    return $d ? date("d/m/Y", strtotime($d)) : "-";
+    if (!$d || $d === "0000-00-00") {
+        return "—";
+    }
+
+    $dt = DateTime::createFromFormat("Y-m-d", $d);
+    if ($dt === false) {
+        return "—";
+    }
+
+    return $dt->format("d/m/Y");
 }
 ?>
 

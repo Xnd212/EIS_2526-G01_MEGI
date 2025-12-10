@@ -18,8 +18,7 @@
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 800px;
-  height: auto;
-  min-height: 1020px;
+  margin-bottom: 3rem;
 }
 
 .page-title {
@@ -47,14 +46,14 @@ label {
   color: #b54242;
 }
 
-/* Custom Multi-select Dropdown */
+/* Custom dropdown (reutilizado para TYPE) */
 .custom-multiselect {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-#dropdownBtn {
+.custom-multiselect button {
   width: 100%;
   text-align: left;
   padding: 0.6rem;
@@ -65,7 +64,7 @@ label {
   font-size: 1rem;
 }
 
-#dropdownBtn:hover {
+.custom-multiselect button:hover {
   border-color: #b54242;
 }
 
@@ -96,31 +95,35 @@ label {
   border-radius: 5px;
 }
 
-/* Inputs */
+/* Type header (botão Criar type) */
+.type-header {
+  margin-bottom: 0.5rem;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="file"],
 input[type="date"],
-textarea {
+textarea,
+select {
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  resize:none;
+}
+
+textarea {
+  resize: none;
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   border-color: #b54242;
   outline: none;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-}
-
+/* Slider */
 .slider-wrapper {
   display: flex;
   align-items: center;
@@ -162,6 +165,14 @@ textarea:focus {
   font-size: 1rem;
 }
 
+/* BOTÕES (iguais ao collectioncreation) */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  gap: 0.75rem;
+}
 
 .btn-primary {
   background: #b54242;
@@ -178,6 +189,25 @@ textarea:focus {
   background: #9d3636;
 }
 
+.btn-secondary {
+  background: #eee;
+  color: #444;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-small {
+  background: #c77462;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+/* MENSAGENS */
+
 .form-message {
   margin-top: 1rem;
   font-weight: bold;
@@ -189,13 +219,21 @@ textarea:focus {
 }
 
 .form-message.success {
-  color: #3d8b3d;
+  color: #3a8d3a;
+}
+
+.redirect-msg {
+  margin-left: 8px;
+  color: #444;
+  font-size: 0.95rem;
 }
 
 input.error {
   border-color: #b54242;
   background-color: #ffecec;
 }
+
+/* Sidebar cores */
 
 .collections-section {
   background-color: #f9d7d1;
@@ -214,30 +252,6 @@ input.error {
     max-width: 100%;
     padding: 1.5rem;
   }
-}
-
-/* Form actions with both buttons */
-.form-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-.btn-secondary {
-    padding: 12px 30px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
 }
 
 /* CSV Import Popup */
@@ -365,6 +379,55 @@ input.error {
 
 .csv-import-popup .form-actions {
     margin-top: 25px;
+    justify-content: flex-end;
 }
 
+/* MODAL PARA TYPE (igual ao modal de tags) */
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+  width: 350px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+}
+
+.modal input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.type-feedback {
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+}

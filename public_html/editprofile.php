@@ -294,6 +294,41 @@ $bodyThemeAttr = $currentTheme;
     <link rel="stylesheet" href="editprofile.css">
     <link rel="stylesheet" href="calendar_popup.css" />
 </head>
+
+<!-- Download Popup -->
+<div class="download-overlay" id="download-overlay"></div>
+<div class="download-popup" id="download-popup">
+    <div class="popup-header">
+        <h3>Download Your Data</h3>
+        <button class="close-popup" id="close-download-popup" type="button">✕</button>
+    </div>
+    
+    <p>Choose what you want to download:</p>
+    
+    <div class="download-options">
+        <a href="download_data.php?type=items" class="download-option-btn">
+            Download Items Only
+        </a>
+        
+        <a href="download_data.php?type=collections" class="download-option-btn">
+            Download Collections Only
+        </a>
+        
+        <a href="download_data.php?type=both" class="download-option-btn">
+            Download Both (Items + Collections)
+        </a>
+    </div>
+    
+    <div class="download-info">
+        <strong>What's included:</strong>
+        <ul>
+            <li><strong>Items:</strong> Name, Price, Type, Importance, Dates, Description, Collection</li>
+            <li><strong>Collections:</strong> Name, Theme, Starting Date, Description, Item Count</li>
+        </ul>
+        <p><em>Note: IDs are not included for better readability.</em></p>
+    </div>
+</div>
+
 <body data-theme="<?php echo htmlspecialchars($bodyThemeAttr); ?>">
 
 <header>
@@ -503,6 +538,15 @@ $bodyThemeAttr = $currentTheme;
                 <a href="userpage.php" class="btn-secondary">Cancel</a>
                 <button type="submit" class="btn-primary">Save Changes</button>
             </div>
+            
+            <!-- Download Data Section -->
+<div class="download-data-section">
+    <h3>Download Your Data</h3>
+    <p>Export your collections and items data to a CSV file for backup or external use.</p>
+    <button type="button" class="download-btn" id="download-data-btn">
+        📥 Download My Data
+    </button>
+</div>
         </form>
     </section>
 </main>
@@ -543,5 +587,6 @@ $bodyThemeAttr = $currentTheme;
 <script src="homepage.js"></script>
 <script src="editprofile.js"></script>
 <script src="logout.js"></script>
+<script src="download_data.js"></script>
 </body>
 </html>

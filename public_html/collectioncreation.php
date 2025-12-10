@@ -182,48 +182,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST['import_csv'])) {
         $image_id = "NULL";
 
         // B. Image Upload (opcional)
-        if (isset($_FILES['collectionImage']) && $_FILES['collectionImage']['error'] == 0) {
+        $PLACEHOLDER_COLLECTION_IMAGE_ID = 12;  
+        $image_id = $PLACEHOLDER_COLLECTION_IMAGE_ID; 
+        
+        // Se o user carregou uma imagem, tentamos usá-la
+        if (isset($_FILES['collectionImage']) && $_FILES['collectionImage']['error'] === UPLOAD_ERR_OK) {
+
             $target_dir = "images/";
             if (!file_exists($target_dir)) {
                 mkdir($target_dir, 0777, true);
             }
 
-            $file_name   = basename($_FILES["collectionImage"]["name"]);
+            $file_name = basename($_FILES["collectionImage"]["name"]);
             $target_file = $target_dir . $file_name;
 
             if (move_uploaded_file($_FILES["collectionImage"]["tmp_name"], $target_file)) {
 
-                $url    = "images/" . $file_name;
-                $url_db = $conn->real_escape_string($url);
+                $url = $conn->real_escape_string("images/" . $file_name);
 
-                $sql_img = "INSERT INTO image (url) VALUES ('$url_db')";
-                if ($conn->query($sql_img) === TRUE) {
-                    $image_id = $conn->insert_id;
+                // Inserir URL na tabela image
+                $stmtImg = $conn->prepare("INSERT INTO image (url) VALUES (?)");
+                $stmtImg->bind_param("s", $url);
+
+                if ($stmtImg->execute()) {
+                    $image_id = $stmtImg->insert_id; // passa a usar a imagem REAL
                 } else {
                     $errors[] = "Image DB Error: " . $conn->error;
                 }
+
+                $stmtImg->close();
             } else {
                 $errors[] = "Error uploading image file.";
             }
         }
 
-        // Se a imagem falhou, não inserimos a coleção
+        // Se houve erros, paramos aqui
         if (!empty($errors)) {
-            $message     = implode("<br>", $errors);
+            $message = implode("<br>", $errors);
             $messageType = "error";
         } else {
-            // C. Insert Collection
-            $img_val = ($image_id === "NULL") ? "NULL" : (int)$image_id;
 
-            $name_db        = $conn->real_escape_string($name);
-            $theme_db       = $conn->real_escape_string($theme);
-            $desc_db        = $conn->real_escape_string($description);
-            $start_db       = $conn->real_escape_string($starting_date);
+            // C. Insert Collection (agora SEM usar NULL — sempre há image_id)
+            $name_db = $conn->real_escape_string($name);
+            $theme_db = $conn->real_escape_string($theme);
+            $desc_db = $conn->real_escape_string($description);
+            $start_db = $conn->real_escape_string($starting_date);
 
             $sql_coll = "
-                INSERT INTO collection (user_id, Theme, image_id, name, starting_date, description) 
-                VALUES ('$user_id', '$theme_db', $img_val, '$name_db', '$start_db', '$desc_db')
-            ";
+        INSERT INTO collection (user_id, Theme, image_id, name, starting_date, description) 
+        VALUES ('$user_id', '$theme_db', '$image_id', '$name_db', '$start_db', '$desc_db')
+        ";
 
             if ($conn->query($sql_coll) === TRUE) {
                 $new_collection_id = $conn->insert_id;

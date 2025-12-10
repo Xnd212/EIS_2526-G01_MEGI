@@ -1,5 +1,3 @@
-itemcreation
-
 <?php
 // ==========================================
 // 1. DEBUG & SETUP
@@ -38,9 +36,10 @@ $post_acc_date      = $_POST['acc_date']          ?? "";
 $post_acc_place     = $_POST['acc_place']         ?? "";
 $post_description   = $_POST['itemDescription']   ?? "";
 
+
 /* ==========================================================
   2. CSV IMPORT HANDLING
-  ========================================================== */
+========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
 
     $collection_id = isset($_POST['collection_id_csv']) ? (int) $_POST['collection_id_csv'] : 0;
@@ -64,9 +63,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
         goto end_of_form;
     }
 
-    $imported = 0;
-    $failed = 0;
-    $errors = [];
+    $imported   = 0;
+    $failed     = 0;
+    $errors     = [];
     $row_number = 0;
 
     // Skip header
@@ -103,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
             continue;
         }
 
-        // DUPLICADOS NA MESMA COLEÇÃO  ✔
+        // DUPLICADOS NA MESMA COLEÇÃO
         $dup_stmt = $conn->prepare("
             SELECT COUNT(*) AS c
             FROM contains c
@@ -119,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
         if ((int)$dup_res['c'] > 0) {
             $failed++;
             $errors[] = "Row $row_number: Item '$name' already exists in this collection.";
-            continue;  // <- NÃO INSERE ESTE REGISTO
+            continue;
         }
 
         // TYPE
@@ -146,7 +145,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
             INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->bind_param("iisdisss",
+        $stmt->bind_param(
+            "iisdisss",
             $type_id,
             $image_id,
             $name,
@@ -188,9 +188,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
     goto end_of_form;
 }
 
+
 /* ==========================================================
   3. MANUAL ITEM CREATION (FORM NORMAL)
-  ========================================================== */
+========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
 
     $name       = trim($_POST['itemName'] ?? "");
@@ -237,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
         goto end_of_form;
     }
 
-    // DUPLICADOS NA MESMA COLEÇÃO ✔
+    // DUPLICADOS NA MESMA COLEÇÃO
     $dup_stmt = $conn->prepare("
         SELECT COUNT(*) AS c
         FROM contains c
@@ -253,7 +254,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
     if ((int)$dup_res['c'] > 0) {
         $message = "⚠️ This collection already has an item with that name.";
         $messageType = "error";
-        goto end_of_form;   // <- NÃO CHEGA A INSERIR
+        goto end_of_form;
     }
 
     // TYPE
@@ -294,7 +295,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
         INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
-
     $stmt->bind_param(
         "iisdisss",
         $type_id,
@@ -329,9 +329,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
     }
 }
 
+
 /* ==========================================================
-  4. FETCH COLLECTIONS
+   A PARTIR DAQUI, **SEMPRE** CORRE (COM OU SEM goto)
 ========================================================== */
+end_of_form:
+
+/* 4. FETCH COLLECTIONS */
 $user_collections = [];
 $sql = "SELECT collection_id, name FROM collection WHERE user_id = $user_id";
 $res = $conn->query($sql);
@@ -342,9 +346,7 @@ if ($res && $res->num_rows > 0) {
     }
 }
 
-/* ==========================================================
-  5. FETCH TYPES (para o dropdown)
-========================================================== */
+/* 5. FETCH TYPES (para o dropdown) */
 $allTypes = [];
 $sqlTypes = "SELECT type_id, name FROM type ORDER BY name ASC";
 $resTypes = $conn->query($sqlTypes);
@@ -353,8 +355,6 @@ if ($resTypes && $resTypes->num_rows > 0) {
         $allTypes[] = $row;
     }
 }
-
-end_of_form:
 ?>
 
 <!DOCTYPE html>

@@ -289,21 +289,26 @@ if (!empty($col['starting_date'])) {
             </div>
 
             <h3>Next Events</h3>
-            <div class="next-event">
-                <?php if ($future_events->num_rows > 0): ?>
+
+            <?php if ($future_events->num_rows > 0): ?>
+                <div class="event-cards">
                     <?php while ($f_event = $future_events->fetch_assoc()): ?>
                         <?php
                         $f_img = !empty($f_event['url']) ? $f_event['url'] : 'images/default_event.png';
                         ?>
-                        <a href="eventpage.php?id=<?php echo $f_event['event_id']; ?>">
-                            <img src="<?php echo htmlspecialchars($f_img); ?>" alt="<?php echo htmlspecialchars($f_event['name']); ?>">
-                            <p><strong><?php echo htmlspecialchars($f_event['name']); ?></strong></p>
-                        </a>
+                        <div class="event-card">
+                            <a href="eventpage.php?id=<?php echo (int)$f_event['event_id']; ?>">
+                                <img src="<?php echo htmlspecialchars($f_img); ?>"
+                                     alt="<?php echo htmlspecialchars($f_event['name']); ?>">
+                                <p><strong><?php echo htmlspecialchars($f_event['name']); ?></strong></p>
+                            </a>
+                        </div>
                     <?php endwhile; ?>
-                <?php else: ?>
-                    <p style="color: #777;">No upcoming events.</p>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php else: ?>
+                <p style="color: #777;">No upcoming events.</p>
+            <?php endif; ?>
+
         </div>
     </div>
 

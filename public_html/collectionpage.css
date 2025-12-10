@@ -52,12 +52,12 @@
 }
 
 .event-card {
-  width: 150px;
+  width: 200px;
   text-align: center;
   background: white;
   border-radius: 10px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  height: 290px;
+  height: 100px;
 }
 
 .event-card img {

@@ -211,9 +211,6 @@ while ($row = $resultE->fetch_assoc()) {
 }
 
 $stmtE->close();
-
-
-
 ?>
 <!DOCTYPE html>
 
@@ -242,8 +239,8 @@ $stmtE->close();
       </div>
     <div class="icons">
       <!-- Botão de notificações -->
-                <?php include __DIR__ . '/calendar_popup.php'; ?>
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+      <?php include __DIR__ . '/calendar_popup.php'; ?>
+      <?php include __DIR__ . '/notifications_popup.php'; ?>
            
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
         
@@ -462,7 +459,8 @@ $stmtE->close();
                 <span class="event-date">
                   <?php echo $eventDate; ?>
                 </span>
-                <a href="pasteventpage.php?id=<?php echo $ev['event_id']; ?>" class="view-all">
+                <a href="eventpage.php?id=<?php echo (int)$ev['event_id']; ?>" class="view-all">
+                  <!-- aqui: vai sempre para eventpage.php com o ID correto -->
                   + See more
                 </a>
               </div>
@@ -471,7 +469,7 @@ $stmtE->close();
         </div>
       </section>
         
-              <!-- ====================== NEXT EVENTS ====================== -->
+      <!-- ====================== NEXT EVENTS ====================== -->
       <section class="past-events">
         <h3>Next events</h3>
         <div class="past-events-grid">
@@ -499,7 +497,8 @@ $stmtE->close();
                 <span class="event-date">
                   <?php echo $eventDate; ?>
                 </span>
-                <a href="pasteventpage.php?id=<?php echo $ev['event_id']; ?>" class="view-all">
+                <a href="eventpage.php?id=<?php echo (int)$ev['event_id']; ?>" class="view-all">
+                  <!-- também aqui: eventpage.php com o mesmo ID -->
                   + See more
                 </a>
               </div>
@@ -511,7 +510,6 @@ $stmtE->close();
     </div>
   </div>
 
-   
   <!-- ===== Right Sidebar (Under Header) ===== -->
   <aside class="sidebar">
     <div class="sidebar-section collections-section">

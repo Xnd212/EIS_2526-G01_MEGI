@@ -1,3 +1,18 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$currentUserId = (int) $_SESSION['user_id'];
+
+require_once __DIR__ . "/db.php";
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -131,6 +146,7 @@
         <!-- === JAVASCRIPT === -->
         <script src="teampage.js"></script>
         <script src="logout.js"></script>
+        <script src="homepage.js"></script>
 
     </body>
 </html>

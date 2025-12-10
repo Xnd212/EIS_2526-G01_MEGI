@@ -7,13 +7,55 @@ session_start();
 $isGuest = isset($_SESSION['is_guest']) && $_SESSION['is_guest'] === true;
 
 if ($isGuest || !isset($_SESSION['user_id'])) {
-    $currentUserId = null; // guest: no friends list
+    $currentUserId = null; // guest: não tem "meus amigos"
 } else {
     $currentUserId = (int) $_SESSION['user_id'];
 }
 
+/* ==========================================
+   QUAL UTILIZADOR ESTAMOS A VER? (PROFILE)
+   ========================================== */
+$profileUserId = filter_input(INPUT_GET, 'user_id', FILTER_VALIDATE_INT);
+
+// Se não vier user_id no URL e existir user logado, usamos o próprio
+if (!$profileUserId && $currentUserId !== null) {
+    $profileUserId = $currentUserId;
+}
+
 /* DB CONNECTION */
 require_once __DIR__ . "/db.php";
+
+/* ==========================================
+   BUSCAR USERNAME DO PERFIL (PARA O TÍTULO)
+   ========================================== */
+$profileUsername = null;
+
+if ($profileUserId !== null) {
+    $sqlProfile = "SELECT username FROM user WHERE user_id = ?";
+    $stmtP = $conn->prepare($sqlProfile);
+    $stmtP->bind_param("i", $profileUserId);
+    $stmtP->execute();
+    $resP = $stmtP->get_result();
+    if ($rowP = $resP->fetch_assoc()) {
+        $profileUsername = $rowP['username'];
+    }
+    $stmtP->close();
+}
+
+/* Definir texto do título e heading */
+// se estou logada e o perfil é o meu → "My Friends"
+if ($currentUserId !== null && $profileUserId === $currentUserId) {
+    $pageTitleSuffix = "My Friends";
+    $friendsHeading  = "My Friends";
+} elseif ($profileUsername !== null) {
+    // senão, se tiver username do perfil → "X's Friends"
+    $pageTitleSuffix = $profileUsername . "'s Friends";
+    $friendsHeading  = $pageTitleSuffix;
+} else {
+    // fallback genérico
+    $pageTitleSuffix = "Friends";
+    $friendsHeading  = "Friends";
+}
 
 /* ==========================================
    SORTING LOGIC
@@ -31,10 +73,15 @@ switch ($sort) {
     default:            $orderBy = "u.username ASC";
 }
 
-/* FETCH FRIENDS — only if not guest */
+/* Para manter o user_id nos links de ordenação */
+$baseQuery = ($profileUserId !== null)
+    ? 'user_id=' . urlencode($profileUserId) . '&'
+    : '';
+
+/* FETCH FRIENDS — só se tivermos um perfil para mostrar */
 $friends = [];
 
-if ($currentUserId !== null) {
+if ($profileUserId !== null) {
 
     $sql = "
         SELECT 
@@ -53,7 +100,7 @@ if ($currentUserId !== null) {
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $currentUserId);
+    $stmt->bind_param("i", $profileUserId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -69,7 +116,7 @@ if ($currentUserId !== null) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | My Friends</title>
+  <title>Trall-E | <?php echo htmlspecialchars($pageTitleSuffix); ?></title>
   <link rel="stylesheet" href="userfriendspage.css">
   <link rel="stylesheet" href="calendar_popup.css" />
 </head>
@@ -111,41 +158,38 @@ if ($currentUserId !== null) {
 
         <section class="friends">
             <div class="friends-header">
-                <h2>My Friends</h2>
+                <h2><?php echo htmlspecialchars($friendsHeading); ?></h2>
 
                 <button class="filter-toggle" id="filterToggle">
                     &#128269; Sort ▾
                 </button>
 
                 <div class="filter-menu" id="filterMenu">
-                    <a href="?sort=alpha-asc">Name: A–Z</a>
-                    <a href="?sort=alpha-desc">Name: Z–A</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=alpha-asc">Name: A–Z</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=alpha-desc">Name: Z–A</a>
                     <hr>
-                    <a href="?sort=date-desc">Newest Friends</a>
-                    <a href="?sort=date-asc">Oldest Friends</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=date-desc">Newest Friends</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=date-asc">Oldest Friends</a>
                 </div>
             </div>
 
             <div class="friends-grid">
-                <?php if ($currentUserId === null): ?>
+                <?php if ($profileUserId === null && $currentUserId === null): ?>
 
-                    <!-- ESTADO: GUEST (mesmo estilo da collections) -->
+                    <!-- ESTADO: GUEST sem perfil específico -->
                     <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
                         You are browsing as a guest.
                         <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
                             Log in
                         </a>
-                        to view friends.
+                        to view your friends.
                     </p>
 
                 <?php elseif (empty($friends)): ?>
 
-                    <!-- ESTADO: LOGADO MAS SEM AMIGOS (igual à collections) -->
+                    <!-- PERFIL (próprio ou de outro user) mas sem amigos -->
                     <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
-                        You don’t have any friends yet.
-                        <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
-                            Find new friends
-                        </a>.
+                        This user doesn’t have any friends yet.
                     </p>
 
                 <?php else: ?>

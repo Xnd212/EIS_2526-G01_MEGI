@@ -101,7 +101,3 @@ try {
 }
 
 $conn->close();
-?>
-<script src="itempage.js"></script>
-<script src="logout.js"></script>
-<script src="deleteitem.js"></script>

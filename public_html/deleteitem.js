@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
     confirmDeleteBtn.disabled = true;
     confirmDeleteBtn.textContent = "Deleting...";
 
-    fetch("delete_item.php", {
+    fetch("deleteitem.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

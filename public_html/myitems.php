@@ -106,71 +106,6 @@ if ($user_id !== null) {
         <title>Trall-E | My Items</title>
         <link rel="stylesheet" href="myitems.css">
         <link rel="stylesheet" href="calendar_popup.css" />
-        <style>
-            /* Filter Menu Styles */
-            .filter-menu a {
-                display: block; width: 100%; text-align: left;
-                padding: 0.5rem 1rem; font-size: 0.85rem;
-                text-decoration: none; color: #333; cursor: pointer; box-sizing: border-box;
-            }
-            .filter-menu a:hover { background-color: #fbecec; color: #b54242; }
-            .filter-menu hr { margin: 0.2rem 0; border: 0; border-top: 1px solid #eee; }
-
-            /* Price Range Styles */
-            .controls-wrapper {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-            .price-form {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                background: #fff;
-                padding: 5px 10px;
-                border-radius: 20px;
-                border: 1px solid #ddd;
-            }
-            .price-form input {
-                width: 60px;
-                border: none;
-                border-bottom: 1px solid #ccc;
-                text-align: center;
-                font-size: 0.9rem;
-                outline: none;
-            }
-            .price-form span { font-size: 0.9rem; color: #666; }
-            
-            /* Apply Button (Arrow) */
-            .price-form button {
-                background: #b54242;
-                color: white;
-                border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-                font-size: 0.8rem;
-                display: flex; align-items: center; justify-content: center;
-            }
-            .price-form button:hover { background: #a03030; }
-
-            /* Reset Button (Circle Arrow) */
-            .reset-btn {
-                background: #6c757d;
-                color: white;
-                border: none;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex; align-items: center; justify-content: center;
-                text-decoration: none;
-                font-size: 0.9rem;
-                margin-left: 2px;
-                transition: background 0.2s;
-            }
-            .reset-btn:hover { background: #5a6268; }
-        </style>
     </head>
 
     <body>    
@@ -293,7 +228,7 @@ if ($user_id !== null) {
                                             <p class="item-title" style="margin-top:10px;">
                                                 <strong><?php echo htmlspecialchars($row['item_name']); ?></strong>
                                             </p>
-                                            <p class="item-price" style="color:#007bff;">
+                                            <p class="item-price">
                                                 €<?php echo $price; ?>
                                             </p>
                                             <?php if (!empty($row['collection_name'])): ?>
@@ -334,26 +269,8 @@ if ($user_id !== null) {
             </aside>
         </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const toggle = document.getElementById('filterToggle');
-                const menu = document.getElementById('filterMenu');
-                
-                if(toggle && menu) {
-                    toggle.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        menu.classList.toggle('show');
-                    });
-                    
-                    document.addEventListener('click', function(e) {
-                        if(!menu.contains(e.target) && !toggle.contains(e.target)) {
-                            menu.classList.remove('show');
-                        }
-                    });
-                }
-            });
-        </script>
         <script src="homepage.js"></script>
+        <script src="myitems.js"></script>
         <script src="logout.js"></script>
     </body>
 </html>

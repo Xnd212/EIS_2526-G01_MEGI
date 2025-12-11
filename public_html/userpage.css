@@ -228,6 +228,12 @@
   width: 180px;
 }
 
+.collection-card img {
+  height: 100px;
+  width: 100%;
+  object-fit: contain;
+}
+
 
 
 .collection-card p {

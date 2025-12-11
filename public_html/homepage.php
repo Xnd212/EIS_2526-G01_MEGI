@@ -33,20 +33,29 @@ $sqlRecommended = "
     JOIN collection_tags ct_evt ON ct_evt.collection_id = c_evt.collection_id
     LEFT JOIN image img         ON e.image_id = img.image_id
     WHERE e.date >= CURDATE()
-      AND e.user_id <> ?              -- NÃO mostrar eventos criados pelo user logado
+      AND c_evt.user_id <> ?          -- Collections attending must NOT belong to the user
       AND ct_evt.tag_id IN (
           SELECT DISTINCT ct_user.tag_id
           FROM collection c_user
-          JOIN collection_tags ct_user
-                ON ct_user.collection_id = c_user.collection_id
-          WHERE c_user.user_id = ?     -- tags das coleções do user logado
+          JOIN collection_tags ct_user ON ct_user.collection_id = c_user.collection_id
+          WHERE c_user.user_id = ?     -- Tags from user's collections
+            AND EXISTS (
+                SELECT 1
+                FROM collection_tags
+                WHERE collection_id = c_user.collection_id
+            )
+      )
+      AND e.event_id NOT IN (
+          SELECT a_user.event_id
+          FROM attends a_user
+          WHERE a_user.user_id = ?     -- Events user is already attending
       )
     ORDER BY e.date ASC
     LIMIT 5
 ";
 
 $stmt = $conn->prepare($sqlRecommended);
-$stmt->bind_param("ii", $currentUserId, $currentUserId);
+$stmt->bind_param("iii", $currentUserId, $currentUserId, $currentUserId);
 
 $stmt->execute();
 $result = $stmt->get_result();
@@ -73,13 +82,18 @@ if (empty($recommendedEvents)) {
         FROM event e
         LEFT JOIN image img ON e.image_id = img.image_id
         WHERE e.date >= CURDATE()
-          AND e.user_id <> ?      -- também aqui só eventos de outros users
+          AND e.user_id <> ?
+          AND e.event_id NOT IN (
+              SELECT a_user.event_id
+              FROM attends a_user
+              WHERE a_user.user_id = ?
+          )
         ORDER BY e.date ASC
         LIMIT 5
     ";
 
     $stmt2 = $conn->prepare($sqlFallback);
-    $stmt2->bind_param("i", $currentUserId);
+    $stmt2->bind_param("ii", $currentUserId, $currentUserId);
     $stmt2->execute();
     $result2 = $stmt2->get_result();
 

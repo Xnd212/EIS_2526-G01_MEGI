@@ -21,25 +21,37 @@ $sql = "
     SELECT 
         i.*,
         c.collection_id,
-        c.name      AS collection_name,
-        c.image_id  AS collection_image_id,
-        c.user_id   AS owner_id,
-        u.username  AS collector_name,
-        t.name      AS type_name
+        c.name AS collection_name,
+        c.image_id AS collection_image_id,
+        c.user_id AS owner_id,
+        u.username AS collector_name,
+        t.name AS type_name
     FROM item i
     INNER JOIN contains con ON i.item_id = con.item_id
     INNER JOIN collection c ON con.collection_id = c.collection_id
-    JOIN user u       ON c.user_id      = u.user_id
-    LEFT JOIN type t  ON i.type_id      = t.type_id
+    JOIN user u ON c.user_id = u.user_id
+    LEFT JOIN type t ON i.type_id = t.type_id
     WHERE i.item_id = ?
-    LIMIT 1
 ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $item_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$item = $result->fetch_assoc();
+$rows = $result->fetch_all(MYSQLI_ASSOC);
+
+// A primeira linha tem os dados do item
+$item = $rows[0];
+
+// Criar array das coleções
+$collections = [];
+foreach ($rows as $row) {
+    $collections[] = [
+        "id" => $row["collection_id"],
+        "name" => $row["collection_name"],
+        "image_id" => $row["collection_image_id"]
+    ];
+}
 
 if (!$item) {
     die("Item não encontrado.");
@@ -202,17 +214,29 @@ function fmtDate($d) {
         <section class="collections">
           <h3>Collections it belongs to</h3>
           <div class="collection-grid">
-            <div class="collection-card">
-              <a href="collectionpage.php?id=<?php echo $item['collection_id']; ?>">
-                
-                <img src="<?php echo htmlspecialchars($collection_img_url); ?>" 
-                alt="<?php echo htmlspecialchars($item['collection_name']); ?>">
+              <?php foreach ($collections as $col): ?>
 
-                <p class="collection-name">
-                  <?php echo htmlspecialchars($item['collection_name']); ?>
-                </p>
-              </a>
-            </div>
+                  <?php
+                  // Load image for each collection
+                  $img = "images/placeholder_collection.png";
+                  if (!empty($col['image_id'])) {
+                      $S = $conn->prepare("SELECT url FROM image WHERE image_id = ?");
+                      $S->bind_param("i", $col['image_id']);
+                      $S->execute();
+                      $imgR = $S->get_result()->fetch_assoc();
+                      if ($imgR)
+                          $img = $imgR['url'];
+                  }
+                  ?>
+
+                  <div class="collection-card">
+                      <a href="collectionpage.php?id=<?= $col['id'] ?>">
+                          <img src="<?= htmlspecialchars($img) ?>">
+                          <p class="collection-name"><?= htmlspecialchars($col['name']) ?></p>
+                      </a>
+                  </div>
+
+              <?php endforeach; ?>
           </div>
         </section>
       </div>

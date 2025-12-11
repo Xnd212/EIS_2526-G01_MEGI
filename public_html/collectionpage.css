@@ -1,6 +1,7 @@
 @import url('homepage.css');
 /* ===== Collection Page Styles ===== */
 
+/* === MESMO ESTILO DA ITEM PAGE === */
 .collection-details {
   display: flex;
   background-color: #fbecec;
@@ -10,18 +11,8 @@
   gap: 1.5rem;
   margin-top: 1rem;
   align-items: flex-start;
-}
-
-.collection-logo {
-  width: 220px;
-  height: 150px;
-  object-fit: contain;
-}
-
-.collection-info p {
-  font-size: 1.05rem;
-  margin: 0.5rem 0;
-  padding-left: 2rem;
+  flex-wrap: nowrap;
+  margin-bottom: 1rem;
 }
 
 .collection-logo-wrapper {
@@ -30,6 +21,38 @@
   align-items: center;
 }
 
+/* imagem da coleção igual à imagem do item */
+.collection-logo {
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+}
+
+/* texto da coleção igual ao .item-info p */
+.collection-info p {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 1.05rem;
+  margin: 0.35rem 0;
+  padding-left: 2rem;
+  background: transparent !important;
+  border: none !important;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.collection-info p strong {
+  display: inline-block;
+  min-width: 160px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* link genérico de edit (se usado fora dos botões) */
 .edit-link {
   margin-top: 0.6rem;
   text-decoration: none;
@@ -38,6 +61,62 @@
   font-size: 0.95rem;
 }
 
+/* ===== BOTÕES EDIT / DELETE (iguais à itempage) ===== */
+
+.owner-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* base igual à .item-actions .edit-link / .delete-link */
+.owner-actions .edit-link,
+.owner-actions .delete-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+/* botão Edit — azul como na itempage */
+.owner-actions .edit-link {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.owner-actions .edit-link:hover {
+  background-color: #357abd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* botão Delete — vermelho, a combinar com o resto do site */
+.owner-actions .delete-link {
+  background-color: #b54242;
+  color: #ffffff;
+}
+
+.owner-actions .delete-link:hover {
+  background-color: #963433;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ===== Secções de eventos / items (mantidos) ===== */
 
 .events-section {
   margin-top: 2.5rem;
@@ -52,12 +131,12 @@
 }
 
 .event-card {
-  width: 150px;
+  width: 200px;
   text-align: center;
   background: white;
   border-radius: 10px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  height: 290px;
+  height: 100px;
 }
 
 .event-card img {
@@ -105,6 +184,18 @@
     margin-left: auto;
     margin-right: auto;
   }
+
+  /* botões responsivos iguais à itempage */
+  .owner-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .owner-actions .edit-link,
+  .owner-actions .delete-link {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 /* Section Colors */
@@ -122,7 +213,6 @@
   gap: 2rem;
   justify-content: flex-start;
   margin-top: 1rem;
-  
 }
 
 .item-card {
@@ -154,8 +244,6 @@
 }
 
 
-
-
 /* ===============================
    POPUP DE DETALHES (GERAL)
 ================================= */
@@ -179,8 +267,8 @@
   font-size: 14px;
 
   display: flex;
-  align-items: flex-start;  /* Alinha topo a topo */
-  overflow: visible;        /* ← Permite conteúdo extra */
+  align-items: flex-start;
+  overflow: visible;
 }
 
 #hover-popup.active {
@@ -188,9 +276,7 @@
   pointer-events: auto;
 }
 
-/* ===============================
-   POPUP CONTEÚDO – TÍTULOS
-================================= */
+/* Títulos */
 #hover-popup h3.popup-title {
   font-size: 18px;
   font-weight: bold;
@@ -203,38 +289,34 @@
   margin-bottom: 10px;
 }
 
-/* ===============================
-   POPUP CONTEÚDO – LAYOUT FLEX
-================================= */
+/* Layout flex */
 .popup-content-flex {
   display: flex;
   align-items: center;
   gap: 0rem;
   width: 100%;
-  height: 100%; 
+  height: 100%;
 }
 
-/* Coluna do texto (esquerda) */
+/* texto */
 .popup-text {
   flex: 1;
   font-size: 13px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;  /* ← alinha tudo no topo */
+  justify-content: flex-start;
 }
 
-/* Coluna da imagem (direita) */
+/* imagem */
 .popup-image img {
   width: 100%;
-  height: auto;             /* ← Altura automática */
+  height: auto;
   max-height: 200px;
   object-fit: contain;
   border-radius: 6px;
 }
 
-/* ===============================
-   POPUP – TÍTULO DO ITEM (ACIMA DA IMAGEM)
-================================= */
+/* título do item */
 #hover-popup h4.popup-subtitle {
   font-size: 14px;
   font-weight: bold;
@@ -242,9 +324,7 @@
   text-align: center;
 }
 
-/* ===============================
-   POPUP – IMAGEM
-================================= */
+/* imagem */
 .popup-image img {
   width: 100%;
   max-height: 180px;
@@ -252,9 +332,7 @@
   border-radius: 6px;
 }
 
-/* ===============================
-   POPUP – DATA FINAL (ABAIXO DA IMAGEM)
-================================= */
+/* data final */
 .popup-date {
   font-size: 11px;
   color: #666;
@@ -262,76 +340,53 @@
   text-align: center;
 }
 
-/* ===============================
-   POPUP – PARÁGRAFOS GERAIS
-================================= */
+/* parágrafos */
 #hover-popup p {
   margin: 4px 0;
 }
 
 
-.owner-actions .delete-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e74c3c;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 0.9rem;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s;
-    width: 100%; /* Match width of container */
-}
-
-.owner-actions .delete-link:hover {
-    background-color: #c0392b;
-}
-
 /* Styling for the Collector Name Link */
 .collector-info p .collector-link {
-    text-decoration: none;
-    color: #333; /* Dark gray to match text, or change to your theme color */
-    font-weight: 500;
-    transition: color 0.2s ease, border-bottom 0.2s ease;
-    border-bottom: 1px solid transparent;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.2s ease, border-bottom 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
 
 .collector-info p .collector-link:hover {
-    color: #e74c3c; /* Change to your preferred hover color */
-    border-bottom: 1px solid #e74c3c;
-    cursor: pointer;
+  color: #e74c3c;
+  border-bottom: 1px solid #e74c3c;
+  cursor: pointer;
 }
-
 
 /* Style for the Most Recent Item Link */
 .collection-info p .recent-item-link {
-    text-decoration: none;
-    color: #4a90e2; /* A nice blue to distinguish it as an item */
-    font-weight: 500;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid transparent;
+  text-decoration: none;
+  color: #4a90e2;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
 
 .collection-info p .recent-item-link:hover {
-    color: #2c3e50; /* Darker on hover */
-    border-bottom: 1px solid #2c3e50;
-    background-color: #f0f4f8; /* Subtle background highlight */
-    border-radius: 4px;
-    padding: 0 4px; /* A little breathing room on hover */
-    margin: 0 -4px; /* Counteract padding to keep text aligned */
+  color: #2c3e50;
+  border-bottom: 1px solid #2c3e50;
+  background-color: #f0f4f8;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin: 0 -4px;
 }
+
 
 /* ===== Delete Collection Popup (modal overlay) ===== */
 
 .delete-popup {
   position: fixed;
-  inset: 0;                 /* top/right/bottom/left: 0 */
+  inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  display: none;            /* JS muda para flex */
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 9999;
@@ -348,9 +403,9 @@
   font-size: 0.95rem;
 }
 
-/* Header cor-de-rosa tipo cards das coleções */
+/* Header */
 .delete-popup .popup-header {
-  margin: -1.8rem -2.2rem 1.2rem;   /* estica header até às bordas */
+  margin: -1.8rem -2.2rem 1.2rem;
   padding: 1rem 2.2rem;
   border-bottom: 1px solid #f1b9b4;
   background-color: #fbecec;

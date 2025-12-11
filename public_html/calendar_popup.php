@@ -22,17 +22,17 @@ if (!isset($conn) || $conn->connect_error) {
 //  - em que o user deu sign up (attends.user_id = user)
 //  - data futura (>= hoje)
 $sql = "
-    SELECT 
+    SELECT DISTINCT
         e.event_id,
         e.name,
         e.date,
         DATEDIFF(e.date, CURDATE()) AS days_left
     FROM event e
-    INNER JOIN attends a
-        ON a.event_id = e.event_id
-       AND a.user_id = ?
+    LEFT JOIN attends a 
+        ON a.event_id = e.event_id 
+        AND a.user_id = ?
     WHERE 
-        e.user_id = ?
+        (e.user_id = ? OR a.user_id IS NOT NULL)
         AND e.date >= CURDATE()
     ORDER BY e.date ASC
     LIMIT 10
@@ -42,8 +42,11 @@ $stmt = $conn->prepare($sql);
 $upcomingEvents = [];
 
 if ($stmt) {
-    // mesmo user nas duas condições (criador + sign up)
+    // Bind variables: 
+    // 1. for LEFT JOIN (checking attendance)
+    // 2. for WHERE clause (checking creator)
     $stmt->bind_param("ii", $currentUserId, $currentUserId);
+    
     $stmt->execute();
     $result = $stmt->get_result();
 

@@ -179,22 +179,6 @@ select:focus {
   padding: 0.3rem 0.2rem;
 }
 
-/* Tema (light / dark) */
-.theme-group {
-  padding-top: 1.2rem;
-  border-top: 1px solid #ddd;
-}
-
-.theme-options {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 0.3rem;
-}
-
-.theme-options label {
-  font-weight: 500;
-}
-
 /* Feedback geral (erros / sucesso) */
 .form-feedback {
   margin-bottom: 1.5rem;
@@ -310,54 +294,6 @@ select.error {
   background-color: transparent;
 }
 
-/* DARK THEME overrides */
-body[data-theme="dark"] {
-  background-color: #2e2e35;
-  color: #f2f2f2;
-}
-
-body[data-theme="dark"] .edit-profile-page {
-  background-color: #3a3a42;
-  border-color: #555;
-  color: #f2f2f2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-body[data-theme="dark"] input,
-body[data-theme="dark"] select {
-  background-color: #484850;
-  color: #f1f1f1;
-  border: 1px solid #666;
-}
-
-body[data-theme="dark"] input:focus,
-body[data-theme="dark"] select:focus {
-  border-color: #c77462;
-}
-
-body[data-theme="dark"] .input-hint,
-body[data-theme="dark"] label {
-  color: #e5e5e5;
-}
-
-body[data-theme="dark"] .btn-primary {
-  background-color: #c77462;
-  border-color: #c77462;
-}
-
-body[data-theme="dark"] .btn-primary:hover {
-  background-color: #b86452;
-}
-
-body[data-theme="dark"] .btn-secondary {
-  background-color: #5a5a63;
-  color: #f2f2f2;
-}
-
-body[data-theme="dark"] .btn-secondary:hover {
-  background-color: #6a6a73;
-}
-
 .form-feedback.success {
     display: flex;
     align-items: center;
@@ -374,18 +310,12 @@ body[data-theme="dark"] .btn-secondary:hover {
     opacity: 0.85;
 }
 
-body[data-theme="dark"] .redirect-msg {
-    color: #ddd;
-}
-
 /* Reset search bar styles to match homepage */
 header .search-bar input[type="text"] {
     border-radius: 20px;
     border: none;
     padding: 0.5rem 1rem;
 }
-
-
 
 /* Download Data Section */
 .download-data-section {
@@ -539,35 +469,4 @@ header .search-bar input[type="text"] {
 
 .download-overlay.active {
     display: block;
-}
-
-/* Dark theme adjustments */
-body[data-theme="dark"] .download-data-section h3 {
-    color: #f0f0f0;
-}
-
-body[data-theme="dark"] .download-data-section p {
-    color: #b0b0b0;
-}
-
-body[data-theme="dark"] .download-popup {
-    background: #2a2a2a;
-    color: #f0f0f0;
-}
-
-body[data-theme="dark"] .download-popup .popup-header h3 {
-    color: #f0f0f0;
-}
-
-body[data-theme="dark"] .download-popup .close-popup {
-    color: #b0b0b0;
-}
-
-body[data-theme="dark"] .download-popup .close-popup:hover {
-    color: #f0f0f0;
-}
-
-body[data-theme="dark"] .download-info {
-    background: #1a1a1a;
-    color: #b0b0b0;
 }

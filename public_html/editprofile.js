@@ -69,14 +69,3 @@ if (dropdownBtn && dropdownContent) {
         }
     });
 }
-
-/* ============================================================
-   TEMA LIGHT / DARK — APLICAÇÃO IMEDIATA
-============================================================ */
-const themeRadios = document.querySelectorAll("input[name='theme']");
-
-themeRadios.forEach(radio => {
-    radio.addEventListener("change", () => {
-        document.body.setAttribute("data-theme", radio.value);
-    });
-});

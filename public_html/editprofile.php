@@ -24,7 +24,6 @@ $sqlUser = "
         u.dob,
         u.country,
         u.image_id,
-        u.theme,
         u.notify_enabled,
         img.url AS image_url
     FROM user u
@@ -48,10 +47,6 @@ $currentUsername = $user['username'] ?? "";
 $currentEmail    = $user['email'] ?? "";
 $currentDob      = $user['dob'] ?? "";
 $currentCountry  = $user['country'] ?? "";
-$currentTheme    = $user['theme'] ?? 'light';
-if ($currentTheme !== 'dark') {
-    $currentTheme = 'light'; // default
-}
 $currentNotifyEnabled = isset($user['notify_enabled']) ? (int)$user['notify_enabled'] : 1;
 
 $currentImageUrl = $user['image_url'] ?: 'images/placeholderuserpicture.png';
@@ -103,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newEmail    = trim($_POST['email'] ?? "");
     $newDob      = $_POST['dob'] ?? "";
     $newCountry  = $_POST['country'] ?? "";
-    $newTheme    = $_POST['theme'] ?? $currentTheme;
     $newNotify   = $_POST['notify'] ?? ($currentNotifyEnabled ? 'yes' : 'no');
 
     // validações mínimas
@@ -118,9 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Please enter a valid email address.";
     }
-
-    // normalizar tema
-    $newTheme = ($newTheme === 'dark') ? 'dark' : 'light';
 
     // normalizar notify
     $newNotifyEnabled = ($newNotify === 'yes') ? 1 : 0;
@@ -186,7 +177,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selectedFavs = array_unique($selectedFavs);
     // limitar a 5
     if (count($selectedFavs) > 5) {
-        // apenas corta; também podes adicionar mensagem se quiseres
         $selectedFavs = array_slice($selectedFavs, 0, 5);
     }
 
@@ -202,17 +192,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($newImageId !== null) {
                 $sqlUpdate = "
                     UPDATE user
-                    SET username = ?, email = ?, dob = ?, country = ?, theme = ?, notify_enabled = ?, image_id = ?
+                    SET username = ?, email = ?, dob = ?, country = ?, notify_enabled = ?, image_id = ?
                     WHERE user_id = ?
                 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
                 $stmtUpdate->bind_param(
-                    "sssssiis",
+                    "ssssiii",
                     $newUsername,
                     $newEmail,
                     $dobValue,
                     $countryValue,
-                    $newTheme,
                     $newNotifyEnabled,
                     $newImageId,
                     $currentUserId
@@ -220,17 +209,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $sqlUpdate = "
                     UPDATE user
-                    SET username = ?, email = ?, dob = ?, country = ?, theme = ?, notify_enabled = ?
+                    SET username = ?, email = ?, dob = ?, country = ?, notify_enabled = ?
                     WHERE user_id = ?
                 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
                 $stmtUpdate->bind_param(
-                    "sssssis",
+                    "ssssii",
                     $newUsername,
                     $newEmail,
                     $dobValue,
                     $countryValue,
-                    $newTheme,
                     $newNotifyEnabled,
                     $currentUserId
                 );
@@ -264,7 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $currentEmail           = $newEmail;
             $currentDob             = $dobValue;
             $currentCountry         = $countryValue;
-            $currentTheme           = $newTheme;
             $currentNotifyEnabled   = $newNotifyEnabled;
             $userFavourites         = $selectedFavs;
 
@@ -274,16 +261,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $successMessage = "✅ Profile updated successfully!";
             
-            
         } catch (Exception $e) {
             $conn->rollback();
             $errors[] = "An error occurred while saving your profile. Please try again.";
         }
     }
 }
-
-// para o body (podes usar em theme.js também, se quiseres)
-$bodyThemeAttr = $currentTheme;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -329,7 +312,7 @@ $bodyThemeAttr = $currentTheme;
     </div>
 </div>
 
-<body data-theme="<?php echo htmlspecialchars($bodyThemeAttr); ?>">
+<body>
 
 <header>
     <a href="homepage.php" class="logo">
@@ -494,6 +477,7 @@ $bodyThemeAttr = $currentTheme;
                                         name="favourites[]"
                                         value="<?php echo $cid; ?>"
                                         <?php echo $isChecked; ?>
+                                        data-name="<?php echo htmlspecialchars($col['name']); ?>"
                                     >
                                     <?php echo htmlspecialchars($col['name']); ?>
                                 </label>
@@ -508,31 +492,6 @@ $bodyThemeAttr = $currentTheme;
                 </small>
             </div>
 
-            <!-- Theme -->
-            <div class="form-group theme-group">
-                <label>Theme</label>
-                <div class="theme-options">
-                    <label>
-                        <input
-                            type="radio"
-                            name="theme"
-                            value="light"
-                            <?php echo ($currentTheme === 'light') ? 'checked' : ''; ?>
-                        >
-                        Light
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="theme"
-                            value="dark"
-                            <?php echo ($currentTheme === 'dark') ? 'checked' : ''; ?>
-                        >
-                        Dark
-                    </label>
-                </div>
-            </div>
-
             <!-- Buttons -->
             <div class="form-actions">
                 <a href="userpage.php" class="btn-secondary">Cancel</a>
@@ -540,13 +499,13 @@ $bodyThemeAttr = $currentTheme;
             </div>
             
             <!-- Download Data Section -->
-<div class="download-data-section">
-    <h3>Download Your Data</h3>
-    <p>Export your collections and items data to a CSV file for backup or external use.</p>
-    <button type="button" class="download-btn" id="download-data-btn">
-        📥 Download My Data
-    </button>
-</div>
+            <div class="download-data-section">
+                <h3>Download Your Data</h3>
+                <p>Export your collections and items data to a CSV file for backup or external use.</p>
+                <button type="button" class="download-btn" id="download-data-btn">
+                    📥 Download My Data
+                </button>
+            </div>
         </form>
     </section>
 </main>

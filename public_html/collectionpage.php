@@ -182,18 +182,19 @@ if (!empty($col['starting_date'])) {
 
                 <?php if ((int) $col['user_id'] === $currentUserId): ?>
                     <div class="owner-actions">
-                        <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" class="edit-link">
+                        <a href="editcollection.php?id=<?php echo $col['collection_id']; ?>" 
+                           class="edit-link">
                             ✎ Edit
                         </a>
 
                         <button id="deleteCollectionBtn" 
                                 class="delete-link" 
-                                data-col-id="<?php echo $col['collection_id']; ?>"
-                                style="margin-top: 5px; background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%;">
+                                data-col-id="<?php echo $col['collection_id']; ?>">
                             🗑️ Delete
                         </button>
                     </div>
                 <?php endif; ?>
+
             </div>
 
             <div class="collection-info">

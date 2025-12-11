@@ -97,6 +97,19 @@
   align-items: center;
 }
 
+/* Delete button - vermelho igual à collectionpage */
+.item-actions .delete-link {
+  background-color: #b54242; /* vermelho Trall-E */
+  color: #ffffff;
+}
+
+.item-actions .delete-link:hover {
+  background-color: #963433;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
 .item-actions .edit-link,
 .item-actions .delete-link {
   display: inline-flex;

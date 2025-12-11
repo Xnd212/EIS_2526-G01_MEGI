@@ -366,6 +366,12 @@ header {
   text-align: center;
 }
 
+.event-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .event-card .event-link {
   display: flex;
@@ -523,8 +529,9 @@ header {
   border-radius: 10px;
   padding: 1rem 1.2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  width: 312px;
+  width: 327px;
   flex-shrink: 0;
+  margin-left: -15px;
 }
 
 .small-title {
@@ -538,6 +545,11 @@ header {
   list-style: none;
   padding: 0;
   margin: 0;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .top-collector-list li {
@@ -610,7 +622,8 @@ header {
   border-radius: 10px;
   padding: 1rem 1.2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  width: 312px;
+  width: 327px;
+  margin-left: -15px;
 }
 
 .top-item {
@@ -618,11 +631,12 @@ header {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .top-item img {
     width: 100px;
-    height: 100px;
+    height: 110px;
     object-fit: contain;
     border-radius: 5px;
 }
@@ -632,6 +646,16 @@ header {
   flex-direction: column;
   justify-content: center;
   gap: 0.1rem;
+}
+
+.top-item .item-info p {
+    font-weight: bold;
+    margin: 0.25rem 0;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .item-name {
@@ -697,11 +721,25 @@ header {
   overflow: visible;
 }
 
+.top-collection-block p {
+  font-size: 0.8rem;
+    
+   display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .top-collection-title {
   font-size: 1.3rem;
   font-weight: bold;
   color: #c08b00;
   margin-bottom: 0.8rem;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .collection-extra,
@@ -712,7 +750,8 @@ header {
 }
 
 .top-collection-block img {
-  height: 90px;
+  height: 130px;
+  width: 100%;
   object-fit: contain;
   margin-bottom: 1rem;
 }

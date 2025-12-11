@@ -23,11 +23,11 @@
 
 .item-image {
   max-width: 220px;
-  width: 100%;
-  height: auto;
+  width: 220px;
+  height: 200px;
   border-radius: 10px;
   object-fit: contain;
-  border: 1px solid #ccc;
+
 }
 
 .item-details .item-info p {
@@ -59,7 +59,7 @@
 .collection-card {
   background-color: #fff;
   border-radius: 12px;
-  padding: 1rem;
+  
   text-align: center;
   width: 180px;          
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -68,10 +68,11 @@
 }
 
 .collection-card img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto 0.5rem;
+ max-width: 220px;
+  width: 220px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: contain;
 }
 
 .collection-card p {

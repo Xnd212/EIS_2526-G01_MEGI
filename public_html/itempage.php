@@ -100,199 +100,209 @@ function fmtDate($d) {
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | Item Page</title>
-  <link rel="stylesheet" href="homepage.css" />
-  <link rel="stylesheet" href="itempage.css" />
-  <link rel="stylesheet" href="mycollectionspage.css" />
-  <link rel="stylesheet" href="calendar_popup.css" />
-</head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Trall-E | Item Page</title>
+        <link rel="stylesheet" href="homepage.css" />
+        <link rel="stylesheet" href="itempage.css" />
+        <link rel="stylesheet" href="mycollectionspage.css" />
+        <link rel="stylesheet" href="calendar_popup.css" />
+    </head>
 
-<body>
-  <!-- ===== HEADER ===== -->
-  <header>
-    <a href="homepage.php" class="logo">
-      <img src="images/TrallE_2.png" alt="logo" />
-    </a>
-      <div class="search-bar">
-          <form action="search.php" method="GET">
-              <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
-          </form>
-      </div>
-    <div class="icons">
+    <body>
+        <!-- ===== HEADER ===== -->
+        <header>
+            <a href="homepage.php" class="logo">
+                <img src="images/TrallE_2.png" alt="logo" />
+            </a>
+            <div class="search-bar">
+                <form action="search.php" method="GET">
+                    <input type="text" name="q" placeholder="Search for friends, collections, events, items..." required>
+                </form>
+            </div>
+            <div class="icons">
                 <?php include __DIR__ . '/calendar_popup.php'; ?>
                 <?php include __DIR__ . '/notifications_popup.php'; ?>
-      <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
-      
-          <!-- Logout -->
-    <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
+                <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
-    <div class="notification-popup logout-popup" id="logout-popup">
-      <div class="popup-header">
-        <h3>Logout</h3>
-      </div>
+                <!-- Logout -->
+                <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
-      <p>Are you sure you want to log out?</p>
+                <div class="notification-popup logout-popup" id="logout-popup">
+                    <div class="popup-header">
+                        <h3>Logout</h3>
+                    </div>
 
-      <div class="logout-btn-wrapper">
-        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">
-          Cancel
-        </button>
-        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">
-          Log out
-        </button>
-      </div>
-    </div>
-    </div>
-  </header>
+                    <p>Are you sure you want to log out?</p>
 
-  <div class="main">
-    <div class="content">
-      <!-- TÍTULO DO ITEM -->
-      <h2><?php echo htmlspecialchars($item['name']); ?></h2>
+                    <div class="logout-btn-wrapper">
+                        <button type="button" class="logout-btn cancel-btn" id="cancel-logout">
+                            Cancel
+                        </button>
+                        <button type="button" class="logout-btn confirm-btn" id="confirm-logout">
+                            Log out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-      <div class="item-details">
-        <div class="item-image-wrapper">
-          <img src="<?php echo htmlspecialchars($item_img_url); ?>" 
-               alt="<?php echo htmlspecialchars($item['name']); ?>" 
-               class="item-image">
+        <div class="main">
+            <div class="content">
+                <!-- TÍTULO DO ITEM -->
+                <h2><?php echo htmlspecialchars($item['name']); ?></h2>
 
-          <?php if ((int)$item['owner_id'] === $currentUserId): ?>
-              <div class="item-actions">
-                <a href="edititem.php?id=<?php echo $item_id; ?>" 
-                   id="editRedirectBtn" class="edit-link">✎ Edit</a>
-                <button id="deleteItemBtn" 
-                        class="delete-link" 
-                        data-item-id="<?php echo $item_id; ?>">🗑️ Delete</button>
-              </div>
-          <?php endif; ?>
+                <div class="item-details">
+                    <div class="item-image-wrapper">
+                        <img src="<?php echo htmlspecialchars($item_img_url); ?>" 
+                             alt="<?php echo htmlspecialchars($item['name']); ?>" 
+                             class="item-image">
+
+                        <?php if ((int) $item['owner_id'] === $currentUserId): ?>
+                            <div class="item-actions">
+                                <a href="edititem.php?id=<?php echo $item_id; ?>" 
+                                   id="editRedirectBtn" class="edit-link">✎ Edit</a>
+                                <button id="deleteItemBtn" 
+                                        class="delete-link" 
+                                        data-item-id="<?php echo $item_id; ?>">🗑️ Delete</button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="item-info">
+                        <p><strong>Collector:</strong> 
+                            <?php
+                            // Check if the current user owns this item
+                            if ((int) $item['owner_id'] === $currentUserId) {
+                                $profileLink = "userpage.php";
+                            } else {
+                                $profileLink = "friendpage.php?user_id=" . $item['owner_id'];
+                            }
+                            ?>
+                            <a href="<?php echo $profileLink; ?>" class="collector-link">
+                                <?php echo htmlspecialchars($item['collector_name']); ?>
+                            </a>
+                        </p>
+                        <p><strong>Price:</strong> 
+                            <?php echo htmlspecialchars($item['price']); ?>€
+                        </p>
+                        <p><strong>Item Type:</strong> 
+                            <?php echo htmlspecialchars($item['type_name'] ?? '—'); ?>
+                        </p>
+                        <p><strong>Importance:</strong> 
+                            <?php echo htmlspecialchars($item['importance']); ?>
+                        </p>
+                        <p><strong>Acquisition Date:</strong> 
+                            <?php echo fmtDate($item['acc_date']); ?>
+                        </p>
+                        <p><strong>Acquisition Place:</strong> 
+                            <?php echo htmlspecialchars($item['acc_place']); ?>
+                        </p>
+                        <p><strong>Description:</strong> 
+                            <?php echo htmlspecialchars($item['description']); ?>
+                        </p>
+                        <?php if (!empty($item['registration_date'])): ?>
+                            <p><strong>Registration Date:</strong> 
+                                <?php echo fmtDate($item['registration_date']); ?>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="collections-and-friends">
+                    <section class="collections">
+                        <h3>Collections it belongs to</h3>
+                        <div class="collection-grid">
+                            <?php foreach ($collections as $col): ?>
+
+                                <?php
+                                // Load image and starting_date for each collection
+                                $img = "images/placeholder_collection.png";
+                                $collection_date = null;
+
+                                $S = $conn->prepare("SELECT url, starting_date FROM image i 
+                         RIGHT JOIN collection c ON c.image_id = i.image_id 
+                         WHERE c.collection_id = ?");
+                                $S->bind_param("i", $col['id']);
+                                $S->execute();
+                                $colData = $S->get_result()->fetch_assoc();
+
+                                if ($colData) {
+                                    if (!empty($colData['url'])) {
+                                        $img = $colData['url'];
+                                    }
+                                    $collection_date = !empty($colData['starting_date']) ? date("d/m/Y", strtotime($colData['starting_date'])) : null;
+                                }
+                                ?>
+
+                                <div class="collection-card">
+                                    <a href="collectionpage.php?id=<?= $col['id'] ?>">
+                                        <img src="<?= htmlspecialchars($img) ?>">
+                                        <p class="collection-name"><?= htmlspecialchars($col['name']) ?></p>
+                                    </a>
+    <?php if ($collection_date): ?>
+                                        <span class="last-updated">Last updated: <?php echo $collection_date; ?></span>
+                                    <?php endif; ?>
+                                </div>
+
+<?php endforeach; ?>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ===== Right Sidebar ===== -->
+            <aside class="sidebar">
+                <div class="sidebar-section collections-section">
+                    <h3>My collections</h3>
+                    <p><a href="collectioncreation.php">Create collection</a></p>
+                    <p><a href="itemcreation.php">Create item</a></p>
+                    <p><a href="mycollectionspage.php">View collections</a></p>
+                    <p><a href="myitems.php">View items</a></p>
+                </div>
+
+                <div class="sidebar-section friends-section">
+                    <h3>My friends</h3>
+                    <p><a href="userfriendspage.php">View Friends</a></p>
+                    <p><a href="allfriendscollectionspage.php">View collections</a></p>
+                    <p><a href="teampage.php">Team Page</a></p>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Events</h3>
+                    <p><a href="createevent.php">Create event</a></p>
+                    <p>View upcoming events</p>
+                    <p><a href="eventhistory.php">Event history</a></p>
+                </div>
+            </aside>
         </div>
 
-        <div class="item-info">
-          <p><strong>Collector:</strong> 
-            <?php 
-                // Check if the current user owns this item
-                if ((int)$item['owner_id'] === $currentUserId) {
-                    $profileLink = "userpage.php";
-                } else {
-                    $profileLink = "friendpage.php?user_id=" . $item['owner_id'];
-                }
-            ?>
-            <a href="<?php echo $profileLink; ?>" class="collector-link">
-                <?php echo htmlspecialchars($item['collector_name']); ?>
-            </a>
-          </p>
-          <p><strong>Price:</strong> 
-            <?php echo htmlspecialchars($item['price']); ?>€
-          </p>
-          <p><strong>Item Type:</strong> 
-            <?php echo htmlspecialchars($item['type_name'] ?? '—'); ?>
-          </p>
-          <p><strong>Importance:</strong> 
-            <?php echo htmlspecialchars($item['importance']); ?>
-          </p>
-          <p><strong>Acquisition Date:</strong> 
-            <?php echo fmtDate($item['acc_date']); ?>
-          </p>
-          <p><strong>Acquisition Place:</strong> 
-            <?php echo htmlspecialchars($item['acc_place']); ?>
-          </p>
-          <p><strong>Description:</strong> 
-            <?php echo htmlspecialchars($item['description']); ?>
-          </p>
-          <?php if (!empty($item['registration_date'])): ?>
-          <p><strong>Registration Date:</strong> 
-            <?php echo fmtDate($item['registration_date']); ?>
-          </p>
-          <?php endif; ?>
+        <!-- Delete Confirmation Modal -->
+        <div class="delete-item-overlay" id="delete-item-popup" style="display: none;">
+            <div class="delete-item-modal">
+                <div class="popup-header">
+                    <h3>Delete Item</h3>
+                </div>
+
+                <p id="delete-item-message">
+                    Are you sure you want to delete this item? This action cannot be undone.
+                </p>
+
+                <div class="logout-btn-wrapper">
+                    <button type="button" class="logout-btn cancel-btn" id="cancel-delete">
+                        Cancel
+                    </button>
+                    <button type="button" class="logout-btn confirm-btn" id="confirm-delete">
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="collections-and-friends">
-        <section class="collections">
-          <h3>Collections it belongs to</h3>
-          <div class="collection-grid">
-              <?php foreach ($collections as $col): ?>
-
-                  <?php
-                  // Load image for each collection
-                  $img = "images/placeholder_collection.png";
-                  if (!empty($col['image_id'])) {
-                      $S = $conn->prepare("SELECT url FROM image WHERE image_id = ?");
-                      $S->bind_param("i", $col['image_id']);
-                      $S->execute();
-                      $imgR = $S->get_result()->fetch_assoc();
-                      if ($imgR)
-                          $img = $imgR['url'];
-                  }
-                  ?>
-
-                  <div class="collection-card">
-                      <a href="collectionpage.php?id=<?= $col['id'] ?>">
-                          <img src="<?= htmlspecialchars($img) ?>">
-                          <p class="collection-name"><?= htmlspecialchars($col['name']) ?></p>
-                      </a>
-                  </div>
-
-              <?php endforeach; ?>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- ===== Right Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="sidebar-section collections-section">
-        <h3>My collections</h3>
-        <p><a href="collectioncreation.php">Create collection</a></p>
-        <p><a href="itemcreation.php">Create item</a></p>
-        <p><a href="mycollectionspage.php">View collections</a></p>
-        <p><a href="myitems.php">View items</a></p>
-      </div>
-
-      <div class="sidebar-section friends-section">
-        <h3>My friends</h3>
-        <p><a href="userfriendspage.php">View Friends</a></p>
-        <p><a href="allfriendscollectionspage.php">View collections</a></p>
-        <p><a href="teampage.php">Team Page</a></p>
-      </div>
-
-      <div class="sidebar-section">
-        <h3>Events</h3>
-        <p><a href="createevent.php">Create event</a></p>
-        <p>View upcoming events</p>
-        <p><a href="eventhistory.php">Event history</a></p>
-      </div>
-    </aside>
-  </div>
-
-  <!-- Delete Confirmation Modal -->
-  <div class="delete-item-overlay" id="delete-item-popup" style="display: none;">
-    <div class="delete-item-modal">
-      <div class="popup-header">
-        <h3>Delete Item</h3>
-      </div>
-
-      <p id="delete-item-message">
-        Are you sure you want to delete this item? This action cannot be undone.
-      </p>
-
-      <div class="logout-btn-wrapper">
-        <button type="button" class="logout-btn cancel-btn" id="cancel-delete">
-          Cancel
-        </button>
-        <button type="button" class="logout-btn confirm-btn" id="confirm-delete">
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script src="homepage.js"></script>
-  <script src="itempage.js"></script>
-  <script src="logout.js"></script>
-  <script src="deleteitem.js"></script>
-</body>
+        <script src="homepage.js"></script>
+        <script src="itempage.js"></script>
+        <script src="logout.js"></script>
+        <script src="deleteitem.js"></script>
+    </body>
 </html>

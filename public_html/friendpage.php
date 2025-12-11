@@ -220,7 +220,7 @@ $stmtE->close();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trall-E | <?php echo htmlspecialchars($profile['username']); ?>'s Page</title>
   <link rel="stylesheet" href="homepage.css" />
-  <link rel="stylesheet" href="userpage.css">
+  <link rel="stylesheet" href="userpage.css"/>
   <link rel="stylesheet" href="calendar_popup.css" />
 </head>
 

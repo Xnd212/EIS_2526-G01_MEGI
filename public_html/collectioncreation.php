@@ -329,6 +329,7 @@ $postedItems = isset($_POST['selectedItems']) ? array_map('intval', (array)$_POS
     <title>Trall-E | Create Collection</title>
     <link rel="stylesheet" href="collectioncreation.css" />
     <link rel="stylesheet" href="calendar_popup.css" />
+    <link <link rel="stylesheet" href="itemcreation.css" />
 </head>
 
 <body>

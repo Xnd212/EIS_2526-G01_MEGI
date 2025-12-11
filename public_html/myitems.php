@@ -20,28 +20,38 @@ if ($isGuest || !isset($_SESSION['user_id'])) {
 
 // ====== 4. GET INPUTS (Sort & Price) ======
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'recent-desc';
-$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : null;
-$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : null;
+$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float) $_GET['min_price'] : null;
+$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float) $_GET['max_price'] : null;
 
 // Helper 1: Base URL for Sort Links (Keeps Price)
 $baseUrl = "?";
-if ($min_price !== null) $baseUrl .= "min_price=" . $min_price . "&";
-if ($max_price !== null) $baseUrl .= "max_price=" . $max_price . "&";
+if ($min_price !== null)
+    $baseUrl .= "min_price=" . $min_price . "&";
+if ($max_price !== null)
+    $baseUrl .= "max_price=" . $max_price . "&";
 
 // Helper 2: Reset URL for the Reset Button (Keeps Sort, Removes Price)
 $resetUrl = "?sort=" . htmlspecialchars($sort);
 
 // ====== 5. SORTING LOGIC ======
 switch ($sort) {
-    case 'alpha-asc':   $orderBy = "i.name ASC"; break;
-    case 'alpha-desc':  $orderBy = "i.name DESC"; break;
-    case 'price-asc':   $orderBy = "i.price ASC"; break;
-    case 'price-desc':  $orderBy = "i.price DESC"; break;
-    case 'importance-asc':  $orderBy = "i.importance ASC"; break;
-    case 'importance-desc': $orderBy = "i.importance DESC"; break;
-    case 'recent-desc': $orderBy = "i.item_id DESC"; break;
-    case 'recent-asc':  $orderBy = "i.item_id ASC"; break;
-    default:            $orderBy = "i.item_id DESC";
+    case 'alpha-asc': $orderBy = "i.name ASC";
+        break;
+    case 'alpha-desc': $orderBy = "i.name DESC";
+        break;
+    case 'price-asc': $orderBy = "i.price ASC";
+        break;
+    case 'price-desc': $orderBy = "i.price DESC";
+        break;
+    case 'importance-asc': $orderBy = "i.importance ASC";
+        break;
+    case 'importance-desc': $orderBy = "i.importance DESC";
+        break;
+    case 'recent-desc': $orderBy = "i.item_id DESC";
+        break;
+    case 'recent-asc': $orderBy = "i.item_id ASC";
+        break;
+    default: $orderBy = "i.item_id DESC";
 }
 
 // ====== 6. FETCH ITEMS (Dynamic Query) ======
@@ -49,17 +59,17 @@ $items = [];
 
 if ($user_id !== null) {
     $sql = "SELECT 
-                i.item_id,
-                i.name AS item_name,
-                i.price,
-                i.importance, 
-                img.url AS item_url,
-                c.name AS collection_name
-            FROM item i
-            JOIN contains cn ON i.item_id = cn.item_id
-            JOIN collection c ON cn.collection_id = c.collection_id
-            LEFT JOIN image img ON i.image_id = img.image_id
-            WHERE c.user_id = ?";
+            i.item_id,
+            i.name AS item_name,
+            i.price,
+            i.importance, 
+            i.acc_date,
+            img.url AS item_url
+        FROM item i
+        JOIN contains cn ON i.item_id = cn.item_id
+        JOIN collection c ON cn.collection_id = c.collection_id
+        LEFT JOIN image img ON i.image_id = img.image_id
+        WHERE c.user_id = ?";
 
     $types = "i";
     $params = [$user_id];
@@ -121,8 +131,8 @@ if ($user_id !== null) {
             </div>
 
             <div class="icons">
-                <?php include __DIR__ . '/calendar_popup.php'; ?>
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+<?php include __DIR__ . '/calendar_popup.php'; ?>
+<?php include __DIR__ . '/notifications_popup.php'; ?>
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
                 <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
 
@@ -148,19 +158,19 @@ if ($user_id !== null) {
                                 <!-- PRICE FILTERS -->
                                 <form method="GET" class="price-form">
                                     <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort); ?>">
-                                    
+
                                     <span>€</span>
                                     <input type="number" name="min_price" placeholder="Min" step="0.01" 
                                            value="<?php echo $min_price; ?>">
                                     <span>-</span>
                                     <input type="number" name="max_price" placeholder="Max" step="0.01" 
                                            value="<?php echo $max_price; ?>">
-                                    
+
                                     <button type="submit" title="Apply Price Filter">➤</button>
 
-                                    <?php if($min_price !== null || $max_price !== null): ?>
+<?php if ($min_price !== null || $max_price !== null): ?>
                                         <a href="<?php echo $resetUrl; ?>" class="reset-btn" title="Reset Price">↺</a>
-                                    <?php endif; ?>
+<?php endif; ?>
                                 </form>
 
                                 <!-- SORT DROPDOWN -->
@@ -197,8 +207,8 @@ if ($user_id !== null) {
                                     to view items.
                                 </p>
 
-                            <?php elseif (empty($items)): ?>
-                                <?php if($min_price !== null || $max_price !== null): ?>
+<?php elseif (empty($items)): ?>
+    <?php if ($min_price !== null || $max_price !== null): ?>
                                     <!-- LOGADO, COM FILTROS MAS SEM RESULTADOS -->
                                     <p style="text-align:left; margin-top:20px; margin-left:0; font-size:18px;">
                                         No items found in this price range.
@@ -214,14 +224,14 @@ if ($user_id !== null) {
                                             Create your first item
                                         </a>.
                                     </p>
-                                <?php endif; ?>
+    <?php endif; ?>
 
-                            <?php else: ?>
-                                <?php foreach ($items as $row): ?>
-                                    <?php
-                                        $img   = !empty($row['item_url']) ? htmlspecialchars($row['item_url']) : 'images/default_item.png';
-                                        $price = number_format($row['price'], 2);
-                                    ?>
+<?php else: ?>
+    <?php foreach ($items as $row): ?>
+        <?php
+        $img = !empty($row['item_url']) ? htmlspecialchars($row['item_url']) : 'images/default_item.png';
+        $price = number_format($row['price'], 2);
+        ?>
                                     <div class="item-card">
                                         <a href="itempage.php?id=<?php echo $row['item_id']; ?>" style="text-decoration:none; color:inherit;">
                                             <img src="<?php echo $img; ?>" alt="<?php echo htmlspecialchars($row['item_name']); ?>">
@@ -231,15 +241,15 @@ if ($user_id !== null) {
                                             <p class="item-price">
                                                 €<?php echo $price; ?>
                                             </p>
-                                            <?php if (!empty($row['collection_name'])): ?>
+        <?php if (!empty($row['acc_date'])): ?>
                                                 <span class="item-collection">
-                                                    Collection: <?php echo htmlspecialchars($row['collection_name']); ?>
+                                                    Acquired: <?php echo date('M d, Y', strtotime($row['acc_date'])); ?>
                                                 </span>
-                                            <?php endif; ?>
+        <?php endif; ?>
                                         </a>
                                     </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
                         </div>
 
                     </section>

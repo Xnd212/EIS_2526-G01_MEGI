@@ -239,6 +239,7 @@ if ($currentUserId !== null) {
 
 </div>
 
+<script src="homepage.js"></script>
 <script src="upcomingevents.js"></script>
 <script src="logout.js"></script>
 

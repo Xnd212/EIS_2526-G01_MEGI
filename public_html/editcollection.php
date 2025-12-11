@@ -317,6 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     window.collectionId = <?= json_encode($collectionId) ?>;
 </script>
 
+<script src="homepage.js"></script>
 <script src="editcollection.js"></script>
 <script src="logout.js"></script>
 

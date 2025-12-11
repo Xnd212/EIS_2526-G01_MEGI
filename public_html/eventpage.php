@@ -386,6 +386,7 @@ if (isset($eventData['teaser_url']) && !empty($eventData['teaser_url'])) {
     </aside>
   </div>
 
+  <script src="homepage.js"></script>
   <script src="eventpage.js"></script>
   <script src="logout.js"></script>
 

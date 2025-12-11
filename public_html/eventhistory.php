@@ -273,7 +273,8 @@ if ($currentUserId !== null) {
 
 
 </div>
-
+    
+<script src="homepage.js"></script>
 <script src="eventhistory.js"></script>
 <script src="logout.js"></script>
 

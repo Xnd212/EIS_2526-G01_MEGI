@@ -356,6 +356,7 @@ if (!empty($col['starting_date'])) {
     </div>
 </div>
 
+<script src="homepage.js"></script>
 <script src="collectionpage.js"></script>
 <script src="logout.js"></script>
 

@@ -481,7 +481,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     window.redirectAfterSuccess = <?= $redirectAfterSuccess ? 'true' : 'false' ?>;
     window.itemId = <?= json_encode($itemId) ?>;
   </script>
-
+  
+  <script src="homepage.js"></script>
   <script src="edititem.js"></script>
   <script src="logout.js"></script>
 </body>

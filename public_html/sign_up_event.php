@@ -260,7 +260,8 @@ $user_collections = $c_res->fetch_all(MYSQLI_ASSOC);
         <p><a href="eventhistory.php">Event history</a></p>
       </div>
   </aside>
-
+  
+  <script src="homepage.js"></script>
   <script src="sign_up_event.js"></script>
   <script src="logout.js"></script>
 

@@ -637,7 +637,8 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
     window.NEW_ITEM_ID = <?php echo (int)$createdItemId; ?>;
 </script>
 <?php endif; ?>
-
+  
+  <script src="homepage.js"></script>
   <script src="itemcreation.js"></script>
   <script src="logout.js"></script>
 

@@ -209,7 +209,8 @@ function fmtDate($d) {
       </div>
     </aside>
   </div>
-
+  
+  <script src="homepage.js"></script>
   <script src="itempage.js"></script>
   <script src="logout.js"></script>
 </body>

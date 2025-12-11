@@ -245,7 +245,8 @@ if ($currentUserId !== null) {
             <p><a href="eventhistory.php">Event history</a></p>
         </div>
     </aside>
-
+    
+    <script src="homepage.js"></script>
     <script src="mycollectionspage.js"></script>
     <script src="logout.js"></script>
 </body>

@@ -248,6 +248,7 @@ $stmtC->close();
 
 
         <!-- === JAVASCRIPT === -->
+        <script src="homepage.js"></script>
         <script src="friendscollectionspage.js"></script>
         <script src="logout.js"></script>
     </body>

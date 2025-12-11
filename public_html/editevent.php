@@ -376,7 +376,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </aside>
         </div>
-
+        
+        <script src="homepage.js"></script>
         <script src="createevent.js"></script>
         <script src="logout.js"></script>
 

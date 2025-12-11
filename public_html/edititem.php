@@ -1,12 +1,12 @@
 <?php
 session_start();
-require_once __DIR__ . "/db.php"; // cria $conn (mysqli)
+require_once __DIR__ . "/db.php";
 
 // =============================================
 // 0. VALIDAR LOGIN
 // =============================================
 if (!isset($_SESSION['user_id'])) {
-    die("Erro: Tem de iniciar sessão para editar itens.");
+    die("Error: You need to be logged in to edit items.");
 }
 $userId = (int)$_SESSION['user_id'];
 
@@ -14,12 +14,12 @@ $userId = (int)$_SESSION['user_id'];
 // 1. VALIDAR ITEM ID
 // =============================================
 if (!isset($_GET['id'])) {
-    die("Erro: Nenhum item especificado.");
+    die("Error: No item specified.");
 }
 $itemId = (int)$_GET['id'];
 
 // =============================================
-// 2. BUSCAR ITEM + TYPE
+// 2. BUSCAR ITEM + TYPE + IMAGE
 // =============================================
 $sql = "
     SELECT i.*, t.name AS type_name, img.url AS item_image
@@ -35,7 +35,7 @@ $item = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$item) {
-    die("Erro: Item não encontrado.");
+    die("Error: Item not found.");
 }
 
 // =============================================
@@ -49,7 +49,7 @@ $collections = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // =============================================
-// 4. BUSCAR COLEÇÕES A QUE O ITEM PERTENCE
+// 4. BUSCAR COLEÇÕES ATUAIS DO ITEM
 // =============================================
 $sql = "SELECT collection_id FROM contains WHERE item_id = ?";
 $stmt = $conn->prepare($sql);
@@ -77,17 +77,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $description = trim($_POST["itemDescription"]);
     $selectedCollections = $_POST["collections"] ?? [];
 
+    // ************************************
+    // 5.1 VALIDAÇÕES INICIAIS
+    // ************************************
     if ($name === "" || $typeName === "" || empty($selectedCollections)) {
-        $message = "⚠ Preencha todos os campos obrigatórios e selecione pelo menos uma coleção.";
-    } else {
-        // =============================
-        // MYSQLI → TRANSAÇÃO
-        // =============================
+        $message = "⚠ Fill in all the required fields and select at least one collection.";
+    }
+
+    // ==============================
+    //  VALIDAR ITEM DUPLICADO
+    // ==============================
+    if ($message === "" && !empty($selectedCollections)) {
+
+        // Criar placeholders (?, ?, ?, ...)
+        $placeholders = implode(',', array_fill(0, count($selectedCollections), '?'));
+
+        $sqlDup = "
+        SELECT 1
+        FROM item i
+        JOIN contains con ON i.item_id = con.item_id
+        WHERE LOWER(TRIM(i.name)) = LOWER(TRIM(?))
+          AND con.collection_id IN ($placeholders)
+          AND i.item_id != ?
+        LIMIT 1
+    ";
+
+        $stmtDup = $conn->prepare($sqlDup);
+
+        // Tipos: 1 string + n inteiros + 1 inteiro final
+        $types = "s" . str_repeat("i", count($selectedCollections)) . "i";
+
+        // Criar array com referências válidas
+        $bind = [];
+        $bind[] = &$types;
+        $bind[] = &$name;
+
+        // Criar variáveis independentes
+        $collectionVars = [];
+        foreach ($selectedCollections as $k => $cid) {
+            $collectionVars[$k] = (int) $cid;
+            $bind[] = &$collectionVars[$k]; // referência válida
+        }
+
+        $bind[] = &$itemId;
+
+        // bind_param dinâmico
+        call_user_func_array([$stmtDup, 'bind_param'], $bind);
+
+        $stmtDup->execute();
+        $dupExists = $stmtDup->get_result()->fetch_assoc();
+        $stmtDup->close();
+
+        if ($dupExists) {
+            $message = "⚠ An item with that name already exists in one of the selected collections.";
+        }
+    }
+
+
+    // ************************************
+    // 5.3 SE NÃO HOUVER ERROS → ATUALIZAR ITEM
+    // ************************************
+    if ($message === "") {
+
         $conn->begin_transaction();
 
         try {
-
-            // A) OBTER OU CRIAR TYPE ID
+            // ---------- TYPE ----------
             $sql = "SELECT type_id FROM type WHERE name = ? LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $typeName);
@@ -106,28 +161,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $stmt->close();
             }
 
-            // B) SE HOUVER NOVA IMAGEM → GUARDAR
+            // ---------- IMAGEM ----------
             $imageIdToUse = $item["image_id"];
 
             if (!empty($_FILES["itemImage"]["name"])) {
                 $file = $_FILES["itemImage"];
-                $uploadDir = "images/";
                 $safeName = time() . "_" . basename($file["name"]);
-                $targetPath = $uploadDir . $safeName;
+                $path = "images/" . $safeName;
 
-                if (move_uploaded_file($file["tmp_name"], $targetPath)) {
+                if (move_uploaded_file($file["tmp_name"], $path)) {
                     $sql = "INSERT INTO image (url) VALUES (?)";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("s", $targetPath);
+                    $stmt->bind_param("s", $path);
                     $stmt->execute();
                     $imageIdToUse = $stmt->insert_id;
                     $stmt->close();
-                } else {
-                    $message = "⚠ Erro ao carregar imagem. Restantes dados guardados.";
                 }
             }
 
-            // C) UPDATE DO ITEM
+            // ---------- UPDATE ITEM ----------
             $sql = "
                 UPDATE item
                 SET type_id = ?, image_id = ?, name = ?, price = ?, importance = ?, acc_date = ?, acc_place = ?, description = ?
@@ -149,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->execute();
             $stmt->close();
 
-            // D) UPDATE DA TABELA contains
+            // ---------- UPDATE COLLECTIONS ----------
             $sql = "DELETE FROM contains WHERE item_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $itemId);
@@ -164,16 +216,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $stmt->bind_param("ii", $cid, $itemId);
                 $stmt->execute();
             }
-            $stmt->close();
 
+            $stmt->close();
             $conn->commit();
-            
+
+            // Recarregar info atualizada
             $sql = "
-            SELECT i.*, t.name AS type_name, img.url AS item_image
-            FROM item i
-            LEFT JOIN type t ON i.type_id = t.type_id
-            LEFT JOIN image img ON i.image_id = img.image_id
-            WHERE i.item_id = ?
+                SELECT i.*, t.name AS type_name, img.url AS item_image
+                FROM item i
+                LEFT JOIN type t ON i.type_id = t.type_id
+                LEFT JOIN image img ON i.image_id = img.image_id
+                WHERE i.item_id = ?
             ";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $itemId);
@@ -181,16 +234,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $item = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            $message = "✓ Item atualizado com sucesso! A redirecionar...";
+            $message = "✓ Changes saved with success! <span class='redirect-msg'>Redirecting...</span>";
             $redirectAfterSuccess = true;
 
         } catch (Exception $e) {
             $conn->rollback();
-            $message = "Erro ao atualizar item: " . $e->getMessage();
+            $message = "Error updating item: " . $e->getMessage();
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -388,11 +440,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </button>
           </div>
 
-          <!-- MENSAGEM -->
+          <!-- MENSAGEM NO FUNDO -->
           <?php if ($message): ?>
-            <p id="form-message" class="form-message <?= $redirectAfterSuccess ? 'success' : 'error' ?>">
-              <?= htmlspecialchars($message) ?>
-            </p>
+              <a id="msg-anchor"></a>   
+              <p id="form-message" class="form-message <?= $redirectAfterSuccess ? 'success' : 'error' ?>">
+                  <?= $message ?>
+              </p>
           <?php endif; ?>
 
         </form>

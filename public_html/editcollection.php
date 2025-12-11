@@ -64,16 +64,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['collectionDescription']);
     $selectedTags = $_POST['tags'] ?? [];
 
-    // Atualizar info principal
-    $sqlUp = "
+    // ==============================
+    // VERIFICAR NOME DUPLICADO
+    // ==============================
+    $checkSql = "
+    SELECT collection_id
+    FROM collection
+    WHERE user_id = ? 
+      AND name = ?
+      AND collection_id != ?   -- Ignorar a coleção atual
+";
+    $stmtCheck = $conn->prepare($checkSql);
+    $stmtCheck->bind_param("isi", $collection['user_id'], $name, $collectionId);
+    $stmtCheck->execute();
+    $duplicate = $stmtCheck->get_result()->fetch_assoc();
+    $stmtCheck->close();
+
+    if ($duplicate) {
+        $message = "⚠ A collection with this name already exists.";
+    } else {
+        // Atualizar info principal
+        $sqlUp = "
         UPDATE collection
         SET name = ?, Theme = ?, description = ?
         WHERE collection_id = ?
     ";
-    $stmtUp = $conn->prepare($sqlUp);
-    $stmtUp->bind_param("sssi", $name, $theme, $description, $collectionId);
-    $stmtUp->execute();
-    $stmtUp->close();
+        $stmtUp = $conn->prepare($sqlUp);
+        $stmtUp->bind_param("sssi", $name, $theme, $description, $collectionId);
+        $stmtUp->execute();
+        $stmtUp->close();
+    }
 
     // Upload imagem
     if (!empty($_FILES['collectionImage']['name'])) {
@@ -265,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- MENSAGEM NO FUNDO -->
                 <?php if ($message): ?>
-                    <a id="msg-anchor"></a>   <!-- âncora invisível -->
+                    <a id="msg-anchor"></a>   
                     <p id="form-message" class="form-message <?= $redirectAfterSuccess ? 'success' : 'error' ?>">
                         <?= $message ?>
                     </p>

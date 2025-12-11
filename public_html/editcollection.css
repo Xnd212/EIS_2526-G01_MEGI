@@ -162,6 +162,10 @@ textarea {
   color: #3a8d3a;
 }
 
+.form-message.error {
+  color: #b54242;
+}
+
 .redirect-msg {
   margin-left: 8px;
   color: #444;

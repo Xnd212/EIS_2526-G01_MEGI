@@ -394,8 +394,8 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                 </form>
             </div>
             <div class="icons">
-<?php include __DIR__ . '/calendar_popup.php'; ?>
-<?php include __DIR__ . '/notifications_popup.php'; ?>
+                <?php include __DIR__ . '/calendar_popup.php'; ?>
+                <?php include __DIR__ . '/notifications_popup.php'; ?>
 
                 <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
@@ -477,9 +477,9 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                             <div class="custom-multiselect">
                                 <button type="button" id="dropdownBtn">Select Tags ⮟</button>
                                 <div class="dropdown-content" id="tagDropdown">
-<?php if (empty($allTags)): ?>
+                                    <?php if (empty($allTags)): ?>
                                         <div style="padding:0.4rem 0.6rem; color:#777;">No tags created yet.</div>
-<?php else: ?>
+                                    <?php else: ?>
                                         <?php foreach ($allTags as $tag): ?>
                                             <?php
                                             $tid = (int) $tag['tag_id'];
@@ -490,12 +490,12 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                                     type="checkbox" 
                                                     name="tags[]" 
                                                     value="<?php echo $tid; ?>" 
-        <?php echo $checked; ?>
+                                                    <?php echo $checked; ?>
                                                     >
-        <?php echo htmlspecialchars($tag['name']); ?>
+                                                    <?php echo htmlspecialchars($tag['name']); ?>
                                             </label>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -507,20 +507,20 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                 <button type="button" id="itemsDropdownBtn">Select from existing items ⮟</button>
                                 <div class="dropdown-content" id="itemsDropdownContent">
 
-<?php
-if (empty($user_items)) {
-    echo "<div style='padding:10px; color:#555;'>No items found in your inventory.</div>";
-} else {
-    foreach ($user_items as $item) {
-        $iid = (int) $item['item_id'];
-        $checked = in_array($iid, $postedItems) ? 'checked' : '';
-        echo '<label>';
-        echo '<input type="checkbox" name="selectedItems[]" value="' . $iid . '" ' . $checked . '> ';
-        echo htmlspecialchars($item['name']);
-        echo '</label>';
-    }
-}
-?>
+                                    <?php
+                                    if (empty($user_items)) {
+                                        echo "<div style='padding:10px; color:#555;'>No items found in your inventory.</div>";
+                                    } else {
+                                        foreach ($user_items as $item) {
+                                            $iid = (int) $item['item_id'];
+                                            $checked = in_array($iid, $postedItems) ? 'checked' : '';
+                                            echo '<label>';
+                                            echo '<input type="checkbox" name="selectedItems[]" value="' . $iid . '" ' . $checked . '> ';
+                                            echo htmlspecialchars($item['name']);
+                                            echo '</label>';
+                                        }
+                                    }
+                                    ?>
 
                                 </div>
                             </div>
@@ -537,9 +537,9 @@ if (empty($user_items)) {
                         </div>
                     </form>
 
-<?php if ($message): ?>
+                    <?php if ($message): ?>
                         <p id="formMessage" class="form-message <?php echo $messageType; ?>">
-    <?php echo $message; ?>
+                            <?php echo $message; ?>
                         </p>
                     <?php endif; ?>
 
@@ -556,7 +556,7 @@ if (empty($user_items)) {
                 </div>
                 <div class="sidebar-section friends-section">
                     <h3>My bubble</h3>
-                    <p><a href="userfriendspage.php">View members</a></p>
+                    <p><a href="userfriendspage.php">View bubble</a></p>
                     <p><a href="allfriendscollectionspage.php">View collections</a></p>
                     <p><a href="teampage.php"> Team page</a></p>
                 </div>
@@ -583,7 +583,7 @@ if (empty($user_items)) {
             </div>
         </div>
 
-<?php if (!empty($createdCollectionId)): ?>
+        <?php if (!empty($createdCollectionId)): ?>
             <script>
                 window.NEW_COLLECTION_ID = <?php echo (int) $createdCollectionId; ?>;
             </script>

@@ -323,7 +323,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         name="coverImage"
         accept="image/*"
     />
-    <small style="color:#666;">Leave empty to keep the current image.</small>
+    <small style="color:#666; margin-top: 5px;">Leave empty to keep the current image.</small>
 </div>
 
 

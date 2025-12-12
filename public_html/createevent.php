@@ -189,10 +189,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <section class="item-creation-section">
                     <h2 class="page-title">Create a Event</h2>
 
-                    <?php if (!empty($error)): ?>
-                        <p class="form-message error" style="color: red; padding: 10px; background: #ffe6e6; border-radius: 5px; margin-bottom: 15px;"><?php echo htmlspecialchars($error); ?></p>
-                    <?php endif; ?>
-
                     <form id="eventForm" method="POST" action="" enctype="multipart/form-data" novalidate>
                         <div class="form-group">
                             <label for="eventName">Event Name <span class="required">*</span></label>
@@ -286,12 +282,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 name="coverImage"
                                 accept="image/*"
                             />
-                            <small style="color: #666;">If no image is uploaded, a default placeholder will be used.</small>
+                            <small style="color: #666; margin-top: 5px;">If no image is uploaded, a default placeholder will be used.</small>
                         </div>
 
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">Create Event</button>
                         </div>
+
+                        <?php if (!empty($error)): ?>
+                            <p class="form-message error"><?php echo htmlspecialchars($error); ?></p>
+                        <?php endif; ?>
                     </form>
 
                 </section>
@@ -308,7 +308,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="sidebar-section friends-section">
                     <h3>My bubble</h3>
-                    <p><a href="userfriendspage.php">View members</a></p>
+                    <p><a href="userfriendspage.php">View bubble</a></p>
                     <p><a href="allfriendscollectionspage.php">View collections</a></p>
                     <p><a href="teampage.php">Team Page</a></p>
                 </div>

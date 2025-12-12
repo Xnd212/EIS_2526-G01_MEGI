@@ -249,7 +249,7 @@ $featuredSql = "
     SELECT 
         i.name,
         i.price,
-        i.acc_date,
+        i.registration_date,
         i.acc_place,
         img.url AS item_image
     FROM contains con
@@ -259,6 +259,23 @@ $featuredSql = "
     ORDER BY i.price DESC, i.item_id DESC   -- aqui escolhemos o mais caro dessa coleção
     LIMIT 1
 ";
+
+
+$featuredRecentSql = "
+    SELECT 
+        i.name,
+        i.price,
+        i.registration_date,
+        i.acc_place,
+        img.url AS item_image
+    FROM contains con
+    JOIN item i       ON i.item_id = con.item_id
+    LEFT JOIN image img ON img.image_id = i.image_id
+    WHERE con.collection_id = ?
+    ORDER BY i.registration_date DESC, i.item_id DESC   -- aqui escolhemos o mais caro dessa coleção
+    LIMIT 1
+";
+
 
 if ($topByValue) {
     $stmtF = $conn->prepare($featuredSql);
@@ -270,7 +287,7 @@ if ($topByValue) {
 }
 
 if ($topMostRecent) {
-    $stmtF = $conn->prepare($featuredSql);
+    $stmtF = $conn->prepare($featuredRecentSql);
     $stmtF->bind_param('i', $topMostRecent['collection_id']);
     $stmtF->execute();
     $resF = $stmtF->get_result();
@@ -525,7 +542,7 @@ if ($topByItems) {
                 $feat      = $featuredByValue;
                 $itemTitle = $feat['name'] ?? '';
                 $itemPrice = isset($feat['price']) ? number_format($feat['price'], 2, ',', '') : '';
-                $itemDate  = !empty($feat['acc_date']) ? date('d/m/Y', strtotime($feat['acc_date'])) : '';
+                $itemDate  = !empty($feat['registration_date']) ? date('d/m/Y', strtotime($feat['registration_date'])) : '';
                 $itemPlace = $feat['acc_place'] ?? '';
                 $itemImg   = !empty($feat['item_image']) ? $feat['item_image'] : 'images/default_item.png';
             ?>
@@ -575,7 +592,7 @@ if ($topByItems) {
                 $featR      = $featuredMostRecent;
                 $itemTitleR = $featR['name'] ?? '';
                 $itemPriceR = isset($featR['price']) ? number_format($featR['price'], 2, ',', '') : '';
-                $itemDateR  = !empty($featR['acc_date']) ? date('d/m/Y', strtotime($featR['acc_date'])) : '';
+                $itemDateR  = !empty($featR['registration_date']) ? date('d/m/Y', strtotime($featR['registration_date'])) : '';
                 $itemPlaceR = $featR['acc_place'] ?? '';
                 $itemImgR   = !empty($featR['item_image']) ? $featR['item_image'] : 'images/default_item.png';
             ?>
@@ -625,7 +642,7 @@ if ($topByItems) {
                 $featI      = $featuredByItems;
                 $itemTitleI = $featI['name'] ?? '';
                 $itemPriceI = isset($featI['price']) ? number_format($featI['price'], 2, ',', '') : '';
-                $itemDateI  = !empty($featI['acc_date']) ? date('d/m/Y', strtotime($featI['acc_date'])) : '';
+                $itemDateI  = !empty($featI['registration_date']) ? date('d/m/Y', strtotime($featI['registration_date'])) : '';
                 $itemPlaceI = $featI['acc_place'] ?? '';
                 $itemImgI   = !empty($featI['item_image']) ? $featI['item_image'] : 'images/default_item.png';
             ?>

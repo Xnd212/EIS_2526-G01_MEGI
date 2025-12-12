@@ -1,4 +1,4 @@
-@import url('homepage.css'); /* Reuse global styles */
+@import url('homepage.css');
 
 body {
   overflow-y: scroll;
@@ -101,7 +101,7 @@ body {
 /* cada card de coleção de amigo (igual à collection-card) */
 .friend {
   width: 100%;
-  height: 260px;
+  height: 240px;
   background-color: #f3cccc;
   padding: 1rem;
   border-radius: 10px;

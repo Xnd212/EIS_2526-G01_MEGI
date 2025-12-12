@@ -55,9 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start_date)) {
         $error = "Invalid date format";
     } else {
-        $image_id = null;
+        $image_id = 13; // Default placeholder image ID
 
-        // Handle image upload
+        // Handle image upload (OPTIONAL)
         if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] == UPLOAD_ERR_OK) {
             $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             $file_type = $_FILES['coverImage']['type'];
@@ -89,21 +89,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 $error = "File type not allowed. Use JPEG, PNG, GIF or WEBP";
             }
-        } else {
-            if (isset($_FILES['coverImage'])) {
-                switch ($_FILES['coverImage']['error']) {
-                    case UPLOAD_ERR_INI_SIZE:
-                    case UPLOAD_ERR_FORM_SIZE:
-                        $error = "Image file is too large";
-                        break;
-                    case UPLOAD_ERR_NO_FILE:
-                        $error = "No image file selected";
-                        break;
-                    default:
-                        $error = "Error uploading image";
-                }
-            } else {
-                $error = "Cover image is required";
+        }
+        // If no file uploaded or file error (other than UPLOAD_ERR_NO_FILE), use placeholder
+        elseif (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] != UPLOAD_ERR_NO_FILE) {
+            switch ($_FILES['coverImage']['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    $error = "Image file is too large";
+                    break;
+                default:
+                    $error = "Error uploading image";
             }
         }
 
@@ -284,14 +279,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
 
                         <div class="form-group">
-                            <label for="coverImage">Cover Image <span class="required">*</span></label>
+                            <label for="coverImage">Cover Image (optional)</label>
                             <input
                                 type="file"
                                 id="coverImage"
                                 name="coverImage"
                                 accept="image/*"
-                                required
                             />
+                            <small style="color: #666;">If no image is uploaded, a default placeholder will be used.</small>
                         </div>
 
                         <div class="form-actions">

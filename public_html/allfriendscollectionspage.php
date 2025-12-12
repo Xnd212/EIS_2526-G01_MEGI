@@ -113,31 +113,6 @@ if (isset($_GET['user_id'])) {
   <link rel="stylesheet" href="allfriendscollectionspage.css">
   <link rel="stylesheet" href="calendar_popup.css" />
   
-  <style>
-      .collections-header {
-          display: flex; align-items: center; justify-content: space-between;
-          position: relative; margin-bottom: 20px;
-      }
-      .filter-toggle {
-          display: inline-flex; align-items: center; gap: 0.25rem;
-          padding: 0.35rem 0.8rem; border-radius: 999px;
-          border: 1px solid #b54242; background-color: #fbecec;
-          font-size: 0.9rem; cursor: pointer; color: #b54242;
-      }
-      .filter-menu {
-          position: absolute; top: 100%; right: 0; margin-top: 5px;
-          background: white; border-radius: 10px; border: 1px solid #ddd;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 200px;
-          display: none; z-index: 1000;
-      }
-      .filter-menu.show { display: block; }
-      .filter-menu a {
-          display: block; padding: 10px 15px; text-decoration: none;
-          color: #333; font-size: 0.9rem;
-      }
-      .filter-menu a:hover { background: #fbecec; color: #b54242; }
-      .filter-menu hr { margin: 0; border: 0; border-top: 1px solid #eee; }
-  </style>
 </head>
 
 <body>    
@@ -281,7 +256,7 @@ if (isset($_GET['user_id'])) {
                     <h3>My bubble</h3>
                     <p><a href="userfriendspage.php">View bubble</a></p>
     <p><a href="allfriendscollectionspage.php">View collections</a></p>
-    <p><a href="teampage.php">Team page</a></p>
+    <p><a href="teampage.php">Team Page</a></p>
   </div>
 
   <div class="sidebar-section events-section">

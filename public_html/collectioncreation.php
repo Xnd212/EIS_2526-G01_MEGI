@@ -558,7 +558,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                     <h3>My bubble</h3>
                     <p><a href="userfriendspage.php">View bubble</a></p>
                     <p><a href="allfriendscollectionspage.php">View collections</a></p>
-                    <p><a href="teampage.php"> Team page</a></p>
+                    <p><a href="teampage.php"> Team Page</a></p>
                 </div>
                 <div class="sidebar-section events-section">
                     <h3>Events</h3>

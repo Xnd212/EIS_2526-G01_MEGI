@@ -434,31 +434,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
 
-            <!-- Notifications (Yes/No only) -->
-            <div class="form-group">
-                <label>Do you want to receive notifications?</label>
-                <div class="radio-group">
-                    <label>
-                        <input
-                            type="radio"
-                            name="notify"
-                            value="yes"
-                            <?php echo $currentNotifyEnabled ? 'checked' : ''; ?>
-                        >
-                        Yes
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="notify"
-                            value="no"
-                            <?php echo !$currentNotifyEnabled ? 'checked' : ''; ?>
-                        >
-                        No
-                    </label>
-                </div>
-            </div>
-
             <!-- Favourite Collections -->
             <div class="form-group">
                 <label>Favourite Collections (up to 5)</label>

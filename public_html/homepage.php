@@ -116,12 +116,19 @@ $sqlRecentCollections = "
         c.starting_date,
         c.image_id,
         img.url           AS collection_image,
-        u.username
+        u.username,
+        GREATEST(
+            c.starting_date,
+            COALESCE(MAX(i.registration_date), c.starting_date)
+        ) AS last_activity_date
     FROM collection c
     LEFT JOIN image img ON c.image_id = img.image_id
     LEFT JOIN user  u   ON c.user_id = u.user_id
+    LEFT JOIN contains con ON con.collection_id = c.collection_id
+    LEFT JOIN item i ON i.item_id = con.item_id
     WHERE c.user_id <> ?        -- NÃO mostrar coleções do user atual
-    ORDER BY c.starting_date DESC
+    GROUP BY c.collection_id, c.name, c.starting_date, c.image_id, img.url, u.username
+    ORDER BY last_activity_date DESC
     LIMIT 9
 ";
 

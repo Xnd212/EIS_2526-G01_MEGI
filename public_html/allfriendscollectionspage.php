@@ -278,10 +278,10 @@ if (isset($_GET['user_id'])) {
   </div>
 
   <div class="sidebar-section friends-section">
-    <h3>My friends</h3>
-    <p><a href="userfriendspage.php">View Friends</a></p>
+                    <h3>My bubble</h3>
+                    <p><a href="userfriendspage.php">View members</a></p>
     <p><a href="allfriendscollectionspage.php">View collections</a></p>
-    <p><a href="teampage.php">Team Page</a></p>
+    <p><a href="teampage.php">Team page</a></p>
   </div>
 
   <div class="sidebar-section events-section">

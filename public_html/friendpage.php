@@ -160,6 +160,34 @@ while ($row = $resultC->fetch_assoc()) {
 }
 $stmtC->close();
 
+/* ==========================================
+   3B) FAVOURITE COLLECTIONS OF THIS USER
+   ========================================== */
+$sqlFavCollections = "
+    SELECT 
+        c.collection_id,
+        c.name,
+        c.starting_date,
+        c.image_id,
+        c.Theme,
+        img.url AS collection_image
+    FROM favourite f
+    INNER JOIN collection c ON c.collection_id = f.collection_id
+    LEFT JOIN image img ON c.image_id = img.image_id
+    WHERE f.user_id = ?
+    ORDER BY c.name ASC
+";
+
+$stmtFav = $conn->prepare($sqlFavCollections);
+$stmtFav->bind_param("i", $profileUserId);
+$stmtFav->execute();
+$resultFav = $stmtFav->get_result();
+
+$favCollections = [];
+while ($row = $resultFav->fetch_assoc()) {
+    $favCollections[] = $row;
+}
+$stmtFav->close();
 
 /* ==========================================
    6) EVENTOS DO PERFIL 
@@ -341,17 +369,15 @@ $stmtE->close();
       <div class="collections-and-friends">
         <!-- COLLECTIONS dinâmicas -->
         <section class="collections">
-          <h3>Collections</h3>
+          <h3>Favourite Collections</h3>
           <div class="collection-grid">
-            <?php if (empty($collections)): ?>
-              <p>This user has no collections yet.</p>
-            <?php else: ?>
-              <?php foreach ($collections as $col): ?>
-                <?php
-                  $colImg = !empty($col['collection_image'])
-                      ? $col['collection_image']
-                      : 'images/default_collection.png';
-                ?>
+            <?php if (empty($favCollections)): ?>
+                  <p>This user doesn't have favourite collections yet.</p>
+              <?php else: ?>
+                  <?php foreach ($favCollections as $col): ?>
+                      <?php
+                      $colImg = !empty($col['collection_image']) ? $col['collection_image'] : 'images/default_collection.png';
+                      ?>
                 <div class="collection-card">
                   <a href="collectionpage.php?id=<?php echo $col['collection_id']; ?>">
                     <img src="<?php echo htmlspecialchars($colImg); ?>" 

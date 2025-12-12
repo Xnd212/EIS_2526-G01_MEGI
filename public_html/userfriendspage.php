@@ -43,18 +43,18 @@ if ($profileUserId !== null) {
 }
 
 /* Definir texto do título e heading */
-// se estou logada e o perfil é o meu → "My Friends"
+// se estou logada e o perfil é o meu → "My bubble"
 if ($currentUserId !== null && $profileUserId === $currentUserId) {
-    $pageTitleSuffix = "My Friends";
-    $friendsHeading  = "My Friends";
+    $pageTitleSuffix = "My bubble";
+    $friendsHeading  = "My bubble";
 } elseif ($profileUsername !== null) {
-    // senão, se tiver username do perfil → "X's Friends"
-    $pageTitleSuffix = $profileUsername . "'s Friends";
+    // senão, se tiver username do perfil → "X's Bubble"
+    $pageTitleSuffix = $profileUsername . "'s Bubble";
     $friendsHeading  = $pageTitleSuffix;
 } else {
     // fallback genérico
-    $pageTitleSuffix = "Friends";
-    $friendsHeading  = "Friends";
+    $pageTitleSuffix = "Bubble";
+    $friendsHeading  = "Bubble";
 }
 
 /* ==========================================
@@ -168,8 +168,8 @@ if ($profileUserId !== null) {
                     <a href="?<?php echo $baseQuery; ?>sort=alpha-asc">Name: A–Z</a>
                     <a href="?<?php echo $baseQuery; ?>sort=alpha-desc">Name: Z–A</a>
                     <hr>
-                    <a href="?<?php echo $baseQuery; ?>sort=date-desc">Newest Friends</a>
-                    <a href="?<?php echo $baseQuery; ?>sort=date-asc">Oldest Friends</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=date-desc">Newest Members</a>
+                    <a href="?<?php echo $baseQuery; ?>sort=date-asc">Oldest Members</a>
                 </div>
             </div>
 
@@ -242,8 +242,8 @@ if ($profileUserId !== null) {
     </div>
 
     <div class="sidebar-section friends-section">
-        <h3>My friends</h3>
-        <p><a href="userfriendspage.php">View Friends</a></p>
+        <h3>My bubble</h3>
+        <p><a href="userfriendspage.php">View bubble</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
     </div>

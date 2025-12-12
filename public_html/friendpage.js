@@ -3,13 +3,13 @@ const btn = document.querySelector(".edit-btn");
 if (btn) {
   btn.addEventListener("click", () => {
     if (btn.dataset.state === "default") {
-      // Vai seguir → muda para Friend Added
-      btn.textContent = "✔ Friend Added";
+      // Vai seguir → muda para Member of your bubble
+      btn.textContent = "✔ Member of your bubble";
       btn.dataset.state = "added";
       btn.classList.add("active");
     } else if (btn.dataset.state === "added") {
-      // Vai deixar de seguir → muda para Add Friend
-      btn.textContent = "👥 Add Friend";
+      // Vai deixar de seguir → muda para Add to bubble
+      btn.textContent = "👥 Add to bubble";
       btn.dataset.state = "default";
       btn.classList.remove("active");
     }

@@ -109,7 +109,7 @@ if (isset($_GET['user_id'])) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trall-E | Friends' Collections</title>
+  <title>Trall-E | My Bubble Collections</title>
   <link rel="stylesheet" href="allfriendscollectionspage.css">
   <link rel="stylesheet" href="calendar_popup.css" />
   
@@ -181,11 +181,11 @@ if (isset($_GET['user_id'])) {
             <h2>
                 <?php
                   if ($profileUserId !== null && $currentUserId !== null && $profileUserId === $currentUserId) {
-                      echo "My friends' collections";
+                      echo "My bubble's collections";
                   } elseif ($profileUserId !== null) {
-                      echo htmlspecialchars($profileUsername) . "'s friends' collections";
+                      echo htmlspecialchars($profileUsername) . "'s bubble's collections";
                   } else {
-                      echo "Friends' collections";
+                      echo "Bubble's collections";
                   }
                 ?>
             </h2>

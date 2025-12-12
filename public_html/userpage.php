@@ -326,7 +326,7 @@ if ($profileUserId !== null) {
                       href="remove_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
                       data-state="added"
                     >
-                      ✔ Friend Added
+                      ✔ Member of your bubble
                     </a>
                   <?php else: ?>
                     <a
@@ -334,7 +334,7 @@ if ($profileUserId !== null) {
                       href="add_friend.php?friend_id=<?php echo $profile['user_id']; ?>"
                       data-state="default"
                     >
-                      👥 Add Friend
+                      👥 Add to bubble
                     </a>
                   <?php endif; ?>
                 <?php else: ?>
@@ -354,7 +354,7 @@ if ($profileUserId !== null) {
                     <strong><?php echo (int) $profile['total_collections']; ?></strong><br>Collections
                   </div>
                   <div>
-                    <strong><?php echo (int) $profile['total_friends']; ?></strong><br>Friends
+                    <strong><?php echo (int) $profile['total_friends']; ?></strong><br>Bubble members
                   </div>
                 </div>
               </div>
@@ -408,12 +408,12 @@ if ($profileUserId !== null) {
 
         <!-- FRIENDS do perfil atual -->
         <section class="friends">
-          <h3>Friends</h3>
+          <h3>Bubble</h3>
           <div class="friends-grid">
 
             <?php if (empty($friends)): ?>
 
-              <p>This user doesn't have any friends yet.</p>
+              <p>This user's bubble is still empty</p>
 
             <?php else: ?>
 
@@ -547,8 +547,8 @@ if ($profileUserId !== null) {
     </div>
 
     <div class="sidebar-section friends-section">
-      <h3>My friends</h3>
-      <p><a href="userfriendspage.php">View Friends</a></p>
+      <h3>My bubble</h3>
+      <p><a href="userfriendspage.php">View bubble</a></p>
       <p><a href="allfriendscollectionspage.php">View collections</a></p>
       <p><a href="teampage.php">Team Page</a></p>
     </div>

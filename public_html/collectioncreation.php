@@ -471,7 +471,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                             <label>Tags</label>
 
                             <div class="tag-header">
-                                <button type="button" id="openTagModal" class="btn-small">Criar tags</button>
+                                <button type="button" id="openTagModal" class="btn-small">Create Tags</button>
                             </div>
 
                             <div class="custom-multiselect">
@@ -574,11 +574,11 @@ if (empty($user_items)) {
         <div id="tagModalOverlay" class="modal-overlay hidden"></div>
 
         <div id="tagModal" class="modal hidden">
-            <h3>Criar nova tag</h3>
-            <input type="text" id="newTagInput" placeholder="Nome da tag...">
+            <h3>Create new Tag</h3>
+            <input type="text" id="newTagInput" placeholder="Tag name...">
             <p id="tagFeedback" class="tag-feedback"></p>
             <div class="modal-buttons">
-                <button id="createTagBtn" class="btn-primary">Criar tag</button>
+                <button id="createTagBtn" class="btn-primary">Create tag</button>
                 <button id="closeTagModal" class="btn-secondary">Close</button>
             </div>
         </div>

@@ -372,8 +372,8 @@ if (isset($eventData['teaser_url']) && !empty($eventData['teaser_url'])) {
         <p><a href="myitems.php">View items</a></p>
       </div>
       <div class="sidebar-section friends-section">
-        <h3>My friends</h3>
-        <p><a href="userfriendspage.php">View Friends</a></p>
+        <h3>My bubble</h3>
+        <p><a href="userfriendspage.php">View bubble</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
       </div>

@@ -109,6 +109,9 @@ if (empty($recommendedEvents)) {
 // =====================================
 // RECENTLY EDITED COLLECTIONS (GLOBAL)
 // =====================================
+// =====================================
+// RECENTLY EDITED COLLECTIONS (GLOBAL)
+// =====================================
 $sqlRecentCollections = "
     SELECT
         c.collection_id,
@@ -126,14 +129,19 @@ $sqlRecentCollections = "
     LEFT JOIN user  u   ON c.user_id = u.user_id
     LEFT JOIN contains con ON con.collection_id = c.collection_id
     LEFT JOIN item i ON i.item_id = con.item_id
-    WHERE c.user_id <> ?        -- NÃO mostrar coleções do user atual
+    WHERE c.user_id <> ?
+      AND EXISTS (
+          SELECT 1
+          FROM friends f
+          WHERE f.user_id = ? AND f.friend_id = c.user_id
+      )
     GROUP BY c.collection_id, c.name, c.starting_date, c.image_id, img.url, u.username
     ORDER BY last_activity_date DESC
     LIMIT 9
 ";
 
 $stmt3 = $conn->prepare($sqlRecentCollections);
-$stmt3->bind_param("i", $currentUserId);
+$stmt3->bind_param("ii", $currentUserId, $currentUserId);
 $stmt3->execute();
 $resultCollections = $stmt3->get_result();
 
@@ -144,6 +152,45 @@ if ($resultCollections) {
     }
 }
 $stmt3->close();
+
+// Fallback: if user has no friends, show 9 recent collections from anyone
+if (empty($recentCollections)) {
+    $sqlFallbackCollections = "
+        SELECT
+            c.collection_id,
+            c.name            AS collection_name,
+            c.starting_date,
+            c.image_id,
+            img.url           AS collection_image,
+            u.username,
+            GREATEST(
+                c.starting_date,
+                COALESCE(MAX(i.registration_date), c.starting_date)
+            ) AS last_activity_date
+        FROM collection c
+        LEFT JOIN image img ON c.image_id = img.image_id
+        LEFT JOIN user  u   ON c.user_id = u.user_id
+        LEFT JOIN contains con ON con.collection_id = c.collection_id
+        LEFT JOIN item i ON i.item_id = con.item_id
+        WHERE c.user_id <> ?
+        GROUP BY c.collection_id, c.name, c.starting_date, c.image_id, img.url, u.username
+        ORDER BY last_activity_date DESC
+        LIMIT 9
+    ";
+    
+    $stmt4 = $conn->prepare($sqlFallbackCollections);
+    $stmt4->bind_param("i", $currentUserId);
+    $stmt4->execute();
+    $resultFallback = $stmt4->get_result();
+    
+    if ($resultFallback) {
+        while ($row = $resultFallback->fetch_assoc()) {
+            $recentCollections[] = $row;
+        }
+    }
+    $stmt4->close();
+}
+
 
 // =====================================
 // TOP COLLECTORS (SEMANAL)
@@ -704,8 +751,8 @@ if ($topByItems) {
                 </div>
 
                 <div class="sidebar-section friends-section">
-                    <h3>My friends</h3>
-                    <p><a href="userfriendspage.php"> View Friends</a></p>
+                    <h3>My bubble</h3>
+                    <p><a href="userfriendspage.php"> View bubble</a></p>
                     <p><a href="allfriendscollectionspage.php">View collections</a></p>
                     <p><a href="teampage.php"> Team Page</a></p>
                 </div>

@@ -239,6 +239,11 @@
 .collection-card p {
   font-weight: bold;
   margin-bottom: 0.2rem;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .collection-card span {
@@ -287,14 +292,14 @@
 }
 
 .view-all {
- display: block;
-  text-align: center;
-  width: 100%;
-  margin-top: 1.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-decoration: none;
-  color: #444;
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: #444;
 }
 
 .view-all:hover {
@@ -335,6 +340,11 @@
   font-weight: bold;
   font-size: 1rem;
   margin: 0.5rem 0 0.2rem;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .event-date {

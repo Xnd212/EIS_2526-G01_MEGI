@@ -392,7 +392,7 @@ if ($profileUserId !== null) {
             <?php endif; ?>
 
             <!-- SEE MORE sempre no meio (coluna 2), mesmo sem coleções -->
-            <a href="mycollectionspage.php" class="collection-see-more">+ See more</a>
+            <a href="mycollectionspage.php" class="collection-see-more">+ See all collections</a>
           </div>
         </section>
 

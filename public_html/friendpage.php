@@ -403,7 +403,7 @@ $stmtE->close();
         <!-- SEE MORE sempre centrado na 2ª coluna -->
         <a href="friendscollectionspage.php?user_id=<?php echo (int)$profile['user_id']; ?>"
            class="collection-see-more">
-           + See more
+           + See all collections
         </a>
       </div>
     </section>

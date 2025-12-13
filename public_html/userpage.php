@@ -370,41 +370,31 @@ if ($profileUserId !== null) {
         <!-- COLLECTIONS dinâmicas -->
         <section class="collections">
           <h3>Favourite Collections</h3>
+
           <div class="collection-grid">
-              <?php if (empty($favCollections)): ?>
-                  <p>You don't have favourite collections yet.</p>
-              <?php else: ?>
-                  <?php foreach ($favCollections as $col): ?>
-                      <?php
-                      $colImg = !empty($col['collection_image']) ? $col['collection_image'] : 'images/default_collection.png';
-                      ?>
+            <?php if (empty($favCollections)): ?>
+              <p>You don't have favourite collections yet.</p>
+            <?php else: ?>
+              <?php foreach ($favCollections as $col): ?>
+                <?php $colImg = !empty($col['collection_image']) ? $col['collection_image'] : 'images/default_collection.png'; ?>
                 <div class="collection-card">
                   <a href="collectionpage.php?id=<?php echo (int)$col['collection_id']; ?>">
-                    <img src="<?php echo htmlspecialchars($colImg); ?>" 
-                         alt="<?php echo htmlspecialchars($col['name']); ?>">
+                    <img src="<?php echo htmlspecialchars($colImg); ?>" alt="<?php echo htmlspecialchars($col['name']); ?>">
                     <p><strong><?php echo htmlspecialchars($col['name']); ?></strong></p>
                     <span class="last-updated">
                       Last updated:
-                      <?php
-                        if (!empty($col['starting_date'])) {
-                            echo date('d/m/Y', strtotime($col['starting_date']));
-                        } else {
-                            echo '-';
-                        }
-                      ?>
+                      <?php echo !empty($col['starting_date']) ? date('d/m/Y', strtotime($col['starting_date'])) : '-'; ?>
                     </span>
                   </a>
                 </div>
               <?php endforeach; ?>
             <?php endif; ?>
 
-            <!-- card para ver todas as coleções deste user -->
-            <div class="collection-card">
-              <a href="mycollectionspage.php" class="view-all">+ See more</a>
-
-            </div>
+            <!-- SEE MORE sempre no meio (coluna 2), mesmo sem coleções -->
+            <a href="mycollectionspage.php" class="collection-see-more">+ See more</a>
           </div>
         </section>
+
 
         <!-- FRIENDS do perfil atual -->
         <section class="friends">

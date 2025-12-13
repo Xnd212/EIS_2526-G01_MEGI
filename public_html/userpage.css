@@ -1,5 +1,35 @@
 @import url('homepage.css');
 
+/* 1) Make width calculations consistent everywhere */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 2) Guarantee the content area is the same on both pages (sidebar = 240px) */
+.profile-container {
+  width: calc(100% - 240px - 2rem);  /* leaves space for the sidebar */
+  max-width: 1200px;
+  margin: 110px 240px 1rem 1rem;     /* you already had this, keep it */
+}
+
+/* 3) Prevent flex children from forcing different sizing */
+.user-box,
+.user-info-wrapper,
+.user-details-and-stats {
+  width: 100%;
+}
+
+.user-info-wrapper,
+.user-details {
+  min-width: 0; /* IMPORTANT in flex layouts: prevents weird shrinking/overflow behavior */
+}
+
+.username,
+.email {
+  overflow-wrap: anywhere; /* long usernames/emails won’t break the layout */
+}
+
+
 .content {
   margin-right: 240px;
   padding: 2rem;
@@ -213,11 +243,36 @@
   text-decoration: underline;
 }
 
-.collection-grid {
-  display: flex;
-  flex-wrap: wrap;
+/* GRID só para a zona das collections */
+.collections .collection-grid{
+  display: grid !important;
+  grid-template-columns: repeat(3, 180px); /* igual ao width do .collection-card */
   gap: 2rem;
+  align-items: start;
 }
+
+/* se aparecer a mensagem "no favourite collections", não estraga o layout */
+.collections .collection-grid > p{
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+/* o see more fica SEMPRE na coluna do meio */
+.collections .collection-grid > .collection-see-more{
+  grid-column: 2;
+  justify-self: center;
+  width: auto;
+  margin-top: 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #444;
+}
+
+.collections .collection-grid > .collection-see-more:hover{
+  color: #b54242;
+}
+
 
 .collection-card {
   background-color: #f3cccc;
@@ -305,6 +360,21 @@
 .view-all:hover {
   color: #b54242;
 }
+
+.collection-see-more {
+  grid-column: 2;        /* coluna do meio */
+  justify-self: center;
+  margin-top: 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #444;
+}
+
+.collection-see-more:hover {
+  color: #b54242;
+}
+
 
 
 /* ==== eventos  ==== */
@@ -394,12 +464,3 @@
   }
 }
 
-.collection-card:last-child {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  background: none; 
-  box-shadow: none; 
-  border-radius: 0; 
-}

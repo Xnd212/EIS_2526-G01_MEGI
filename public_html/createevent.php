@@ -54,7 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate date format (YYYY-MM-DD)
     elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start_date)) {
         $error = "Invalid date format";
-    } else {
+    }
+    // Validate date is not in the past
+    elseif (strtotime($start_date) < strtotime(date('Y-m-d'))) {
+        $error = "Event date cannot be in the past. Please select today or a future date.";
+    }
+    else {
         $image_id = 13; // Default placeholder image ID
 
         // Handle image upload (OPTIONAL)
@@ -208,6 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 type="date" 
                                 id="startDate" 
                                 name="startDate" 
+                                min="<?php echo date('Y-m-d'); ?>"
                                 value="<?php echo isset($_POST['startDate']) ? htmlspecialchars($_POST['startDate']) : ''; ?>"
                                 required 
                             />

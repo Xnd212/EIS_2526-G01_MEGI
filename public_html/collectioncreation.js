@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           tagDropdown.appendChild(label);
 
-          tagFeedback.textContent = "Tag criada ✔";
+          tagFeedback.textContent = "Tag created ✔";
           tagFeedback.style.color = "#2e7d32";
         }
 

@@ -6,16 +6,16 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$currentUserId = (int)$_SESSION['user_id'];
+$currentUserId = (int) $_SESSION['user_id'];
 
 require_once __DIR__ . '/db.php';
 
 $errors = [];
 $successMessage = "";
 
-// ===============================
-// 1) BUSCAR DADOS ATUAIS DO USER
-// ===============================
+/* =========================================
+   1) BUSCAR DADOS ATUAIS DO USER
+========================================= */
 $sqlUser = "
     SELECT 
         u.user_id,
@@ -24,7 +24,6 @@ $sqlUser = "
         u.dob,
         u.country,
         u.image_id,
-        u.notify_enabled,
         img.url AS image_url
     FROM user u
     LEFT JOIN image img ON img.image_id = u.image_id
@@ -42,22 +41,20 @@ if (!$user) {
     die("User not found.");
 }
 
-// defaults
+/* Defaults */
 $currentUsername = $user['username'] ?? "";
 $currentEmail    = $user['email'] ?? "";
 $currentDob      = $user['dob'] ?? "";
 $currentCountry  = $user['country'] ?? "";
-$currentNotifyEnabled = isset($user['notify_enabled']) ? (int)$user['notify_enabled'] : 1;
-
 $currentImageUrl = $user['image_url'] ?: 'images/placeholderuserpicture.png';
 
-// ===============================
-// 2) COLEÇÕES DO USER & FAVORITOS
-// ===============================
+/* =========================================
+   2) COLEÇÕES DO USER & FAVORITOS
+========================================= */
 $allCollections = [];
 $userFavourites = [];
 
-// coleções do próprio user
+/* Coleções do próprio user */
 $sqlCollections = "
     SELECT collection_id, name
     FROM collection
@@ -73,7 +70,7 @@ while ($row = $resCol->fetch_assoc()) {
 }
 $stmtCol->close();
 
-// favoritos atuais
+/* Favoritos atuais */
 $sqlFav = "
     SELECT collection_id
     FROM favourite
@@ -88,19 +85,18 @@ while ($row = $resFav->fetch_assoc()) {
 }
 $stmtFav->close();
 
-// Se houver POST, processar update
+/* =========================================
+   3) PROCESSAR FORM (POST)
+========================================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // =========================
-    // 3) LER CAMPOS DO FORM
-    // =========================
+    /* Ler campos */
     $newUsername = trim($_POST['username'] ?? "");
     $newEmail    = trim($_POST['email'] ?? "");
     $newDob      = $_POST['dob'] ?? "";
     $newCountry  = $_POST['country'] ?? "";
-    $newNotify   = $_POST['notify'] ?? ($currentNotifyEnabled ? 'yes' : 'no');
 
-    // validações mínimas
+    /* Validações */
     if ($newUsername === "") {
         $errors[] = "Username is required.";
     } elseif (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $newUsername)) {
@@ -113,32 +109,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Please enter a valid email address.";
     }
 
-    // normalizar notify
-    $newNotifyEnabled = ($newNotify === 'yes') ? 1 : 0;
-
-    // dob/country opcionais
-    $dobValue = $newDob !== "" ? $newDob : null;
+    $dobValue     = $newDob !== "" ? $newDob : null;
     $countryValue = $newCountry !== "" ? $newCountry : null;
 
-    // =========================
-    // 4) FOTO DE PERFIL (upload)
-    // =========================
+    /* =====================================
+       4) FOTO DE PERFIL (UPLOAD)
+    ===================================== */
     $newImageId = null;
+    $relativePath = null;
+
     if (!empty($_FILES['profilePhoto']['name'])) {
         $file = $_FILES['profilePhoto'];
 
         if ($file['error'] === UPLOAD_ERR_OK) {
+
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            $maxSize = 2 * 1024 * 1024; // 2MB
+            $maxSize = 2 * 1024 * 1024;
 
             if (!in_array($file['type'], $allowedTypes)) {
                 $errors[] = "Profile photo must be an image (JPG, PNG, GIF, WEBP).";
             } elseif ($file['size'] > $maxSize) {
                 $errors[] = "Profile photo is too large. Max size is 2MB.";
             } else {
-                // guardar ficheiro
-                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $ext = strtolower($ext);
+
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                 if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
                     $ext = 'jpg';
                 }
@@ -153,63 +147,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fullPath = $uploadDir . '/' . $newFileName;
 
                 if (move_uploaded_file($file['tmp_name'], $fullPath)) {
-                    // criar registo na tabela image
+
                     $sqlImg = "INSERT INTO image (url) VALUES (?)";
                     $stmtImg = $conn->prepare($sqlImg);
                     $stmtImg->bind_param("s", $relativePath);
                     $stmtImg->execute();
                     $newImageId = $stmtImg->insert_id;
                     $stmtImg->close();
+
                 } else {
-                    $errors[] = "There was an error saving the profile photo.";
+                    $errors[] = "Error saving the profile photo.";
                 }
             }
-        } elseif ($file['error'] !== UPLOAD_ERR_NO_FILE) {
-            $errors[] = "Error uploading file.";
         }
     }
 
-    // =========================
-    // 5) FAVORITE COLLECTIONS
-    // =========================
-    $selectedFavs = isset($_POST['favourites']) ? $_POST['favourites'] : [];
-    $selectedFavs = array_map('intval', $selectedFavs);
-    $selectedFavs = array_unique($selectedFavs);
-    // limitar a 5
+    /* =====================================
+       5) FAVORITE COLLECTIONS
+    ===================================== */
+    $selectedFavs = $_POST['favourites'] ?? [];
+    $selectedFavs = array_unique(array_map('intval', $selectedFavs));
     if (count($selectedFavs) > 5) {
         $selectedFavs = array_slice($selectedFavs, 0, 5);
     }
 
-    // =========================
-    // 6) SE NÃO HÁ ERROS → UPDATE
-    // =========================
+    /* =====================================
+       6) UPDATE FINAL
+    ===================================== */
     if (empty($errors)) {
 
         $conn->begin_transaction();
 
         try {
-            // update user
+
             if ($newImageId !== null) {
                 $sqlUpdate = "
                     UPDATE user
-                    SET username = ?, email = ?, dob = ?, country = ?, notify_enabled = ?, image_id = ?
-                    WHERE user_id = ?
-                ";
-                $stmtUpdate = $conn->prepare($sqlUpdate);
-                $stmtUpdate->bind_param(
-                    "ssssiii",
-                    $newUsername,
-                    $newEmail,
-                    $dobValue,
-                    $countryValue,
-                    $newNotifyEnabled,
-                    $newImageId,
-                    $currentUserId
-                );
-            } else {
-                $sqlUpdate = "
-                    UPDATE user
-                    SET username = ?, email = ?, dob = ?, country = ?, notify_enabled = ?
+                    SET username = ?, email = ?, dob = ?, country = ?, image_id = ?
                     WHERE user_id = ?
                 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
@@ -219,7 +193,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $newEmail,
                     $dobValue,
                     $countryValue,
-                    $newNotifyEnabled,
+                    $newImageId,
+                    $currentUserId
+                );
+            } else {
+                $sqlUpdate = "
+                    UPDATE user
+                    SET username = ?, email = ?, dob = ?, country = ?
+                    WHERE user_id = ?
+                ";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->bind_param(
+                    "ssssi",
+                    $newUsername,
+                    $newEmail,
+                    $dobValue,
+                    $countryValue,
                     $currentUserId
                 );
             }
@@ -227,17 +216,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate->execute();
             $stmtUpdate->close();
 
-            // apagar favoritos antigos
-            $sqlDelFav = "DELETE FROM favourite WHERE user_id = ?";
-            $stmtDelFav = $conn->prepare($sqlDelFav);
+            /* Limpar favoritos antigos */
+            $stmtDelFav = $conn->prepare("DELETE FROM favourite WHERE user_id = ?");
             $stmtDelFav->bind_param("i", $currentUserId);
             $stmtDelFav->execute();
             $stmtDelFav->close();
 
-            // inserir novos favoritos
+            /* Inserir novos favoritos */
             if (!empty($selectedFavs)) {
-                $sqlInsFav = "INSERT INTO favourite (user_id, collection_id) VALUES (?, ?)";
-                $stmtInsFav = $conn->prepare($sqlInsFav);
+                $stmtInsFav = $conn->prepare(
+                    "INSERT INTO favourite (user_id, collection_id) VALUES (?, ?)"
+                );
                 foreach ($selectedFavs as $cid) {
                     $stmtInsFav->bind_param("ii", $currentUserId, $cid);
                     $stmtInsFav->execute();
@@ -247,27 +236,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $conn->commit();
 
-            // atualizar variáveis para refletir o novo estado
-            $currentUsername        = $newUsername;
-            $currentEmail           = $newEmail;
-            $currentDob             = $dobValue;
-            $currentCountry         = $countryValue;
-            $currentNotifyEnabled   = $newNotifyEnabled;
-            $userFavourites         = $selectedFavs;
+            /* Atualizar variáveis locais */
+            $currentUsername = $newUsername;
+            $currentEmail    = $newEmail;
+            $currentDob      = $dobValue;
+            $currentCountry  = $countryValue;
+            $userFavourites = $selectedFavs;
 
-            if ($newImageId !== null) {
+            if ($relativePath) {
                 $currentImageUrl = $relativePath;
             }
 
             $successMessage = "✅ Profile updated successfully!";
-            
+
         } catch (Exception $e) {
             $conn->rollback();
-            $errors[] = "An error occurred while saving your profile. Please try again.";
+            $errors[] = "An error occurred while saving your profile.";
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

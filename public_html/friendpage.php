@@ -97,6 +97,7 @@ $sqlFriends = "
     INNER JOIN user u ON f.friend_id = u.user_id
     LEFT JOIN image img ON u.image_id = img.image_id
     WHERE f.user_id = ?
+    LIMIT 4
 ";
 
 $stmtF = $conn->prepare($sqlFriends);
@@ -368,43 +369,45 @@ $stmtE->close();
       <!-- ========== COLLECTIONS + FRIENDS ========== -->
       <div class="collections-and-friends">
         <!-- COLLECTIONS dinâmicas -->
-        <section class="collections">
-          <h3>Favourite Collections</h3>
-          <div class="collection-grid">
-            <?php if (empty($favCollections)): ?>
-                  <p>This user doesn't have favourite collections yet.</p>
-              <?php else: ?>
-                  <?php foreach ($favCollections as $col): ?>
-                      <?php
-                      $colImg = !empty($col['collection_image']) ? $col['collection_image'] : 'images/default_collection.png';
-                      ?>
-                <div class="collection-card">
-                  <a href="collectionpage.php?id=<?php echo $col['collection_id']; ?>">
-                    <img src="<?php echo htmlspecialchars($colImg); ?>" 
-                         alt="<?php echo htmlspecialchars($col['name']); ?>">
-                    <p><strong><?php echo htmlspecialchars($col['name']); ?></strong></p>
-                    <span class="last-updated">
-                      Last updated:
-                      <?php
-                        if (!empty($col['starting_date'])) {
-                            echo date('d/m/Y', strtotime($col['starting_date']));
-                        } else {
-                            echo '-';
-                        }
-                      ?>
-                    </span>
-                  </a>
-                </div>
-              <?php endforeach; ?>
-            <?php endif; ?>
+    <section class="collections">
+      <h3>Favourite Collections</h3>
 
-            <!-- card para ver todas as coleções deste user -->
+      <div class="collection-grid">
+        <?php if (empty($favCollections)): ?>
+          <p>This user doesn't have favourite collections yet.</p>
+        <?php else: ?>
+          <?php foreach ($favCollections as $col): ?>
+            <?php
+              $colImg = !empty($col['collection_image'])
+                  ? $col['collection_image']
+                  : 'images/default_collection.png';
+            ?>
             <div class="collection-card">
-              <a href="friendscollectionspage.php?user_id=<?php echo $profile['user_id']; ?>" 
-                 class="view-all">+ See more</a>
+              <a href="collectionpage.php?id=<?php echo (int)$col['collection_id']; ?>">
+                <img src="<?php echo htmlspecialchars($colImg); ?>" 
+                     alt="<?php echo htmlspecialchars($col['name']); ?>">
+                <p><strong><?php echo htmlspecialchars($col['name']); ?></strong></p>
+                <span class="last-updated">
+                  Last updated:
+                  <?php
+                    echo !empty($col['starting_date'])
+                        ? date('d/m/Y', strtotime($col['starting_date']))
+                        : '-';
+                  ?>
+                </span>
+              </a>
             </div>
-          </div>
-        </section>
+          <?php endforeach; ?>
+        <?php endif; ?>
+
+        <!-- SEE MORE sempre centrado na 2ª coluna -->
+        <a href="friendscollectionspage.php?user_id=<?php echo (int)$profile['user_id']; ?>"
+           class="collection-see-more">
+           + See all collections
+        </a>
+      </div>
+    </section>
+
 
         <!-- FRIENDS do perfil atual -->
         <section class="friends">

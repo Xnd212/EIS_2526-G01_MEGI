@@ -60,3 +60,56 @@
     color: #888;
     font-size: 12px;
 }
+
+/* Unrated Events Warning */
+.unrated-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.75rem;
+}
+
+.warning-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #856404;
+}
+
+.warning-icon {
+    font-size: 1.2rem;
+}
+
+.warning-text {
+    font-size: 0.9rem;
+    color: #856404;
+    margin: 0.5rem 0;
+}
+
+.unrated-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+}
+
+.unrated-list li {
+    padding: 0.5rem 0;
+    border-top: 1px solid #ffe69c;
+}
+
+.unrated-list li:first-child {
+    border-top: none;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0.75rem 0.75rem 0.5rem;
+    color: #333;
+}
+
+.upcoming-section {
+    margin-top: 0.5rem;
+}

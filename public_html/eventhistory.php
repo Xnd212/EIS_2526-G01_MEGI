@@ -78,7 +78,7 @@ if ($currentUserId !== null) {
         ) r ON r.event_id = e.event_id
 
         WHERE (e.user_id = ? OR a.user_id IS NOT NULL)
-          AND e.date <= CURDATE()
+          AND e.date < CURDATE()
 
         GROUP BY e.event_id
         ORDER BY $orderBy

@@ -97,6 +97,7 @@ $sqlFriends = "
     INNER JOIN user u ON f.friend_id = u.user_id
     LEFT JOIN image img ON u.image_id = img.image_id
     WHERE f.user_id = ?
+    LIMIT 4
 ";
 
 $stmtF = $conn->prepare($sqlFriends);

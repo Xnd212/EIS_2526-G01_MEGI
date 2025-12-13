@@ -174,26 +174,37 @@
   padding: 1rem;
   text-align: center;
   box-shadow: 0 0 8px rgba(0,0,0,0.05);
-  width: 200px;
+  width: 250px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .collection-bring img {
-  max-width: 100%;
-  height: auto;
+  max-width: 200px;
+  height: 180px;
   margin-bottom: 1rem;
+  object-fit: contain;
 }
 
 .collection-name {
   margin: 0;
   font-weight: bold;
   line-height: 1.2;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .collection-user {
   margin: 0.5rem;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 

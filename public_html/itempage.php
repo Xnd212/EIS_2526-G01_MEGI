@@ -242,7 +242,7 @@ function fmtDate($d) {
                                         <p class="collection-name"><?= htmlspecialchars($col['name']) ?></p>
                                     </a>
     <?php if ($collection_date): ?>
-                                        <span class="last-updated">Last updated: <?php echo $collection_date; ?></span>
+                                        <span class="last-updated">Started in: <?php echo $collection_date; ?></span>
                                     <?php endif; ?>
                                 </div>
 

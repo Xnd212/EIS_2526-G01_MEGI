@@ -214,6 +214,9 @@ input[type="checkbox"] {
   background-color: transparent;
 }
 
+textarea {
+    resize: none;
+}
 
 @media (max-width: 768px) {
   .item-creation-section {

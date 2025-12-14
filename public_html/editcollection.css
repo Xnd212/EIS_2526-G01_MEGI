@@ -237,3 +237,20 @@ textarea {
   border: none;
   font-size: 1rem;
 }
+
+/* =======================
+   TAG SEARCH INPUT
+======================= */
+.tag-search-input {
+  width: calc(100% - 12px);
+  margin: 6px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.tag-search-input:focus {
+  outline: none;
+  border-color: #b54242;
+}

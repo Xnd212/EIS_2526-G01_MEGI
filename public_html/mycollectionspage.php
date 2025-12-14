@@ -186,10 +186,10 @@ if ($currentUserId !== null) {
                             </p>
 
                         <?php elseif (empty($collections)): ?>
-                            <div style="margin-top:20px; font-size:18px;">
-                                <p>
+                            <div>
+                                <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">
                                     You don’t have any collections yet.
-                                    <a href="collectioncreation.php" style="color:#7a1b24; font-weight:600;">
+                                    <a href="collectioncreation.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">
                                         Create your first collection
                                     </a>.
                                 </p>

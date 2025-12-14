@@ -32,7 +32,7 @@ $sqlRecommended = "
     JOIN collection c_evt       ON c_evt.collection_id = a.collection_id
     JOIN collection_tags ct_evt ON ct_evt.collection_id = c_evt.collection_id
     LEFT JOIN image img         ON e.image_id = img.image_id
-    WHERE e.date >= CURDATE()
+    WHERE e.date > CURDATE()
       AND c_evt.user_id <> ?          -- Collections attending must NOT belong to the user
       AND ct_evt.tag_id IN (
           SELECT DISTINCT ct_user.tag_id
@@ -81,7 +81,7 @@ if (empty($recommendedEvents)) {
             img.url AS event_image
         FROM event e
         LEFT JOIN image img ON e.image_id = img.image_id
-        WHERE e.date >= CURDATE()
+        WHERE e.date > CURDATE()
           AND e.user_id <> ?
           AND e.event_id NOT IN (
               SELECT a_user.event_id

@@ -198,7 +198,7 @@ if (isset($_GET['user_id'])) {
 
           <?php elseif (empty($friendCollections)): ?>
 
-              <p style="margin-top:20px; font-size:18px;">
+              <p style="margin-top:20px; font-size:18px; width: 500px;">
                   <?php echo htmlspecialchars($profileUsername); ?> has no friends' collections to display.
               </p>
 

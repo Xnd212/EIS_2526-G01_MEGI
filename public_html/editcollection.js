@@ -1,20 +1,73 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ============================
-    // MULTISELECT DROPDOWN
-    // ============================
+    // ============================================================
+    // TAG MULTISELECT + SEARCH (EDIT COLLECTION)
+    // ============================================================
     const dropdownBtn = document.getElementById("dropdownBtn");
     const dropdown = document.getElementById("tagDropdown");
+    const tagSearchInput = document.getElementById("tagSearchInput");
 
-    dropdownBtn.addEventListener("click", () => {
-        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-    });
+    if (dropdownBtn && dropdown) {
 
-    document.addEventListener("click", (e) => {
-        if (!dropdown.contains(e.target) && e.target !== dropdownBtn) {
-            dropdown.style.display = "none";
-        }
-    });
+        dropdownBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            dropdown.style.display =
+                    dropdown.style.display === "block" ? "none" : "block";
+
+            if (tagSearchInput) {
+                tagSearchInput.value = "";
+                tagSearchInput.focus();
+                filterTags("");
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target) && e.target !== dropdownBtn) {
+                dropdown.style.display = "none";
+            }
+        });
+
+        dropdown.addEventListener("change", () => {
+            const checked = [
+                ...dropdown.querySelectorAll("input[type='checkbox']:checked")
+            ].map(c => c.parentElement.textContent.trim());
+
+            dropdownBtn.textContent =
+                    checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+        });
+    }
+
+    /* =======================
+     TAG FILTER LOGIC
+     ======================= */
+    function normalizeTag(str) {
+        return str
+                .toLowerCase()
+                .normalize("NFD")                 // remove acentos
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/s$/, "");               // remove plural simples
+    }
+
+    function filterTags(query) {
+        const normalizedQuery = normalizeTag(query);
+
+        const labels = dropdown.querySelectorAll("label[data-tag-name]");
+
+        labels.forEach(label => {
+            const tagName = normalizeTag(label.dataset.tagName);
+            label.style.display =
+                    tagName.includes(normalizedQuery) ? "flex" : "none";
+        });
+    }
+
+    if (tagSearchInput) {
+        tagSearchInput.addEventListener("input", () => {
+            filterTags(tagSearchInput.value.trim());
+        });
+    }
+
 
     // ============================
     // MODAL PARA CRIAR TAGS
@@ -88,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Criar nova checkbox no dropdown
         let label = document.createElement("label");
+        label.setAttribute("data-tag-name", result.name.toLowerCase());
         label.innerHTML = `
             <input type="checkbox" name="tags[]" value="${result.tag_id}" checked>
             ${result.name}

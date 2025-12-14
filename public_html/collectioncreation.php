@@ -477,6 +477,16 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                             <div class="custom-multiselect">
                                 <button type="button" id="dropdownBtn">Select Tags ⮟</button>
                                 <div class="dropdown-content" id="tagDropdown">
+                                    
+                                    <!-- Tag search -->
+                                    <input
+                                        type="text"
+                                        id="tagSearchInput"
+                                        class="tag-search-input"
+                                        placeholder="Search tags..."
+                                        autocomplete="off"
+                                        >
+                                    
                                     <?php if (empty($allTags)): ?>
                                         <div style="padding:0.4rem 0.6rem; color:#777;">No tags created yet.</div>
                                     <?php else: ?>
@@ -485,7 +495,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                             $tid = (int) $tag['tag_id'];
                                             $checked = in_array($tid, $postedTags) ? 'checked' : '';
                                             ?>
-                                            <label>
+                                            <label data-tag-name="<?php echo strtolower($tag['name']); ?>">
                                                 <input 
                                                     type="checkbox" 
                                                     name="tags[]" 
@@ -506,6 +516,15 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                             <div class="custom-multiselect">
                                 <button type="button" id="itemsDropdownBtn">Select from existing items ⮟</button>
                                 <div class="dropdown-content" id="itemsDropdownContent">
+                                    
+                                    <!-- Item search -->
+                                    <input
+                                        type="text"
+                                        id="itemSearchInput"
+                                        class="tag-search-input"
+                                        placeholder="Search items..."
+                                        autocomplete="off"
+                                        >
 
                                     <?php
                                     if (empty($user_items)) {
@@ -514,7 +533,7 @@ Vintage Comics,Comics,2024-03-10,Classic Marvel and DC comics</pre>
                                         foreach ($user_items as $item) {
                                             $iid = (int) $item['item_id'];
                                             $checked = in_array($iid, $postedItems) ? 'checked' : '';
-                                            echo '<label>';
+                                            echo '<label data-item-name="' . strtolower(htmlspecialchars($item['name'])) . '">';
                                             echo '<input type="checkbox" name="selectedItems[]" value="' . $iid . '" ' . $checked . '> ';
                                             echo htmlspecialchars($item['name']);
                                             echo '</label>';

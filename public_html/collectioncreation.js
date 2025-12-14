@@ -1,65 +1,139 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ============================================================
-  // 1. MULTISELECT: ITENS EXISTENTES
-  // ============================================================
-  const itemsBtn = document.getElementById("itemsDropdownBtn");
-  const itemsContent = document.getElementById("itemsDropdownContent");
+    // ============================================================
+// 1.a MULTISELECT: TAGS + SEARCH
+// ============================================================
+    const tagBtn = document.getElementById("dropdownBtn");
+    const tagDropdown = document.getElementById("tagDropdown");
+    const tagSearchInput = document.getElementById("tagSearchInput");
 
-  if (itemsBtn && itemsContent) {
-    itemsBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      itemsContent.style.display =
-        itemsContent.style.display === "block" ? "none" : "block";
-    });
+    if (tagBtn && tagDropdown) {
 
-    document.addEventListener("click", (e) => {
-      if (!itemsContent.contains(e.target) && e.target !== itemsBtn) {
-        itemsContent.style.display = "none";
-      }
-    });
+        tagBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            tagDropdown.style.display =
+                    tagDropdown.style.display === "block" ? "none" : "block";
 
-    itemsContent.addEventListener("change", () => {
-      const checked = [
-        ...itemsContent.querySelectorAll("input[type='checkbox']:checked"),
-      ].map((c) => c.parentElement.textContent.trim());
+            if (tagSearchInput) {
+                tagSearchInput.value = "";
+                tagSearchInput.focus();
+                filterTags("");
+            }
+        });
 
-      itemsBtn.textContent =
-        checked.length > 0
-          ? checked.join(", ")
-          : "Select from existing items ⮟";
-    });
-  }
+        document.addEventListener("click", (e) => {
+            if (!tagDropdown.contains(e.target) && e.target !== tagBtn) {
+                tagDropdown.style.display = "none";
+            }
+        });
 
-  // ============================================================
-  // 1.b MULTISELECT: TAGS
-  // ============================================================
-  const tagBtn = document.getElementById("dropdownBtn");
-  const tagDropdown = document.getElementById("tagDropdown");
+        tagDropdown.addEventListener("change", () => {
+            const checked = [
+                ...tagDropdown.querySelectorAll("input[type='checkbox']:checked")
+            ].map((c) => c.parentElement.textContent.trim());
 
-  if (tagBtn && tagDropdown) {
-    tagBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      tagDropdown.style.display =
-        tagDropdown.style.display === "block" ? "none" : "block";
-    });
+            tagBtn.textContent =
+                    checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
+        });
+    }
 
-    document.addEventListener("click", (e) => {
-      if (!tagDropdown.contains(e.target) && e.target !== tagBtn) {
-        tagDropdown.style.display = "none";
-      }
-    });
+    /* =======================
+     TAG FILTER LOGIC
+     ======================= */
+    function normalizeTag(str) {
+        return str
+                .toLowerCase()
+                .normalize("NFD")               // remove accents
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/s$/, "");             // remove plural "s"
+    }
 
-    tagDropdown.addEventListener("change", () => {
-      const checked = [
-        ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
-      ].map((c) => c.parentElement.textContent.trim());
+    function filterTags(query) {
+        const normalizedQuery = normalizeTag(query);
 
-      tagBtn.textContent =
-        checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";
-    });
-  }
+        const labels = tagDropdown.querySelectorAll("label[data-tag-name]");
+
+        labels.forEach(label => {
+            const tagName = normalizeTag(label.dataset.tagName);
+
+            if (tagName.includes(normalizedQuery)) {
+                label.style.display = "flex";
+            } else {
+                label.style.display = "none";
+            }
+        });
+    }
+
+    if (tagSearchInput) {
+        tagSearchInput.addEventListener("input", () => {
+            filterTags(tagSearchInput.value.trim());
+        });
+    }
+
+// ============================================================
+// 1.b MULTISELECT: ITENS + SEARCH
+// ============================================================
+    const itemsBtn = document.getElementById("itemsDropdownBtn");
+    const itemsContent = document.getElementById("itemsDropdownContent");
+    const itemSearchInput = document.getElementById("itemSearchInput");
+    if (itemsBtn && itemsContent) {
+
+        itemsBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            itemsContent.style.display =
+                    itemsContent.style.display === "block" ? "none" : "block";
+            if (itemSearchInput) {
+                itemSearchInput.value = "";
+                itemSearchInput.focus();
+                filterItems("");
+            }
+        });
+        document.addEventListener("click", (e) => {
+            if (!itemsContent.contains(e.target) && e.target !== itemsBtn) {
+                itemsContent.style.display = "none";
+            }
+        });
+        itemsContent.addEventListener("change", () => {
+            const checked = [
+                ...itemsContent.querySelectorAll("input[type='checkbox']:checked")
+            ].map((c) => c.parentElement.textContent.trim());
+            itemsBtn.textContent =
+                    checked.length > 0
+                    ? checked.join(", ")
+                    : "Select from existing items ⮟";
+        });
+    }
+
+    /* =======================
+     ITEM FILTER LOGIC
+     ======================= */
+    function normalizeItem(str) {
+        return str
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/s$/, "");
+    }
+
+    function filterItems(query) {
+        const normalizedQuery = normalizeItem(query);
+        const labels = itemsContent.querySelectorAll("label[data-item-name]");
+        labels.forEach(label => {
+            const itemName = normalizeItem(label.dataset.itemName);
+            if (itemName.includes(normalizedQuery)) {
+                label.style.display = "flex";
+            } else {
+                label.style.display = "none";
+            }
+        });
+    }
+
+    if (itemSearchInput) {
+        itemSearchInput.addEventListener("input", () => {
+            filterItems(itemSearchInput.value.trim());
+        });
+    }
 
   // ============================================================
   // 2. MODAL PARA CRIAR TAGS (AJAX)
@@ -118,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch("create_tag.php", {
           method: "POST",
-          body: formData,
+          body: formData
         });
 
         const result = await response.json();
@@ -149,13 +223,13 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           tagDropdown.appendChild(label);
 
-          tagFeedback.textContent = "Tag criada ✔";
+          tagFeedback.textContent = "Tag created ✔";
           tagFeedback.style.color = "#2e7d32";
         }
 
         // Atualizar texto do botão
         const checked = [
-          ...tagDropdown.querySelectorAll("input[type='checkbox']:checked"),
+          ...tagDropdown.querySelectorAll("input[type='checkbox']:checked")
         ].map((c) => c.parentElement.textContent.trim());
         tagBtn.textContent =
           checked.length > 0 ? checked.join(", ") : "Select Tags ⮟";

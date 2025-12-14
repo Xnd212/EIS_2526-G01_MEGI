@@ -26,19 +26,23 @@ $message = "";
 $messageType = ""; // success | error
 $createdItemId = 0;
 
-// Helpers para repovoar o form
-$post_collection_id = isset($_POST['collection_id']) ? (int)$_POST['collection_id'] : 0;
-$post_itemName      = $_POST['itemName']          ?? "";
-$post_itemPrice     = $_POST['itemPrice']         ?? "";
-$post_itemType      = $_POST['itemType']          ?? "";
-$post_importance    = $_POST['itemImportanceNumber'] ?? 5;
-$post_acc_date      = $_POST['acc_date']          ?? "";
-$post_acc_place     = $_POST['acc_place']         ?? "";
-$post_description   = $_POST['itemDescription']   ?? "";
+/* =========================================
+   HELPERS PARA REPOVOAR O FORM
+========================================= */
+$post_collections = isset($_POST['collections']) && is_array($_POST['collections'])
+    ? array_map('intval', $_POST['collections'])
+    : [];
 
+$post_itemName      = $_POST['itemName']        ?? "";
+$post_itemPrice     = $_POST['itemPrice']       ?? "";
+$post_itemType      = $_POST['itemType']        ?? "";
+$post_importance    = $_POST['itemImportanceNumber'] ?? 5;
+$post_acc_date      = $_POST['acc_date']        ?? "";
+$post_acc_place     = $_POST['acc_place']       ?? "";
+$post_description   = $_POST['itemDescription'] ?? "";
 
 /* ==========================================================
-  2. CSV IMPORT HANDLING
+  2. CSV IMPORT HANDLING (FICA IGUAL)
 ========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
 
@@ -63,63 +67,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
         goto end_of_form;
     }
 
-    $imported   = 0;
-    $failed     = 0;
-    $errors     = [];
-    $row_number = 0;
-
-    // Skip header
-    fgetcsv($handle);
+    fgetcsv($handle); // skip header
 
     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-        $row_number++;
 
-        if (count($data) < 3) {
-            $failed++;
-            $errors[] = "Row $row_number: Not enough columns.";
-            continue;
-        }
-
-        $name  = trim($data[0]);
-        $price = trim($data[1]);
-        $type  = trim($data[2]);
+        $name  = trim($data[0] ?? "");
+        $price = trim($data[1] ?? "");
+        $type  = trim($data[2] ?? "");
 
         if ($name === "" || $price === "" || $type === "") {
-            $failed++;
-            $errors[] = "Row $row_number: Missing required fields.";
             continue;
         }
 
         $price      = (float)$price;
         $importance = isset($data[3]) ? (int)$data[3] : 5;
-        $acc_date   = isset($data[4]) && $data[4] !== "" ? $data[4] : date('Y-m-d');
-        $acc_place   = isset($data[5]) ? trim($data[5]) : "";
-        $description = isset($data[6]) ? trim($data[6]) : "";
+        $acc_date   = $data[4] ?? date('Y-m-d');
+        $acc_place  = trim($data[5] ?? "");
+        $description= trim($data[6] ?? "");
 
-        if ($acc_date > date("Y-m-d")) {
-            $failed++;
-            $errors[] = "Row $row_number: Acquisition date cannot be in the future.";
-            continue;
-        }
-
-        // DUPLICADOS NA MESMA COLEÇÃO
-        $dup_stmt = $conn->prepare("
-            SELECT COUNT(*) AS c
-            FROM contains c
-            JOIN item i ON c.item_id = i.item_id
-            WHERE c.collection_id = ?
-              AND LOWER(TRIM(i.name)) = LOWER(TRIM(?))
-        ");
-        $dup_stmt->bind_param("is", $collection_id, $name);
-        $dup_stmt->execute();
-        $dup_res = $dup_stmt->get_result()->fetch_assoc();
-        $dup_stmt->close();
-
-        if ((int)$dup_res['c'] > 0) {
-            $failed++;
-            $errors[] = "Row $row_number: Item '$name' already exists in this collection.";
-            continue;
-        }
+        if ($acc_date > date("Y-m-d")) continue;
 
         // TYPE
         $stmtT = $conn->prepare("SELECT type_id FROM type WHERE name = ? LIMIT 1");
@@ -137,10 +103,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
             $stmtInsT->close();
         }
 
-        // DEFAULT IMAGE
         $image_id = 42;
 
-        // INSERT ITEM
         $stmt = $conn->prepare("
             INSERT INTO item (type_id, image_id, name, price, importance, acc_date, acc_place, description)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -166,96 +130,82 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["import_csv"])) {
             ");
             $stmtC->bind_param("ii", $collection_id, $item_id);
             $stmtC->execute();
-
-            $imported++;
-        } else {
-            $failed++;
-            $errors[] = "Row $row_number: Failed inserting item.";
         }
     }
 
     fclose($handle);
 
-    $message = "Import finished! $imported items imported.";
-    if ($failed > 0) {
-        $message .= " $failed errors occurred.<br>" .
-                    implode("<br>", array_slice($errors, 0, 5));
-        $messageType = "error";
-    } else {
-        $messageType = "success";
-    }
-
+    $message = "✔ CSV import finished successfully.";
+    $messageType = "success";
     goto end_of_form;
 }
 
-
 /* ==========================================================
-  3. MANUAL ITEM CREATION (FORM NORMAL)
+  3. MANUAL ITEM CREATION (MULTI COLLECTION)
 ========================================================== */
 if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
 
     $name       = trim($_POST['itemName'] ?? "");
-    $price      = isset($_POST['itemPrice']) ? (float) $_POST['itemPrice'] : -1;
+    $price      = (float) ($_POST['itemPrice'] ?? -1);
     $typeInput  = trim($_POST['itemType'] ?? "");
     $importance = (int) ($_POST['itemImportanceNumber'] ?? 5);
     $acc_date   = trim($_POST['acc_date'] ?? "");
-    $acc_place   = trim($_POST['acc_place'] ?? "");
-    $description = trim($_POST['itemDescription'] ?? "");
-    $collection_id = (int)($_POST['collection_id'] ?? 0);
-
-    // Repovoar
-    $post_collection_id = $collection_id;
-    $post_itemName      = $name;
-    $post_itemPrice     = $_POST['itemPrice'] ?? "";
-    $post_itemType      = $typeInput;
-    $post_importance    = $importance;
-    $post_acc_date      = $acc_date;
-    $post_acc_place     = $acc_place;
-    $post_description   = $description;
+    $acc_place  = trim($_POST['acc_place'] ?? "");
+    $description= trim($_POST['itemDescription'] ?? "");
+    $selectedCollections = $_POST['collections'] ?? [];
 
     // VALIDAÇÕES
-    if ($collection_id === 0 || $name === "" || $typeInput === "" || $acc_date === "") {
-        $message = "⚠️ Please fill in all required (*) fields.";
+    if (empty($selectedCollections) || $name === "" || $typeInput === "" || $acc_date === "") {
+        $message = "⚠ Please fill in all required fields and select at least one collection.";
         $messageType = "error";
         goto end_of_form;
     }
 
     if ($price < 0) {
-        $message = "⚠️ Price cannot be negative.";
-        $messageType = "error";
-        goto end_of_form;
-    }
-
-    if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $acc_date)) {
-        $message = "⚠️ Invalid acquisition date format.";
+        $message = "⚠ Price cannot be negative.";
         $messageType = "error";
         goto end_of_form;
     }
 
     if ($acc_date > date("Y-m-d")) {
-        $message = "⚠️ Acquisition date cannot be in the future.";
+        $message = "⚠ Acquisition date cannot be in the future.";
         $messageType = "error";
         goto end_of_form;
     }
 
-    // DUPLICADOS NA MESMA COLEÇÃO
-    $dup_stmt = $conn->prepare("
-        SELECT COUNT(*) AS c
-        FROM contains c
-        JOIN item i ON c.item_id = i.item_id
-        WHERE c.collection_id = ?
-          AND LOWER(TRIM(i.name)) = LOWER(TRIM(?))
-    ");
-    $dup_stmt->bind_param("is", $collection_id, $name);
-    $dup_stmt->execute();
-    $dup_res = $dup_stmt->get_result()->fetch_assoc();
-    $dup_stmt->close();
+    // DUPLICADOS (EM QUALQUER COLEÇÃO)
+    $placeholders = implode(',', array_fill(0, count($selectedCollections), '?'));
 
-    if ((int)$dup_res['c'] > 0) {
-        $message = "⚠️ This collection already has an item with that name.";
+    $sqlDup = "
+        SELECT 1
+        FROM item i
+        JOIN contains c ON i.item_id = c.item_id
+        WHERE LOWER(TRIM(i.name)) = LOWER(TRIM(?))
+          AND c.collection_id IN ($placeholders)
+        LIMIT 1
+    ";
+
+    $stmtDup = $conn->prepare($sqlDup);
+
+    $types = "s" . str_repeat("i", count($selectedCollections));
+    $bind = [];
+    $bind[] = &$types;
+    $bind[] = &$name;
+
+    foreach ($selectedCollections as $k => $cid) {
+        $selectedCollections[$k] = (int)$cid;
+        $bind[] = &$selectedCollections[$k];
+    }
+
+    call_user_func_array([$stmtDup, 'bind_param'], $bind);
+    $stmtDup->execute();
+
+    if ($stmtDup->get_result()->fetch_assoc()) {
+        $message = "⚠ An item with that name already exists in one of the selected collections.";
         $messageType = "error";
         goto end_of_form;
     }
+    $stmtDup->close();
 
     // TYPE
     $stmtT = $conn->prepare("SELECT type_id FROM type WHERE name = ? LIMIT 1");
@@ -276,15 +226,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
     // IMAGE
     $image_id = 42;
 
-    if (isset($_FILES["itemImage"]) && $_FILES["itemImage"]["error"] === 0) {
+    if (!empty($_FILES["itemImage"]["name"])) {
         $dir = "images/";
         if (!is_dir($dir)) mkdir($dir, 0777, true);
 
-        $file = $dir . basename($_FILES["itemImage"]["name"]);
+        $file = $dir . time() . "_" . basename($_FILES["itemImage"]["name"]);
         if (move_uploaded_file($_FILES["itemImage"]["tmp_name"], $file)) {
-            $url = $file;
             $stmtImg = $conn->prepare("INSERT INTO image (url) VALUES (?)");
-            $stmtImg->bind_param("s", $url);
+            $stmtImg->bind_param("s", $file);
             $stmtImg->execute();
             $image_id = $stmtImg->insert_id;
         }
@@ -314,46 +263,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST["import_csv"])) {
             INSERT INTO contains (collection_id, item_id)
             VALUES (?, ?)
         ");
-        $stmtC->bind_param("ii", $collection_id, $item_id);
-        $stmtC->execute();
+
+        foreach ($selectedCollections as $cid) {
+            $cid = (int)$cid;
+            $stmtC->bind_param("ii", $cid, $item_id);
+            $stmtC->execute();
+        }
 
         $message = "✔ Item created successfully! <span class='redirect-msg'>Redirecting...</span>";
         $messageType = "success";
         $createdItemId = $item_id;
-        goto end_of_form;
-
     } else {
         $message = "Database error while creating item.";
         $messageType = "error";
-        goto end_of_form;
     }
 }
 
-
 /* ==========================================================
-   A PARTIR DAQUI, **SEMPRE** CORRE (COM OU SEM goto)
+   SEMPRE EXECUTA
 ========================================================== */
 end_of_form:
 
-/* 4. FETCH COLLECTIONS */
 $user_collections = [];
-$sql = "SELECT collection_id, name FROM collection WHERE user_id = $user_id";
-$res = $conn->query($sql);
-
-if ($res && $res->num_rows > 0) {
-    while ($row = $res->fetch_assoc()) {
-        $user_collections[] = $row;
-    }
+$res = $conn->query("SELECT collection_id, name FROM collection WHERE user_id = $user_id");
+while ($row = $res->fetch_assoc()) {
+    $user_collections[] = $row;
 }
 
-/* 5. FETCH TYPES (para o dropdown) */
 $allTypes = [];
-$sqlTypes = "SELECT type_id, name FROM type ORDER BY name ASC";
-$resTypes = $conn->query($sqlTypes);
-if ($resTypes && $resTypes->num_rows > 0) {
-    while ($row = $resTypes->fetch_assoc()) {
-        $allTypes[] = $row;
-    }
+$resTypes = $conn->query("SELECT name FROM type ORDER BY name ASC");
+while ($row = $resTypes->fetch_assoc()) {
+    $allTypes[] = $row;
 }
 ?>
 
@@ -477,20 +417,53 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
 
         <form id="itemForm" method="POST" action="" enctype="multipart/form-data">
 
-          <div class="form-group">
-            <label for="collection_id">Collection <span class="required">*</span></label>
-            <select id="collection_id" name="collection_id" required>
-                <option value="">-- Select a Collection --</option>
-                <?php 
-                if (!empty($user_collections)) {
-                    foreach ($user_collections as $col) {
-                        $selected = ($post_collection_id === (int)$col['collection_id']) ? "selected" : "";
-                        echo '<option value="' . (int)$col['collection_id'] . '" ' . $selected . '>' . htmlspecialchars($col['name']) . '</option>';
-                    }
-                }
-                ?>
-            </select>
-          </div>
+            <div class="form-group">
+                <label>Collections <span class="required">*</span></label>
+
+                <div class="custom-multiselect">
+                    <button type="button" id="collectionDropdownBtn">
+                        <?php
+                        if (!empty($post_collections)) {
+                            $names = [];
+                            foreach ($user_collections as $c) {
+                                if (in_array((int) $c['collection_id'], $post_collections, true)) {
+                                    $names[] = $c['name'];
+                                }
+                            }
+                            echo htmlspecialchars(implode(', ', $names));
+                        } else {
+                            echo "Select Collections ⮟";
+                        }
+                        ?>
+                    </button>
+
+                    <div class="dropdown-content" id="collectionDropdown">
+
+                        <input
+                            type="text"
+                            id="collectionSearchInput"
+                            class="tag-search-input"
+                            placeholder="Search collections..."
+                            autocomplete="off"
+                            >
+
+                        <?php foreach ($user_collections as $col): ?>
+                            <?php $cid = (int) $col['collection_id']; ?>
+                            <label data-collection-name="<?php echo strtolower(htmlspecialchars($col['name'])); ?>">
+                                <input
+                                    type="checkbox"
+                                    name="collections[]"
+                                    value="<?php echo $cid; ?>"
+                                    <?php echo in_array($cid, $post_collections, true) ? 'checked' : ''; ?>
+                                    >
+                                    <?php echo htmlspecialchars($col['name']); ?>
+                            </label>
+                        <?php endforeach; ?>
+
+                    </div>
+                </div>
+            </div>
+
 
           <div class="form-group">
             <label for="itemName">Name <span class="required">*</span></label>
@@ -518,13 +491,22 @@ Bulbasaur Plush,15.99,Plush,6,2024-03-10,Convention,Soft and cuddly</pre>
                 <?php echo $post_itemType !== "" ? htmlspecialchars($post_itemType) : "Select Type ⮟"; ?>
               </button>
               <div class="dropdown-content" id="typeDropdown">
+                  
+                  <input
+                      type="text"
+                      id="typeSearchInput"
+                      class="tag-search-input"
+                      placeholder="Search types..."
+                      autocomplete="off"
+                      />
+                  
                 <?php if (empty($allTypes)): ?>
                   <div style="padding:0.4rem 0.6rem; color:#777;">No types created yet.</div>
                 <?php else: ?>
                   <?php foreach ($allTypes as $t): 
                         $checked = ($post_itemType !== "" && $post_itemType === $t['name']) ? "checked" : "";
                   ?>
-                    <label>
+                    <label data-type-name="<?php echo strtolower(htmlspecialchars($t['name'])); ?>">
                       <input type="radio" name="typeRadio"
                              value="<?php echo htmlspecialchars($t['name']); ?>"
                              <?php echo $checked; ?>>

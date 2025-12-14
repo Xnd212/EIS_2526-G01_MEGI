@@ -236,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <?php endforeach; ?>
                             </select>
                             <?php if (empty($user_collections)): ?>
-                                <small style="color:red;">You have no collections to bring. Please create one first.</small>
+                                <small style="color:red; margin-top: 5px;">You have no collections to bring. Please create one first.</small>
                             <?php endif; ?>
                         </div>
 

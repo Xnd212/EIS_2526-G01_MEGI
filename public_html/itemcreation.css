@@ -55,44 +55,37 @@ label {
 
 .custom-multiselect button {
   width: 100%;
-  text-align: left;
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  background: #fff;
+  text-align: left;
+  background: white;
   cursor: pointer;
-  font-size: 1rem;
-}
-
-.custom-multiselect button:hover {
-  border-color: #b54242;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #fff;
+  background: white;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 6px;
   width: 100%;
-  margin-top: 5px;
-  z-index: 20;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem;
+  margin-top: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 1000;
 }
 
 .dropdown-content label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   cursor: pointer;
-  font-weight: normal;
+  gap: 8px;
 }
 
 .dropdown-content label:hover {
-  background-color: #f8cbc1;
-  border-radius: 5px;
+  background: #f7d6ce;
 }
 
 /* Type header (botão Criar type) */
@@ -430,4 +423,22 @@ input.error {
 .type-feedback {
   margin-top: 0.7rem;
   font-size: 0.9rem;
+}
+
+
+/* =======================
+   TAG SEARCH INPUT
+======================= */
+.tag-search-input {
+  width: calc(100% - 12px);
+  margin: 6px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.tag-search-input:focus {
+  outline: none;
+  border-color: #b54242;
 }

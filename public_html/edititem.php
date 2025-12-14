@@ -56,11 +56,37 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $itemId);
 $stmt->execute();
 $res = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$itemCollectionIds = array_column($res, "collection_id");
+$itemCollectionIds = array_map('intval', array_column($res, "collection_id"));
+$stmt->close();
+
+// =============================================
+// 4.1 BUSCAR TYPES (para dropdown)
+// =============================================
+$allTypes = [];
+$sqlTypes = "SELECT type_id, name FROM type ORDER BY name ASC";
+$stmt = $conn->prepare($sqlTypes);
+$stmt->execute();
+$allTypes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 $message = "";
 $redirectAfterSuccess = false;
+
+// =====================================================
+// 4.2 HELPERS PARA REPOR VALORES NO FORM (SEM WARNINGS)
+// =====================================================
+$post_itemType = $item['type_name'] ?? "";
+$selectedCollectionsForForm = $itemCollectionIds;
+
+// Se houve POST e deu erro, repor o que o user escolheu
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (isset($_POST["itemType"])) {
+        $post_itemType = trim($_POST["itemType"]);
+    }
+    if (isset($_POST["collections"]) && is_array($_POST["collections"])) {
+        $selectedCollectionsForForm = array_map('intval', $_POST["collections"]);
+    }
+}
 
 // =============================================
 // 5. PROCESSAR UPDATE (POST)
@@ -68,15 +94,22 @@ $redirectAfterSuccess = false;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Campos principais
-    $name   = trim($_POST["itemName"]);
+    $name   = trim($_POST["itemName"] ?? "");
     $price  = (float)($_POST["itemPrice"] ?? 0);
-    $typeName = trim($_POST["itemType"]);
+    $typeName = trim($_POST["itemType"] ?? "");
     $importance = (int)($_POST["itemImportance"] ?? 0);
     $accDate = $_POST["acquisitionDate"] ?: null;
-    $accPlace = trim($_POST["acquisitionPlace"]);
-    $description = trim($_POST["itemDescription"]);
-    $selectedCollections = $_POST["collections"] ?? [];
+    
+    $today = date("Y-m-d");
 
+    if ($accDate && $accDate > $today) {
+        $message = "⚠ Acquisition date cannot be in the future.";
+    }
+
+    $accPlace = trim($_POST["acquisitionPlace"] ?? "");
+    $description = trim($_POST["itemDescription"] ?? "");
+    $selectedCollections = $_POST["collections"] ?? [];
+    
     // ************************************
     // 5.1 VALIDAÇÕES INICIAIS
     // ************************************
@@ -89,39 +122,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // ==============================
     if ($message === "" && !empty($selectedCollections)) {
 
-        // Criar placeholders (?, ?, ?, ...)
         $placeholders = implode(',', array_fill(0, count($selectedCollections), '?'));
 
         $sqlDup = "
-        SELECT 1
-        FROM item i
-        JOIN contains con ON i.item_id = con.item_id
-        WHERE LOWER(TRIM(i.name)) = LOWER(TRIM(?))
-          AND con.collection_id IN ($placeholders)
-          AND i.item_id != ?
-        LIMIT 1
-    ";
+            SELECT 1
+            FROM item i
+            JOIN contains con ON i.item_id = con.item_id
+            WHERE LOWER(TRIM(i.name)) = LOWER(TRIM(?))
+              AND con.collection_id IN ($placeholders)
+              AND i.item_id != ?
+            LIMIT 1
+        ";
 
         $stmtDup = $conn->prepare($sqlDup);
 
-        // Tipos: 1 string + n inteiros + 1 inteiro final
         $types = "s" . str_repeat("i", count($selectedCollections)) . "i";
 
-        // Criar array com referências válidas
         $bind = [];
         $bind[] = &$types;
         $bind[] = &$name;
 
-        // Criar variáveis independentes
         $collectionVars = [];
         foreach ($selectedCollections as $k => $cid) {
             $collectionVars[$k] = (int) $cid;
-            $bind[] = &$collectionVars[$k]; // referência válida
+            $bind[] = &$collectionVars[$k];
         }
 
         $bind[] = &$itemId;
 
-        // bind_param dinâmico
         call_user_func_array([$stmtDup, 'bind_param'], $bind);
 
         $stmtDup->execute();
@@ -132,7 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $message = "⚠ An item with that name already exists in one of the selected collections.";
         }
     }
-
 
     // ************************************
     // 5.3 SE NÃO HOUVER ERROS → ATUALIZAR ITEM
@@ -151,18 +178,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->close();
 
             if ($result) {
-                $typeId = $result["type_id"];
+                $typeId = (int)$result["type_id"];
             } else {
                 $sql = "INSERT INTO type (name) VALUES (?)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("s", $typeName);
                 $stmt->execute();
-                $typeId = $stmt->insert_id;
+                $typeId = (int)$stmt->insert_id;
                 $stmt->close();
             }
 
             // ---------- IMAGEM ----------
-            $imageIdToUse = $item["image_id"];
+            $imageIdToUse = (int)$item["image_id"];
 
             if (!empty($_FILES["itemImage"]["name"])) {
                 $file = $_FILES["itemImage"];
@@ -174,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $stmt = $conn->prepare($sql);
                     $stmt->bind_param("s", $path);
                     $stmt->execute();
-                    $imageIdToUse = $stmt->insert_id;
+                    $imageIdToUse = (int)$stmt->insert_id;
                     $stmt->close();
                 }
             }
@@ -234,6 +261,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $item = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
+            // Atualizar repovoamento após sucesso
+            $post_itemType = $item['type_name'] ?? "";
+            $selectedCollectionsForForm = $itemCollectionIds;
+
             $message = "✓ Changes saved with success! <span class='redirect-msg'>Redirecting...</span>";
             $redirectAfterSuccess = true;
 
@@ -243,8 +274,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 }
-?>
 
+// helper para o texto do botão (coleções selecionadas)
+function buildSelectedCollectionsLabel($collections, $selectedIds) {
+    $names = [];
+    foreach ($collections as $c) {
+        if (in_array((int)$c['collection_id'], $selectedIds, true)) {
+            $names[] = $c['name'];
+        }
+    }
+    return !empty($names) ? implode(", ", $names) : "Select Collections ⮟";
+}
+
+$collectionsBtnLabel = buildSelectedCollectionsLabel($collections, $selectedCollectionsForForm);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -267,14 +310,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </form>
       </div>
     <div class="icons">
-      <!-- Notificações -->
-                <?php include __DIR__ . '/calendar_popup.php'; ?>
-                <?php include __DIR__ . '/notifications_popup.php'; ?>
+      <?php include __DIR__ . '/calendar_popup.php'; ?>
+      <?php include __DIR__ . '/notifications_popup.php'; ?>
 
-      <!-- Perfil -->
       <a href="userpage.php" class="icon-btn" aria-label="Perfil">👤</a>
 
-      <!-- Logout -->
       <button class="icon-btn" id="logout-btn" aria-label="Logout">🚪</button>
       <div class="notification-popup logout-popup" id="logout-popup">
         <div class="popup-header">
@@ -294,35 +334,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <section class="item-creation-section">
         <h2 class="page-title">Edit Item</h2>
 
-        <!-- Âncora para poder fazer scroll para a mensagem -->
         <a id="stay-here"></a>
 
         <form id="itemForm" method="POST" action="" enctype="multipart/form-data" novalidate>
 
-          <!-- COLEÇÕES (multi-select) -->
+          <!-- COLEÇÕES (multi-select com search) -->
           <div class="form-group">
-            <label>Collection <span class="required">*</span></label>
+            <label>Collections <span class="required">*</span></label>
+
             <div class="custom-multiselect">
-              <button type="button" id="dropdownBtn">Select Collections ⮟</button>
-              <div class="dropdown-content" id="dropdownContent">
+              <button type="button" id="collectionDropdownBtn">
+                <?= htmlspecialchars($collectionsBtnLabel) ?>
+              </button>
+
+              <div class="dropdown-content" id="collectionDropdown">
+
+                <input
+                  type="text"
+                  id="collectionSearchInput"
+                  class="tag-search-input"
+                  placeholder="Search collections..."
+                  autocomplete="off"
+                >
+
                 <?php if (!empty($collections)): ?>
-                    <?php foreach ($collections as $col): 
-                        $cid = (int)$col['collection_id'];
-                        $isChecked = in_array($cid, $itemCollectionIds);
-                    ?>
-                        <label>
-                          <input
-                              type="checkbox"
-                              name="collections[]"
-                              value="<?= $cid ?>"
-                              <?= $isChecked ? 'checked' : '' ?>
-                          >
-                          <?= htmlspecialchars($col['name']) ?>
-                        </label>
-                    <?php endforeach; ?>
+                  <?php foreach ($collections as $col): 
+                      $cid = (int)$col['collection_id'];
+                      $isChecked = in_array($cid, $selectedCollectionsForForm, true);
+                  ?>
+                    <label data-collection-name="<?php echo strtolower(htmlspecialchars($col['name'])); ?>">
+                      <input
+                        type="checkbox"
+                        name="collections[]"
+                        value="<?= $cid ?>"
+                        <?= $isChecked ? 'checked' : '' ?>
+                      >
+                      <?= htmlspecialchars($col['name']) ?>
+                    </label>
+                  <?php endforeach; ?>
                 <?php else: ?>
-                    <p style="padding:0.5rem;">No collections available.</p>
+                  <p style="padding:0.5rem;">No collections available.</p>
                 <?php endif; ?>
+
               </div>
             </div>
           </div>
@@ -331,11 +384,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="form-group">
             <label for="itemName">Name <span class="required">*</span></label>
             <input
-                type="text"
-                id="itemName"
-                name="itemName"
-                value="<?= htmlspecialchars($item['name']) ?>"
-                required
+              type="text"
+              id="itemName"
+              name="itemName"
+              value="<?= htmlspecialchars($item['name']) ?>"
+              required
             />
           </div>
 
@@ -343,67 +396,104 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="form-group">
             <label for="itemPrice">Price (€) <span class="required">*</span></label>
             <input
-                type="number"
-                id="itemPrice"
-                name="itemPrice"
-                step="0.01"
-                min="0"
-                value="<?= htmlspecialchars($item['price']) ?>"
-                required
+              type="number"
+              id="itemPrice"
+              name="itemPrice"
+              step="0.01"
+              min="0"
+              value="<?= htmlspecialchars($item['price']) ?>"
+              required
             />
           </div>
 
-          <!-- TYPE -->
+          <!-- TYPE DROPDOWN + BOTÃO CRIAR TYPE -->
           <div class="form-group">
-            <label for="itemType">Item Type <span class="required">*</span></label>
-            <input
-                type="text"
-                id="itemType"
-                name="itemType"
-                value="<?= htmlspecialchars($item['type_name'] ?? '') ?>"
-                required
-            />
-          </div>
+            <label>Item Type <span class="required">*</span></label>
 
-          <!-- IMPORTANCE (1–10) -->
-          <div class="form-group">
-              <label for="itemImportance">Importance (1–10) <span class="required">*</span></label>
+            <div class="type-header">
+              <button type="button" id="openTypeModal" class="btn-small">Create type</button>
+            </div>
 
-              <div class="importance-wrapper">
+            <div class="custom-multiselect">
+              <button type="button" id="typeDropdownBtn">
+                <?= $post_itemType !== "" ? htmlspecialchars($post_itemType) : "Select Type ⮟"; ?>
+              </button>
 
-                  <!-- SLIDER -->
-                  <input
-                      type="range"
-                      id="importanceSlider"
-                      min="1"
-                      max="10"
-                      step="1"
-                      value="<?= (int) $item['importance'] ?>"
+              <div class="dropdown-content" id="typeDropdown">
+
+                <input
+                  type="text"
+                  id="typeSearchInput"
+                  class="tag-search-input"
+                  placeholder="Search types..."
+                  autocomplete="off"
+                />
+
+                <?php if (empty($allTypes)): ?>
+                  <div style="padding:0.4rem 0.6rem; color:#777;">No types created yet.</div>
+                <?php else: ?>
+                  <?php foreach ($allTypes as $t):
+                        $checked = ($post_itemType !== "" && $post_itemType === $t['name']) ? "checked" : "";
+                  ?>
+                    <label data-type-name="<?php echo strtolower(htmlspecialchars($t['name'])); ?>">
+                      <input
+                        type="radio"
+                        name="typeRadio"
+                        value="<?php echo htmlspecialchars($t['name']); ?>"
+                        <?php echo $checked; ?>
                       >
+                      <?php echo htmlspecialchars($t['name']); ?>
+                    </label>
+                  <?php endforeach; ?>
+                <?php endif; ?>
 
-                  <!-- INPUT NUMÉRICO QUE SERÁ ENVIADO NO POST -->
-                  <input
-                      type="number"
-                      id="itemImportance"
-                      name="itemImportance"
-                      min="1"
-                      max="10"
-                      step="1"
-                      value="<?= (int) $item['importance'] ?>"
-                      class="importance-number"
-                      >
               </div>
+            </div>
+
+            <input
+              type="hidden"
+              id="itemType"
+              name="itemType"
+              value="<?php echo htmlspecialchars($post_itemType); ?>"
+            >
+          </div>
+
+          <!-- IMPORTANCE -->
+          <div class="form-group">
+            <label for="itemImportance">Importance (1–10) <span class="required">*</span></label>
+
+            <div class="importance-wrapper">
+              <input
+                type="range"
+                id="importanceSlider"
+                min="1"
+                max="10"
+                step="1"
+                value="<?= (int)$item['importance'] ?>"
+              >
+
+              <input
+                type="number"
+                id="itemImportance"
+                name="itemImportance"
+                min="1"
+                max="10"
+                step="1"
+                value="<?= (int)$item['importance'] ?>"
+                class="importance-number"
+              >
+            </div>
           </div>
 
           <!-- ACQUISITION DATE -->
           <div class="form-group">
             <label for="acquisitionDate">Acquisition Date (DD-MM-YYYY) <span class="required">*</span></label>
             <input
-                type="date"
-                id="acquisitionDate"
-                name="acquisitionDate"
-                value="<?= htmlspecialchars($item['acc_date']) ?>"
-                required
+              type="date"
+              id="acquisitionDate"
+              name="acquisitionDate"
+              value="<?= htmlspecialchars($item['acc_date']) ?>"
+              required
             />
           </div>
 
@@ -411,10 +501,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="form-group">
             <label for="acquisitionPlace">Acquisition Place</label>
             <input
-                type="text"
-                id="acquisitionPlace"
-                name="acquisitionPlace"
-                value="<?= htmlspecialchars($item['acc_place']) ?>"
+              type="text"
+              id="acquisitionPlace"
+              name="acquisitionPlace"
+              value="<?= htmlspecialchars($item['acc_place']) ?>"
             />
           </div>
 
@@ -422,9 +512,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <div class="form-group">
             <label for="itemDescription">Description</label>
             <textarea
-                id="itemDescription"
-                name="itemDescription"
-                rows="4"
+              id="itemDescription"
+              name="itemDescription"
+              rows="4"
             ><?= htmlspecialchars($item['description']) ?></textarea>
           </div>
 
@@ -435,17 +525,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary">
-              Save Changes
-            </button>
+            <button type="submit" class="btn-primary">Save Changes</button>
           </div>
 
-          <!-- MENSAGEM NO FUNDO -->
           <?php if ($message): ?>
-              <a id="msg-anchor"></a>   
-              <p id="form-message" class="form-message <?= $redirectAfterSuccess ? 'success' : 'error' ?>">
-                  <?= $message ?>
-              </p>
+            <a id="msg-anchor"></a>
+            <p id="form-message" class="form-message <?= $redirectAfterSuccess ? 'success' : 'error' ?>">
+              <?= $message ?>
+            </p>
           <?php endif; ?>
 
         </form>
@@ -461,12 +548,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <p><a href="mycollectionspage.php">View collections</a></p>
         <p><a href="myitems.php">View items</a></p>
       </div>
+
       <div class="sidebar-section friends-section">
         <h3>My bubble</h3>
         <p><a href="userfriendspage.php"> View bubble</a></p>
         <p><a href="allfriendscollectionspage.php">View collections</a></p>
         <p><a href="teampage.php">Team Page</a></p>
       </div>
+
       <div class="sidebar-section events-section">
         <h3>Events</h3>
         <p><a href="createevent.php">Create event</a></p>
@@ -476,14 +565,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </aside>
   </div>
 
+  <!-- MODAL PARA TYPE -->
+  <div id="typeModalOverlay" class="modal-overlay hidden"></div>
+
+  <div id="typeModal" class="modal hidden">
+    <h3>Create new type</h3>
+
+    <input type="text" id="newTypeInput" placeholder="Type name...">
+
+    <p id="typeFeedback" class="type-feedback"></p>
+
+    <div class="modal-buttons">
+      <button id="createTypeBtn" class="btn-primary">Create type</button>
+      <button id="closeTypeModal" class="btn-secondary">Close</button>
+    </div>
+  </div>
+
   <!-- Variáveis JS globais para redirect -->
   <script>
     window.redirectAfterSuccess = <?= $redirectAfterSuccess ? 'true' : 'false' ?>;
     window.itemId = <?= json_encode($itemId) ?>;
   </script>
-  
+
   <script src="homepage.js"></script>
   <script src="edititem.js"></script>
   <script src="logout.js"></script>
+
 </body>
 </html>

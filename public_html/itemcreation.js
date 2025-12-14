@@ -1,5 +1,64 @@
 document.addEventListener("DOMContentLoaded", () => {
+    
+    function normalize(str) {
+        return str
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/s$/, "");
+    }
+    
+    // ============================================================
+    // COLLECTION DROPDOWN (CHECKBOXES) + SEARCH + LABEL UPDATE
+    // ============================================================
+    const colBtn = document.getElementById("collectionDropdownBtn");
+    const colDropdown = document.getElementById("collectionDropdown");
+    const colSearch = document.getElementById("collectionSearchInput");
 
+    if (colBtn && colDropdown) {
+
+        colBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            colDropdown.style.display =
+                    colDropdown.style.display === "block" ? "none" : "block";
+
+            if (colSearch) {
+                colSearch.value = "";
+                colSearch.focus();
+                filterCollections("");
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!colDropdown.contains(e.target) && e.target !== colBtn) {
+                colDropdown.style.display = "none";
+            }
+        });
+
+        colDropdown.addEventListener("change", updateCollectionButtonText);
+        updateCollectionButtonText();
+    }
+
+    function updateCollectionButtonText() {
+        const checked = [
+            ...colDropdown.querySelectorAll("input[type='checkbox']:checked")
+        ].map(cb => cb.parentElement.textContent.trim());
+
+        colBtn.textContent =
+                checked.length > 0 ? checked.join(", ") : "Select Collections ⮟";
+    }
+
+    function filterCollections(query) {
+        const q = normalize(query);
+        colDropdown.querySelectorAll("label[data-collection-name]").forEach(label => {
+            const name = normalize(label.dataset.collectionName);
+            label.style.display = name.includes(q) ? "flex" : "none";
+        });
+    }
+
+    
   // ============================================
   // 1. IMPORTANCE SLIDER SYNCHRONIZATION
   // ============================================
@@ -51,6 +110,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  
+    // ============================================================
+    // TYPE SEARCH
+    // ============================================================
+    const typeSearchInput = document.getElementById("typeSearchInput");
+
+    function filterTypes(query) {
+        const q = normalize(query);
+        typeDropdown.querySelectorAll("label[data-type-name]").forEach(label => {
+            const name = normalize(label.dataset.typeName);
+            label.style.display = name.includes(q) ? "flex" : "none";
+        });
+    }
+
+    if (typeSearchInput) {
+        typeSearchInput.addEventListener("input", () => {
+            filterTypes(typeSearchInput.value.trim());
+        });
+    }
+
 
   // ============================================
   // 3. MODAL PARA CRIAR TYPE (AJAX)
@@ -107,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch("create_type.php", {
           method: "POST",
-          body: formData,
+          body: formData
         });
 
         const result = await response.json();

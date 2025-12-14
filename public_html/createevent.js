@@ -72,4 +72,68 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  
+    // ============================================================
+    // COLLECTION DROPDOWN + SEARCH (CREATE EVENT)
+    // ============================================================
+    const colBtn = document.getElementById("collectionDropdownBtn");
+    const colDropdown = document.getElementById("collectionDropdown");
+    const colSearch = document.getElementById("collectionSearchInput");
+    const colHidden = document.getElementById("collection_id");
+
+    function normalize(str) {
+        return str
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    if (colBtn && colDropdown && colHidden) {
+
+        colBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            colDropdown.style.display =
+                    colDropdown.style.display === "block" ? "none" : "block";
+
+            if (colSearch) {
+                colSearch.value = "";
+                colSearch.focus();
+                filterCollections("");
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!colDropdown.contains(e.target) && e.target !== colBtn) {
+                colDropdown.style.display = "none";
+            }
+        });
+
+        colDropdown.addEventListener("change", () => {
+            const checked = colDropdown.querySelector("input[type='radio']:checked");
+            if (checked) {
+                colHidden.value = checked.value;
+                colBtn.textContent = checked.parentElement.textContent.trim();
+                colDropdown.style.display = "none";
+            }
+        });
+    }
+
+    function filterCollections(query) {
+        const q = normalize(query);
+        colDropdown
+                .querySelectorAll("label[data-collection-name]")
+                .forEach(label => {
+                    const name = normalize(label.dataset.collectionName);
+                    label.style.display = name.includes(q) ? "flex" : "none";
+                });
+    }
+
+    if (colSearch) {
+        colSearch.addEventListener("input", () => {
+            filterCollections(colSearch.value.trim());
+        });
+    }
+
 });

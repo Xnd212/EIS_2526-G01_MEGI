@@ -383,7 +383,7 @@ if ($profileUserId !== null) {
                     <img src="<?php echo htmlspecialchars($colImg); ?>" alt="<?php echo htmlspecialchars($col['name']); ?>">
                     <p><strong><?php echo htmlspecialchars($col['name']); ?></strong></p>
                     <span class="last-updated">
-                      Last updated:
+                      Started in:
                       <?php echo !empty($col['starting_date']) ? date('d/m/Y', strtotime($col['starting_date'])) : '-'; ?>
                     </span>
                   </a>

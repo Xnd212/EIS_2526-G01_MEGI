@@ -101,6 +101,9 @@ label {
   z-index: 20;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   padding: 0.5rem;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .dropdown-content label {
@@ -387,3 +390,7 @@ textarea {
   cursor: pointer;
 }
 
+.type-feedback {
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+}

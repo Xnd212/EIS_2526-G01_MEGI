@@ -210,7 +210,7 @@ if ($currentUserId !== null) {
                                         <p><strong><?php echo htmlspecialchars($row['name']); ?></strong></p>
                                         
                                         <?php if ($date): ?>
-                                            <span class="last-updated">Last updated: <?php echo $date; ?></span>
+                                            <span class="last-updated">Started in: <?php echo $date; ?></span>
                                         <?php endif; ?>
                                     </a>
                                 </div>

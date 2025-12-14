@@ -271,17 +271,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </div>
 
                             <div class="form-group">
-                                <label for="collection_id">Collection to Bring <span class="required">*</span></label>
-                                <select id="collection_id" name="collection_id" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                                    <option value="">-- Select one of your collections --</option>
-                                    <?php foreach ($user_collections as $coll): ?>
-                                        <option value="<?php echo $coll['collection_id']; ?>" 
-                                                <?php echo ($coll['collection_id'] == $current_collection_id) ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($coll['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                                    <label>Collection to Bring <span class="required">*</span></label>
+
+                                    <div class="custom-multiselect">
+                                        <button type="button" id="collectionDropdownBtn">
+                                            <?php
+                                            $selectedName = "Select Collection ⮟";
+                                            if (!empty($_POST['collection_id'])) {
+                                                foreach ($user_collections as $c) {
+                                                    if ((int) $_POST['collection_id'] === (int) $c['collection_id']) {
+                                                        $selectedName = htmlspecialchars($c['name']);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            echo $selectedName;
+                                            ?>
+                                        </button>
+
+                                        <div class="dropdown-content" id="collectionDropdown">
+
+                                            <input
+                                                type="text"
+                                                id="collectionSearchInput"
+                                                class="tag-search-input"
+                                                placeholder="Search collections..."
+                                                autocomplete="off"
+                                                >
+
+                                            <?php foreach ($user_collections as $c): ?>
+                                                <label data-collection-name="<?= strtolower(htmlspecialchars($c['name'])) ?>">
+                                                    <input
+                                                        type="radio"
+                                                        name="collectionRadio"
+                                                        value="<?= (int) $c['collection_id'] ?>"
+                                                        <?= (isset($_POST['collection_id']) && (int) $_POST['collection_id'] === (int) $c['collection_id']) ? 'checked' : '' ?>
+                                                        >
+                                                        <?= htmlspecialchars($c['name']) ?>
+                                                </label>
+                                            <?php endforeach; ?>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- valor real enviado para o PHP -->
+                                    <input
+                                        type="hidden"
+                                        id="collection_id"
+                                        name="collection_id"
+                                        value="<?= isset($_POST['collection_id']) ? (int) $_POST['collection_id'] : '' ?>"
+                                        >
+
+                                    <?php if (empty($user_collections)): ?>
+                                        <small style="color:red; margin-top: 5px;">You have no collections to bring. Please create one first.</small>
+                                    <?php endif; ?>
+                                </div>
+
 
                             <div class="form-group">
                                 <label for="location">Place <span class="required">*</span></label>

@@ -440,3 +440,74 @@ textarea.error {
 textarea {
     resize: none;
 }
+
+.custom-multiselect {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 5px;
+  z-index: 20;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dropdown-content label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.dropdown-content label:hover {
+  background-color: #f8cbc1;
+  border-radius: 5px;
+}
+
+/* =========================
+   COLLECTION DROPDOWN BTN
+========================= */
+#collectionDropdownBtn {
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+#collectionDropdownBtn:hover {
+  border-color: #b54242;
+}
+
+/* =======================
+   TAG SEARCH INPUT
+======================= */
+.tag-search-input {
+  width: calc(100% - 12px);
+  margin: 6px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.tag-search-input:focus {
+  outline: none;
+  border-color: #b54242;
+}

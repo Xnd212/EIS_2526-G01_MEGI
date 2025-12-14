@@ -162,9 +162,9 @@ if ($currentUserId !== null) {
 
     <div class="event-list">
 
-        <?php if ($currentUserId === null): ?>
+        <?php if ($isGuest || ($profileUserId === null && $currentUserId === null)): ?>
 
-            <p>You are browsing as a guest. <a href="login.php">Log in</a> to view your event history.</p>
+            <p>You are browsing as a guest. <a href="login.php" style="color:#7a1b24; font-weight:600; text-decoration:none;">Log in</a> to view your event history.</p>
 
         <?php elseif (empty($events)): ?>
 

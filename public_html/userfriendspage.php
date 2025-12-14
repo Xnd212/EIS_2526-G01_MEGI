@@ -174,7 +174,7 @@ if ($profileUserId !== null) {
             </div>
 
             <div class="friends-grid">
-                <?php if ($profileUserId === null && $currentUserId === null): ?>
+                <?php if ($isGuest || ($profileUserId === null && $currentUserId === null)): ?>
 
                     <!-- ESTADO: GUEST sem perfil específico -->
                     <p style="text-align:left; margin-top:20px; margin-left:0; white-space:nowrap; font-size:18px;">

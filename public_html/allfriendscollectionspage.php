@@ -186,7 +186,7 @@ if (isset($_GET['user_id'])) {
 
         <div class="friends-grid">
 
-          <?php if ($currentUserId === null && $profileUserId === null): ?>
+          <?php if ($isGuest || ($profileUserId === null && $currentUserId === null)): ?>
 
               <p style="margin-top:20px; text-align:left; white-space:nowrap; font-size:18px;">
                   You are browsing as a guest.

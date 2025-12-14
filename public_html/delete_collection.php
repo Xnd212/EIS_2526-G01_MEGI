@@ -13,13 +13,13 @@ $currentUserId = (int)$_SESSION['user_id'];
 $action = $_GET['action'] ?? '';
 
 // ==========================================
-// ACTION: CHECK (Count exclusive items)
+// ACTION: CHECK (Count exclusive items and event attendance)
 // ==========================================
 if ($action === 'check') {
     $col_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
     if (!$col_id) { echo json_encode(['error' => 'Invalid ID']); exit; }
 
-    // Logic: Find items in this collection that DO NOT exist in any other collection
+    // Logic 1: Find items in this collection that DO NOT exist in any other collection
     $sql = "
         SELECT COUNT(*) as exclusive_count
         FROM (
@@ -39,7 +39,23 @@ if ($action === 'check') {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
 
-    echo json_encode(['exclusive_count' => (int)$row['exclusive_count']]);
+    // Logic 2: Check if this collection is attending any future events
+    $eventSql = "
+        SELECT COUNT(*) as future_event_count 
+        FROM attends a
+        JOIN event e ON a.event_id = e.event_id
+        WHERE a.collection_id = ? AND e.date > NOW()
+    ";
+    $stmtEvent = $conn->prepare($eventSql);
+    $stmtEvent->bind_param("i", $col_id);
+    $stmtEvent->execute();
+    $eventResult = $stmtEvent->get_result();
+    $eventRow = $eventResult->fetch_assoc();
+
+    echo json_encode([
+        'exclusive_count' => (int)$row['exclusive_count'],
+        'future_event_count' => (int)$eventRow['future_event_count']
+    ]);
     exit();
 }
 
@@ -57,6 +73,25 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$resOwner || $resOwner['user_id'] != $currentUserId) {
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit();
+    }
+
+    // 2. Check if collection is attending any future events
+    $checkFutureEvents = $conn->prepare("
+        SELECT COUNT(*) as future_count 
+        FROM attends a
+        JOIN event e ON a.event_id = e.event_id
+        WHERE a.collection_id = ? AND e.date > NOW()
+    ");
+    $checkFutureEvents->bind_param("i", $col_id);
+    $checkFutureEvents->execute();
+    $resFuture = $checkFutureEvents->get_result()->fetch_assoc();
+
+    if ($resFuture['future_count'] > 0) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Cannot delete collection: it is attending ' . $resFuture['future_count'] . ' future event(s). Please edit the event(s) to remove this collection before deletion.'
+        ]);
         exit();
     }
 
@@ -123,4 +158,3 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit();
 }
-?>
